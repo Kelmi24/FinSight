@@ -182,3 +182,94 @@ The target audience includes tech-savvy millennials and Gen Z who are comfortabl
 *   **Competitor Analysis:** Brief overview of apps like Mint, Monarch Money, Copilot, and YNAB, highlighting gaps FinSight AI addresses (AI coaching focus, developer portfolio project).
 *   **Prompt Engineering Guide:** Document containing the initial system and user prompts used for the AI Financial Coach feature.
 *   **Database Schema Diagram:** `./docs/database_schema.png`
+
+---
+
+## 16. Detailed Feature Specifications
+
+### **Section 1: Dashboard (Primary User View)**
+
+-   **Purpose & User Goal:** To provide users with an immediate, comprehensive, and actionable overview of their financial health at a single glance, enabling quick decisions and fostering daily engagement.
+
+-   **Core Features & Functionality:**
+    -   **Summary KPI Cards:** Visually distinct cards for Net Worth, Current Month Income, Current Month Expenses, and Savings Rate (calculated).
+    -   **Monthly Cash Flow Chart:** An interactive line chart (Recharts) showing income vs. expenses over the last 6 months. Users can hover for details.
+    -   **Spending by Category (Pie/Donut Chart):** A chart breaking down current month's expenses by category (e.g., Food, Transport, Entertainment). Clicking a segment could filter the transaction list.
+    -   **Recent Transactions List:** A paginated or infinite-scroll list of the last 10-15 transactions, with columns for Date, Description, Category, and Amount. Includes a prominent "Add Transaction" button.
+    -   **AI Insight Spotlight:** A dedicated card displaying the most recent or most relevant AI-generated insight (e.g., "You're on track to save $50 more than last month!").
+    -   **Active Goals Progress:** Compact progress bars for up to 3 active savings goals, showing goal name, amount saved, and target.
+
+-   **UI/UX Considerations:**
+    -   **Layout:** Grid-based on desktop, single column on mobile. KPI cards and charts at the top for immediate visibility.
+    -   **Progressive Disclosure:** Charts have a "View Details" link that navigates to the full Analytics section.
+    -   **Loading States:** Skeleton screens for all chart and list components to indicate data is being fetched.
+    -   **Empty States:** Friendly illustrations and prompts to "Add Your First Transaction" or "Connect an Account" when no data is present.
+
+-   **Data & State Management:**
+    -   **Summary Data:** Fetched via a single aggregated endpoint on page load. Can be cached for 5 minutes to reduce database load.
+    -   **Chart Data:** Fetched separately; state managed with `SWR` or `TanStack Query` for automatic revalidation and caching.
+    -   **Transactions List:** Client-side pagination/filtering managed with React state or a lightweight library like `@tanstack/react-table`.
+
+-   **Technical Specifications:**
+    -   **Key Components:** `<DashboardLayout />`, `<KpiCard />`, `<CashFlowChart />`, `<CategoryChart />`, `<TransactionList />`, `<InsightCard />`
+    -   **Libraries:** `Recharts`, `SWR` or `@tanstack/react-query`, `date-fns`
+    -   **Backend Endpoints:** `GET /api/dashboard/summary`, `GET /api/transactions?limit=15`, `GET /api/ai/insights/latest`
+
+### **Section 2: Analytics & Insights**
+
+-   **Purpose & User Goal:** To empower users to conduct deep, exploratory analysis of their financial habits over time and receive personalized, actionable advice from an AI coach.
+
+-   **Core Features & Functionality:**
+    -   **Advanced Filtering & Date Range Selection:** Customizable filters by category, date range (presets: Last Month, YTD, Custom), amount, and type (income/expense).
+    -   **Trend Analysis Charts:**
+        -   Spending Trend Line Chart: Compare category spending across selected months.
+        -   Income vs. Expenses Bar Chart: Monthly comparison.
+        -   Net Worth Over Time Chart.
+    -   **Interactive Transaction Table:** Full-featured table with sorting, filtering, and multi-select for bulk actions (e.g., "Recategorize Selected").
+    -   **AI Coach Interface:** A chat-like panel where users can ask free-form questions (e.g., "How much did I spend on coffee last quarter?") or trigger pre-set analysis ("Analyze my subscription costs"). Responses include text and generated mini-charts.
+    -   **Export Functionality:** Button to export filtered transaction data to CSV.
+
+-   **UI/UX Considerations:**
+    -   **Dynamic Layout:** Filters in a left sidebar (collapsible on mobile) with main content area for charts and table.
+    -   **Linked Interactions:** Selecting a data point in a chart (e.g., a spike in "Shopping") automatically filters the transaction table below.
+    -   **AI Coach UX:** Clearly distinguish user messages from AI responses. Include a "thumbs up/down" feedback mechanism on AI answers to improve future prompts.
+
+-   **Data & State Management:**
+    -   **Filter State:** Complex filter state (date range, categories) managed globally using a state management solution like `Zustand` or via URL search params for shareable views.
+    -   **AI Conversations:** Each user query and AI response stored in the database to maintain conversation context and for feedback learning.
+    -   **Data Export:** Triggered on the client-side using a library like `json2csv` on the filtered dataset.
+
+-   **Technical Specifications:**
+    -   **Key Components:** `<AnalyticsFilters />`, `<TrendChart />`, `<DataTable />`, `<AICoachPanel />`
+    -   **Libraries:** `Recharts`/`Visx`, `@tanstack/react-table`, `Zustand`, `json2csv`
+    -   **Backend Endpoints:** `POST /api/analytics/filter` (for complex queries), `POST /api/ai/coach/query`, `GET /api/transactions/export`
+
+### **Section 3: User Settings & Configuration**
+
+-   **Purpose & User Goal:** To provide a secure and intuitive space for users to manage their account, control their data, and customize the application's behavior to fit their preferences.
+
+-   **Core Features & Functionality:**
+    -   **Profile Management:** Edit display name, email, and currency preference.
+    -   **Account Security:** Change password, enable two-factor authentication (2FA), and view active login sessions with ability to revoke.
+    -   **Data Management:**
+        -   "Connected Accounts" panel showing linked Plaid sandbox institutions with option to "disconnect."
+        -   Manual data controls: Option to bulk delete transactions, export all personal data (GDPR-style).
+        -   Account deactivation/deletion.
+    -   **Application Preferences:** Toggle for dark/light mode, set default transaction category, configure notification preferences (future), and control AI insight frequency.
+    -   **API Key Management (Admin/Advanced):** Interface to input and mask an OpenAI/Groq API key for personal use, stored encrypted per user.
+
+-   **UI/UX Considerations:**
+    -   **Clear Sectioning:** Use distinct cards or tabs for "Profile," "Security," "Data & Privacy," and "Preferences."
+    -   **Destructive Actions:** Actions like "Delete All Data" or "Close Account" require a confirmation modal and password re-entry.
+    -   **Feedback:** Immediate inline validation for form fields (email, password strength). Success/error toasts for save actions.
+
+-   **Data & State Management:**
+    -   **Form State:** Managed per-form using `react-hook-form` for efficient validation and submission.
+    -   **Sensitive Operations:** Security-related changes (password, 2FA) require a re-authentication check via a separate endpoint.
+    -   **User Preferences:** Saved immediately on change (debounced) to the database and reflected in global app state (e.g., theme).
+
+-   **Technical Specifications:**
+    -   **Key Components:** `<SettingsLayout />`, `<ProfileForm />`, `<SecurityPanel />`, `<DataManagementCard />`, `<PreferencesToggle />`
+    -   **Libraries:** `react-hook-form`, `bcryptjs` (backend for password ops), `sonner` or `react-hot-toast` for notifications
+    -   **Backend Endpoints:** `PATCH /api/user/profile`, `POST /api/user/change-password`, `GET /api/user/data-export`, `DELETE /api/user`
+
