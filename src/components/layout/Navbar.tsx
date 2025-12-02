@@ -1,6 +1,6 @@
 import Link from "next/link"
-import { LayoutDashboard, PieChart, Wallet, Settings, LogOut } from "lucide-react"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { Wallet } from "lucide-react"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 
 export function Navbar() {
   return (
