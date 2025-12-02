@@ -1,4 +1,32 @@
-export default function DashboardPage() {
+import {
+  getDashboardSummary,
+  getCashFlowData,
+  getCategoryBreakdown,
+} from "@/lib/actions/dashboard"
+import { getTransactions } from "@/lib/actions/transactions"
+import { KpiCard } from "@/components/dashboard/KpiCard"
+import { CashFlowChart } from "@/components/dashboard/CashFlowChart"
+import { CategoryChart } from "@/components/dashboard/CategoryChart"
+import { RecentTransactions } from "@/components/dashboard/RecentTransactions"
+import { DollarSign, TrendingUp, TrendingDown, Receipt } from "lucide-react"
+
+export default async function DashboardPage() {
+  const [summary, cashFlowData, categoryData, transactions] = await Promise.all([
+    getDashboardSummary(),
+    getCashFlowData(),
+    getCategoryBreakdown(),
+    getTransactions(),
+  ])
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount)
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -8,12 +36,38 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-700 dark:bg-gray-900">
-        <h2 className="text-xl font-semibold mb-2">Coming Soon</h2>
-        <p className="text-gray-500 dark:text-gray-400">
-          Dashboard with KPI cards, charts, and insights will be implemented here.
-        </p>
+      {/* KPI Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <KpiCard
+          title="Total Income"
+          value={formatCurrency(summary.totalIncome)}
+          icon={TrendingUp}
+        />
+        <KpiCard
+          title="Total Expenses"
+          value={formatCurrency(summary.totalExpenses)}
+          icon={TrendingDown}
+        />
+        <KpiCard
+          title="Net Balance"
+          value={formatCurrency(summary.netBalance)}
+          icon={DollarSign}
+        />
+        <KpiCard
+          title="Transactions"
+          value={summary.transactionCount}
+          icon={Receipt}
+        />
       </div>
+
+      {/* Charts */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <CashFlowChart data={cashFlowData} />
+        <CategoryChart data={categoryData} />
+      </div>
+
+      {/* Recent Transactions */}
+      <RecentTransactions transactions={transactions} />
     </div>
   )
 }
