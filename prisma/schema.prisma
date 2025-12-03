@@ -65,15 +65,13 @@ model VerificationToken {
 
 model Transaction {
   id          String   @id @default(cuid())
-  userId      String
   amount      Float
-  date        DateTime
   description String
   category    String
+  date        DateTime
   type        String   // "income" or "expense"
-  
+  userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
