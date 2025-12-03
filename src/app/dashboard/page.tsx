@@ -10,7 +10,24 @@ import { CategoryChart } from "@/components/dashboard/CategoryChart"
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions"
 import { DollarSign, TrendingUp, TrendingDown, Receipt } from "lucide-react"
 
+import { auth } from "@/auth"
+import { db } from "@/lib/db"
+import { ConnectedAccount } from "@/components/plaid/ConnectedAccount"
+import { ConnectBankButton } from "@/components/plaid/ConnectBankButton"
+
+import { redirect } from "next/navigation"
+
 export default async function DashboardPage() {
+  const session = await auth()
+  
+  if (!session?.user?.id) {
+    redirect("/api/auth/signin?callbackUrl=/dashboard")
+  }
+
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+  })
+
   const [summary, cashFlowData, categoryData, transactions] = await Promise.all([
     getDashboardSummary(),
     getCashFlowData(),
@@ -29,11 +46,20 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-gray-500 dark:text-gray-400">
-          Your financial overview at a glance.
-        </p>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-gray-500 dark:text-gray-400">
+            Your financial overview at a glance.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {user?.institutionName ? (
+            <ConnectedAccount institutionName={user.institutionName} />
+          ) : (
+            <ConnectBankButton />
+          )}
+        </div>
       </div>
 
       {/* KPI Cards */}
