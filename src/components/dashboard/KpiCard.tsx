@@ -8,44 +8,33 @@ interface KpiCardProps {
     value: string
     isPositive: boolean
   }
-  gradient?: string
 }
 
-export function KpiCard({ title, value, icon: Icon, trend, gradient = "from-blue-500 to-cyan-500" }: KpiCardProps) {
+export function KpiCard({ title, value, icon: Icon, trend }: KpiCardProps) {
   return (
-    <div className="group relative overflow-hidden rounded-2xl bg-card border border-border/50 p-6 shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-105 animate-fade-in">
-      {/* Gradient overlay on hover */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
-      
-      <div className="relative flex items-center justify-between">
+    <div className="rounded-lg border bg-white p-6 shadow-sm dark:bg-gray-950 dark:border-gray-800">
+      <div className="flex items-center justify-between">
         <div className="flex-1">
-          <p className="text-sm font-medium text-muted-foreground mb-2">
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
             {title}
           </p>
-          <p className="text-3xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text">
-            {value}
-          </p>
+          <p className="mt-2 text-3xl font-bold tracking-tight">{value}</p>
           {trend && (
             <p
-              className={`mt-3 text-sm font-medium flex items-center gap-1 ${
+              className={`mt-2 text-sm ${
                 trend.isPositive
-                  ? "text-success"
-                  : "text-destructive"
+                  ? "text-green-600 dark:text-green-400"
+                  : "text-red-600 dark:text-red-400"
               }`}
             >
-              <span>{trend.isPositive ? "↑" : "↓"}</span>
               {trend.value}
             </p>
           )}
         </div>
-        
-        <div className={`rounded-2xl bg-gradient-to-br ${gradient} p-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-          <Icon className="h-7 w-7 text-white drop-shadow-lg" />
+        <div className="rounded-full bg-blue-100 p-3 dark:bg-blue-900">
+          <Icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
         </div>
       </div>
-      
-      {/* Bottom gradient line */}
-      <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
     </div>
   )
 }

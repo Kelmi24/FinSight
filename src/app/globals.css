@@ -4,132 +4,25 @@
 
 @layer base {
   :root {
-    /* Base Colors */
-    --background: 0 0% 98%;
+    --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
-    
-    /* Card & Surface */
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    
-    /* Primary - Vibrant Blue */
-    --primary: 217 91% 60%;
-    --primary-foreground: 0 0% 100%;
-    
-    /* Secondary - Purple */
-    --secondary: 262 83% 58%;
-    --secondary-foreground: 0 0% 100%;
-    
-    /* Accent - Emerald */
-    --accent: 142 76% 36%;
-    --accent-foreground: 0 0% 100%;
-    
-    /* Muted */
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    
-    /* Destructive - Red */
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
-    
-    /* Success - Green */
-    --success: 142 76% 36%;
-    --success-foreground: 0 0% 100%;
-    
-    /* Warning - Amber */
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
-    
-    /* Borders & Inputs */
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 217 91% 60%;
-    
-    /* Radius */
-    --radius: 0.75rem;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
   }
 
   .dark {
-    /* Base Colors - Deep Dark */
-    --background: 222.2 84% 3%;
+    --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-    
-    /* Card & Surface */
-    --card: 222.2 84% 5%;
-    --card-foreground: 210 40% 98%;
-    
-    /* Primary - Bright Blue */
-    --primary: 217 91% 65%;
+    --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
-    
-    /* Secondary - Vibrant Purple */
-    --secondary: 262 83% 65%;
-    --secondary-foreground: 0 0% 100%;
-    
-    /* Accent - Neon Emerald */
-    --accent: 142 76% 45%;
-    --accent-foreground: 0 0% 100%;
-    
-    /* Muted */
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    
-    /* Destructive - Bright Red */
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-    
-    /* Success - Neon Green */
-    --success: 142 76% 45%;
-    --success-foreground: 0 0% 100%;
-    
-    /* Warning - Bright Amber */
-    --warning: 38 92% 55%;
-    --warning-foreground: 0 0% 100%;
-    
-    /* Borders & Inputs */
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 217 91% 65%;
   }
 }
 
 @layer base {
+  * {
+    @apply border-border;
+  }
   body {
-    font-feature-settings: "rlig" 1, "calt" 1;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-  
-  html {
-    scroll-behavior: smooth;
-  }
-}
-
-/* Custom Utilities */
-@layer utilities {
-  /* Glassmorphism */
-  .glass {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-  }
-  
-  .dark .glass {
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  /* Gradient Text */
-  .gradient-text {
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-    background-image: linear-gradient(to right, hsl(var(--primary)), hsl(var(--secondary)), hsl(var(--accent)));
-  }
-  
-  /* Smooth Transitions */
-  .transition-smooth {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    @apply bg-background text-foreground;
   }
 }
