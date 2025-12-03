@@ -37,26 +37,30 @@ export default async function DashboardPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           title="Total Income"
           value={formatCurrency(summary.totalIncome)}
           icon={TrendingUp}
+          gradient="from-emerald-500 to-teal-500"
         />
         <KpiCard
           title="Total Expenses"
           value={formatCurrency(summary.totalExpenses)}
           icon={TrendingDown}
+          gradient="from-rose-500 to-pink-500"
         />
         <KpiCard
           title="Net Balance"
           value={formatCurrency(summary.netBalance)}
           icon={DollarSign}
+          gradient="from-blue-500 to-cyan-500"
         />
         <KpiCard
           title="Transactions"
           value={summary.transactionCount}
           icon={Receipt}
+          gradient="from-purple-500 to-indigo-500"
         />
       </div>
 
