@@ -1,4 +1,31 @@
-export default function SettingsPage() {
+import { redirect } from "next/navigation"
+import { auth } from "@/auth"
+import { db } from "@/lib/db"
+import { ProfileSection } from "@/components/settings/ProfileSection"
+import { AppearanceSection } from "@/components/settings/AppearanceSection"
+import { AccountsSection } from "@/components/settings/AccountsSection"
+import { DataManagementSection } from "@/components/settings/DataManagementSection"
+
+export default async function SettingsPage() {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    redirect("/api/auth/signin?callbackUrl=/settings")
+  }
+
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      name: true,
+      email: true,
+      institutionName: true,
+    },
+  })
+
+  if (!user) {
+    redirect("/api/auth/signin")
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -8,11 +35,14 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-700 dark:bg-gray-900">
-        <h2 className="text-xl font-semibold mb-2">Coming Soon</h2>
-        <p className="text-gray-500 dark:text-gray-400">
-          Profile, security, and application settings will be implemented here.
-        </p>
+      <div className="grid gap-6">
+        <ProfileSection user={user} />
+        
+        <AppearanceSection />
+        
+        <AccountsSection institutionName={user.institutionName} />
+        
+        <DataManagementSection />
       </div>
     </div>
   )
