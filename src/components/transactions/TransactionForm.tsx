@@ -9,11 +9,7 @@ import { Label } from "@/components/ui/label"
 import { CategorySelect } from "@/components/categories/CategorySelect"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DatePicker } from "@/components/ui/date-picker"
-import { FileUploadZone } from "@/components/ui/file-upload-zone"
-import { ExtractionPreview } from "@/components/transactions/ExtractionPreview"
-import { useOCRExtraction } from "@/hooks/useOCRExtraction"
 import { Loader2 } from "lucide-react"
-import type { ParsedTransaction } from "@/lib/services/ocr-parser"
 
 interface TransactionFormProps {
   transaction?: any
@@ -36,73 +32,14 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
       : new Date().toISOString().split("T")[0]
   )
 
-  // OCR extraction state
-  const ocr = useOCRExtraction()
-  const [amount, setAmount] = React.useState(transaction?.amount || "")
-  const [description, setDescription] = React.useState(transaction?.description || "")
-  const [category, setCategory] = React.useState(transaction?.category || "")
-  const [autoFilledFields, setAutoFilledFields] = React.useState<Set<string>>(new Set())
-
-  // Apply extraction to form
-  const handleApplyExtraction = React.useCallback(() => {
-    const extraction = ocr.handleApplyExtraction()
-    if (!extraction) return
-
-    const newAutoFilled = new Set<string>()
-
-    // Apply amount
-    if (extraction.amount.value) {
-      setAmount(extraction.amount.value.toString())
-      newAutoFilled.add("amount")
-    }
-
-    // Apply date
-    if (extraction.date.value) {
-      setDate(extraction.date.value)
-      newAutoFilled.add("date")
-    }
-
-    // Apply type
-    if (extraction.type.value) {
-      setTransactionType(extraction.type.value)
-      newAutoFilled.add("type")
-    }
-
-    // Apply category
-    if (extraction.category.primary) {
-      setCategory(extraction.category.primary)
-      newAutoFilled.add("category")
-    }
-
-    // Apply description
-    if (extraction.description) {
-      setDescription(extraction.description)
-      newAutoFilled.add("description")
-    }
-
-    setAutoFilledFields(newAutoFilled)
-    ocr.handleReset()
-
-    // Clear highlighting after 2 seconds
-    setTimeout(() => {
-      setAutoFilledFields(new Set())
-    }, 2000)
-  }, [ocr])
-
   async function handleSubmit(formData: FormData) {
     setError(null)
-    
-    // Update formData with current state values
-    formData.set("amount", amount)
-    formData.set("description", description)
-    formData.set("category", category)
-    formData.set("date", date)
-    
     startTransition(async () => {
       let result;
       
       if (isRecurring && !transaction) {
         // Create recurring transaction
+        // Append recurring fields to formData
         formData.append("frequency", frequency)
         formData.append("startDate", date)
         formData.append("type", transactionType)
@@ -130,57 +67,6 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
       {/* Hidden input for type - Radix Select doesn't submit via FormData */}
       <input type="hidden" name="type" value={transactionType} />
       
-      {/* OCR Extraction Preview */}
-      {ocr.step === "preview" && ocr.extraction && (
-        <div className="mb-6 rounded-lg bg-blue-50 border border-blue-200 p-4">
-          <ExtractionPreview
-            extraction={ocr.extraction}
-            processingTimeMs={ocr.processingTimeMs || undefined}
-            onApply={handleApplyExtraction}
-            onBack={ocr.handleBack}
-            isApplying={false}
-          />
-        </div>
-      )}
-
-      {/* Processing state */}
-      {ocr.step === "processing" && (
-        <div className="mb-6 rounded-lg bg-blue-50 border border-blue-200 p-4 flex items-center gap-3">
-          <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
-          <div>
-            <p className="font-medium text-blue-900">Processing document...</p>
-            <p className="text-sm text-blue-700">Extracting transaction details with OCR</p>
-          </div>
-        </div>
-      )}
-
-      {/* Error state */}
-      {ocr.step === "error" && ocr.error && (
-        <div className="mb-6 rounded-lg bg-red-50 border border-red-200 p-4">
-          <p className="font-medium text-red-900">Extraction failed</p>
-          <p className="text-sm text-red-700 mt-1">{ocr.error}</p>
-          <button
-            type="button"
-            onClick={ocr.handleReset}
-            className="mt-3 text-sm text-red-600 hover:text-red-700 font-medium"
-          >
-            Try again
-          </button>
-        </div>
-      )}
-
-      {/* Upload zone - only show if not in preview mode */}
-      {ocr.step === "idle" && (
-        <div className="mb-6">
-          <Label className="block mb-2 text-sm font-medium">📎 Upload Receipt (Optional)</Label>
-          <FileUploadZone
-            onFileSelect={ocr.handleFileSelect}
-            isLoading={false}
-            disabled={false}
-          />
-        </div>
-      )}
-      
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="type">Type</Label>
@@ -207,10 +93,8 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
             placeholder="0.00"
             step="0.01"
             min="0"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            defaultValue={transaction?.amount || ""}
             required
-            className={autoFilledFields.has("amount") ? "border-indigo-500 bg-indigo-50" : ""}
           />
         </div>
       </div>
@@ -223,10 +107,8 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
             name="description"
             id="description"
             placeholder="Groceries, Rent, Salary..."
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            defaultValue={transaction?.description || ""}
             required
-            className={autoFilledFields.has("description") ? "border-indigo-500 bg-indigo-50" : ""}
           />
         </div>
 
@@ -237,7 +119,7 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
               name="category"
               id="category"
               type={transactionType}
-              defaultValue={category}
+              defaultValue={transaction?.category || ""}
               required
             />
           </div>
