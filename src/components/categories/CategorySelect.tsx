@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
-import { createPortal } from "react-dom"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -49,32 +48,14 @@ export function CategorySelect({
   const [newCategoryName, setNewCategoryName] = useState("")
   const [selectedColor, setSelectedColor] = useState(PRESET_COLORS[0])
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 })
-  const [mounted, setMounted] = useState(false)
   const dialogRef = useRef<HTMLDialogElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  useEffect(() => {
     loadCategories()
   }, [type])
-
-  // Calculate dropdown position
-  const updatePosition = useCallback(() => {
-    if (triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect()
-      setDropdownPosition({
-        top: rect.bottom + 8,
-        left: rect.left,
-        width: rect.width,
-      })
-    }
-  }, [])
 
   // Handle click outside
   useEffect(() => {
@@ -108,20 +89,6 @@ export function CategorySelect({
       document.removeEventListener("mousedown", handleClickOutside)
     }
   }, [isOpen])
-
-  // Update dropdown position when opened
-  useEffect(() => {
-    if (isOpen) {
-      updatePosition()
-      // Also update on scroll/resize
-      window.addEventListener('scroll', updatePosition, true)
-      window.addEventListener('resize', updatePosition)
-      return () => {
-        window.removeEventListener('scroll', updatePosition, true)
-        window.removeEventListener('resize', updatePosition)
-      }
-    }
-  }, [isOpen, updatePosition])
 
   async function loadCategories() {
     setIsLoading(true)
@@ -236,22 +203,16 @@ export function CategorySelect({
           )} />
         </button>
 
-        {/* Dropdown panel - rendered in portal to avoid dialog clipping */}
-        {isOpen && !isLoading && mounted && createPortal(
+        {/* Dropdown panel - positioned absolutely within container */}
+        {isOpen && !isLoading && (
           <div 
             ref={dropdownRef}
             className={cn(
-              "fixed z-[9999] rounded-xl",
+              "absolute left-0 right-0 top-full mt-2 z-[100] rounded-xl",
               "bg-white border border-gray-200 shadow-dropdown",
               "max-h-80 overflow-hidden",
               "animate-fade-in"
             )}
-            style={{
-              top: dropdownPosition.top,
-              left: dropdownPosition.left,
-              width: Math.max(dropdownPosition.width, 200),
-            }}
-            onMouseDown={(e) => e.stopPropagation()}
           >
             {/* Categories list */}
             <div className="max-h-60 overflow-y-auto py-2">
@@ -372,8 +333,7 @@ export function CategorySelect({
                 Add new category
               </button>
             </div>
-          </div>,
-          document.body
+          </div>
         )}
       </div>
 
