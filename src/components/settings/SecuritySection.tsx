@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { changePassword } from "@/lib/actions/user"
-import { Lock, Eye, EyeOff } from "lucide-react"
+import { Lock, Eye, EyeOff, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
 export function SecuritySection() {
@@ -67,9 +67,12 @@ export function SecuritySection() {
           <DialogTrigger asChild>
             <Button variant="outline">Change Password</Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="max-w-sm sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Change Password</DialogTitle>
+              <div className="mx-auto sm:mx-0 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 mb-2">
+                <Lock className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              <DialogTitle className="text-xl">Change Password</DialogTitle>
               <DialogDescription>
                 Enter your current password and choose a new one.
               </DialogDescription>
@@ -159,19 +162,27 @@ export function SecuritySection() {
                 </div>
               </div>
 
-              <div className="flex gap-3 justify-end pt-4">
+              <DialogFooter className="flex-col-reverse sm:flex-row gap-2 pt-4">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setOpen(false)}
                   disabled={isSubmitting}
+                  className="w-full sm:w-auto"
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Changing..." : "Change Password"}
+                <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Changing...
+                    </>
+                  ) : (
+                    "Change Password"
+                  )}
                 </Button>
-              </div>
+              </DialogFooter>
             </form>
           </DialogContent>
         </Dialog>
