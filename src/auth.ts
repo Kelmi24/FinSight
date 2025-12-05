@@ -18,11 +18,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       authorize: async (credentials) => {
-        // MOCK USER FOR TESTING
+        // MOCK USER FOR TESTING - Ensure user exists in DB
+        const user = await db.user.upsert({
+          where: { email: "demo@example.com" },
+          update: {},
+          create: {
+            id: "mock-user-id",
+            name: "Demo User",
+            email: "demo@example.com",
+            image: "https://github.com/shadcn.png",
+          },
+        })
+        
         return {
-          id: "mock-user-id",
-          name: "Demo User",
-          email: "demo@example.com",
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          image: user.image,
         }
       },
     }),
