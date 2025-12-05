@@ -21,7 +21,7 @@ export function TransactionDialog() {
         Add Transaction
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-xl">
           <DialogHeader>
             <DialogTitle>Add Transaction</DialogTitle>
           </DialogHeader>

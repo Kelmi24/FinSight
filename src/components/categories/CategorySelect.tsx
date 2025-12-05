@@ -335,8 +335,8 @@ export function CategorySelect({
       {/* Create category dialog */}
       <dialog
         ref={dialogRef}
-        className="fixed inset-0 m-auto backdrop:bg-black/50 rounded-xl p-0 shadow-2xl bg-white dark:bg-gray-900 dark:text-gray-50 border border-gray-200 dark:border-gray-800"
-        style={{ width: '90%', maxWidth: '28rem', minWidth: '320px' }}
+        className="fixed inset-0 m-auto backdrop:bg-black/50 rounded-xl p-0 shadow-2xl bg-white border border-gray-200"
+        style={{ width: '90%', maxWidth: '32rem', minWidth: '320px' }}
         onClose={(e) => {
           e.stopPropagation()
           setError(null)

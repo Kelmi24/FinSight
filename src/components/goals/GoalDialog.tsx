@@ -20,7 +20,7 @@ interface GoalDialogProps {
 export function GoalDialog({ open, onOpenChange, goal }: GoalDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>{goal ? "Edit Goal" : "Create New Goal"}</DialogTitle>
         </DialogHeader>

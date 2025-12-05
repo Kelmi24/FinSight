@@ -63,7 +63,7 @@ export function CategoryDialog({ open, onOpenChange, category }: CategoryDialogP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>{category ? "Edit Category" : "Create Category"}</DialogTitle>
         </DialogHeader>

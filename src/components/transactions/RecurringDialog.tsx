@@ -20,7 +20,7 @@ export function RecurringDialog({ open, onOpenChange, recurring, onSuccess }: Re
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>{recurring ? "Edit Recurring" : "Set Up Recurring Transaction"}</DialogTitle>
         </DialogHeader>

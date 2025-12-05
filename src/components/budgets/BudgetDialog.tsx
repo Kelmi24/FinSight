@@ -13,7 +13,7 @@ interface BudgetDialogProps {
 export function BudgetDialog({ open, onOpenChange, budget }: BudgetDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>{budget ? "Edit Budget" : "Create Budget"}</DialogTitle>
         </DialogHeader>
