@@ -11,10 +11,15 @@ import { PreferencesSection } from "@/components/settings/PreferencesSection"
 export default async function SettingsPage() {
   const session = await auth()
   
+  console.log("Settings page - Session:", JSON.stringify(session, null, 2))
+  
   if (!session?.user?.id) {
+    console.log("Settings page - No user ID in session, redirecting to login")
     redirect("/login?callbackUrl=/settings")
   }
 
+  console.log("Settings page - Looking for user with ID:", session.user.id)
+  
   let user = await db.user.findUnique({
     where: { id: session.user.id },
     select: {
@@ -29,6 +34,7 @@ export default async function SettingsPage() {
 
   // Fallback: if user not found by ID, try finding by email
   if (!user && session.user.email) {
+    console.log("Settings page - User not found by ID, trying email:", session.user.email)
     user = await db.user.findUnique({
       where: { email: session.user.email },
       select: {
@@ -40,12 +46,16 @@ export default async function SettingsPage() {
         currencyPreference: true,
       },
     })
+    console.log("Settings page - User found by email:", !!user)
   }
 
   if (!user) {
+    console.log("Settings page - No user found, redirecting to login")
     redirect("/login")
   }
 
+  console.log("Settings page - User found:", user.email)
+  
   // Check if user has a password (credentials auth vs OAuth)
   const hasPassword = !!(user as any).password
 

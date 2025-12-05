@@ -48,6 +48,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // When user logs in, attach user id and currency preference
       if (user) {
         token.sub = user.id
+        token.email = user.email // Ensure email is in token
         const dbUser = await db.user.findUnique({
           where: { id: user.id },
           select: { currencyPreference: true },
@@ -59,6 +60,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       if (token.sub && session.user) {
         session.user.id = token.sub;
+      }
+      if (token.email && session.user) {
+        session.user.email = token.email as string;
       }
       if (session.user) {
         // @ts-ignore add custom field
