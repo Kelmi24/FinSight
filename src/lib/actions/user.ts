@@ -86,6 +86,62 @@ export async function changePassword(formData: FormData) {
   }
 }
 
+export async function updateProfileImage(imageData: string) {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return { error: "Not authenticated" }
+  }
+
+  try {
+    // Validate base64 image data
+    if (!imageData.startsWith('data:image/')) {
+      return { error: "Invalid image format" }
+    }
+
+    // Check approximate size (base64 is ~33% larger than original)
+    const sizeInBytes = (imageData.length * 3) / 4
+    const maxSize = 2 * 1024 * 1024 // 2MB
+    if (sizeInBytes > maxSize) {
+      return { error: "Image must be less than 2MB" }
+    }
+
+    await db.user.update({
+      where: { id: session.user.id },
+      data: { image: imageData },
+    })
+
+    revalidatePath("/settings")
+    revalidatePath("/dashboard")
+    return { success: "Profile photo updated successfully" }
+  } catch (error) {
+    console.error("Failed to update profile image:", error)
+    return { error: "Failed to update profile photo" }
+  }
+}
+
+export async function removeProfileImage() {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return { error: "Not authenticated" }
+  }
+
+  try {
+    await db.user.update({
+      where: { id: session.user.id },
+      data: { image: null },
+    })
+
+    revalidatePath("/settings")
+    revalidatePath("/dashboard")
+    return { success: "Profile photo removed successfully" }
+  } catch (error) {
+    console.error("Failed to remove profile image:", error)
+    return { error: "Failed to remove profile photo" }
+  }
+}
+
 export async function logout() {
   await signOut({ redirect: false })
   redirect("/login")

@@ -19,6 +19,7 @@ export default async function SettingsPage() {
     select: {
       name: true,
       email: true,
+      image: true,
       password: true,
       institutionName: true,
     },
