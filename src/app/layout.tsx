@@ -19,7 +19,16 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         {children}
-        <Toaster />
+        <Toaster 
+          position="top-right"
+          toastOptions={{
+            classNames: {
+              toast: 'border shadow-lg',
+              success: 'bg-green-50 border-green-200 text-green-800 dark:bg-green-950 dark:border-green-800 dark:text-green-200',
+              error: 'bg-red-50 border-red-200 text-red-800 dark:bg-red-950 dark:border-red-800 dark:text-red-200',
+            },
+          }}
+        />
       </body>
     </html>
   );
