@@ -82,21 +82,26 @@ export function CategorySelect({
     
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node
-      if (
-        containerRef.current && 
-        !containerRef.current.contains(target) &&
-        dropdownRef.current &&
-        !dropdownRef.current.contains(target)
-      ) {
-        setIsOpen(false)
-        setShowDeleteConfirm(null)
+      
+      // Check if click is inside the container (trigger button)
+      if (containerRef.current?.contains(target)) {
+        return
       }
+      
+      // Check if click is inside the dropdown
+      if (dropdownRef.current?.contains(target)) {
+        return
+      }
+      
+      // Click was outside, close the dropdown
+      setIsOpen(false)
+      setShowDeleteConfirm(null)
     }
     
-    // Use timeout to avoid immediate close on the same click that opens
+    // Add listener on next tick to avoid catching the opening click
     const timeoutId = setTimeout(() => {
       document.addEventListener("mousedown", handleClickOutside)
-    }, 0)
+    }, 10)
     
     return () => {
       clearTimeout(timeoutId)
@@ -246,6 +251,7 @@ export function CategorySelect({
               left: dropdownPosition.left,
               width: Math.max(dropdownPosition.width, 200),
             }}
+            onMouseDown={(e) => e.stopPropagation()}
           >
             {/* Categories list */}
             <div className="max-h-60 overflow-y-auto py-2">
@@ -296,7 +302,11 @@ export function CategorySelect({
                           "transition-colors duration-150",
                           selectedValue === cat.name && "bg-indigo-50"
                         )}
-                        onClick={() => handleSelectCategory(cat.name)}
+                        onMouseDown={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          handleSelectCategory(cat.name)
+                        }}
                       >
                         <div className="flex items-center gap-3">
                           <span
@@ -345,7 +355,9 @@ export function CategorySelect({
             <div className="border-t border-gray-100 p-2">
               <button
                 type="button"
-                onClick={() => {
+                onMouseDown={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
                   setIsOpen(false)
                   openDialog()
                 }}
