@@ -24,10 +24,10 @@ interface GoalCardProps {
 
 export function GoalCard({ goal }: GoalCardProps) {
   const router = useRouter()
+  const { formatCurrency } = useCurrency()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
-  const { formatCurrency } = useCurrency()
 
   const progress = Math.min((goal.currentAmount / goal.targetAmount) * 100, 100)
   const remaining = goal.targetAmount - goal.currentAmount
@@ -95,7 +95,7 @@ export function GoalCard({ goal }: GoalCardProps) {
               {formatCurrency(goal.targetAmount)} goal
             </span>
           </div>
-
+          
           <div className="h-2 w-full rounded-full bg-gray-100">
             <div
               className="h-2 rounded-full bg-primary-600 transition-all duration-500"
@@ -126,6 +126,14 @@ export function GoalCard({ goal }: GoalCardProps) {
           </p>
           <div className="flex gap-3 justify-end pt-4">
             <Button
+              variant="outline"
+              onClick={() => setDeleteOpen(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
               onClick={handleDelete}
               disabled={isDeleting}
             >

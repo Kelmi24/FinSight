@@ -6,7 +6,6 @@ import { AlertCircle, CheckCircle, AlertTriangle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { ParsedTransaction } from "@/lib/services/ocr-parser"
 import { getConfidenceColor, formatConfidence } from "@/lib/services/ocr-parser"
-import { useCurrency } from "@/providers/currency-provider"
 
 interface ExtractionPreviewProps {
   extraction: ParsedTransaction
@@ -23,7 +22,6 @@ export function ExtractionPreview({
   onBack,
   isApplying = false,
 }: ExtractionPreviewProps) {
-  const { formatCurrency } = useCurrency()
   const getConfidenceIcon = (confidence: number) => {
     const color = getConfidenceColor(confidence)
     if (color === "green") return <CheckCircle className="h-4 w-4 text-emerald-600" />
@@ -87,8 +85,8 @@ export function ExtractionPreview({
         <FieldRow
           label="Amount"
           value={
-            extraction.amount.value !== null
-              ? formatCurrency(extraction.amount.value)
+            extraction.amount.value
+              ? `${extraction.amount.currency} ${extraction.amount.value.toFixed(2)}`
               : null
           }
           confidence={extraction.amount.confidence}

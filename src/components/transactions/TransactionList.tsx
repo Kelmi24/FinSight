@@ -43,8 +43,9 @@ export function TransactionList({ transactions, onDeleteSuccess }: TransactionLi
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
-  const router = useRouter()
   const { formatCurrency } = useCurrency()
+
+  const router = useRouter()
 
   async function handleDelete(id: string) {
     setIsDeleting(true)

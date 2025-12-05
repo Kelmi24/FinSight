@@ -17,10 +17,10 @@ interface RecurringListProps {
 
 export function RecurringList({ recurring, onDeleteSuccess }: RecurringListProps) {
   const router = useRouter()
+  const { formatCurrency } = useCurrency()
   const [editingRecurring, setEditingRecurring] = useState<any | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
-  const { formatCurrency } = useCurrency()
 
   const handleDelete = async (id: string) => {
     setIsDeleting(true)
