@@ -15,7 +15,7 @@ export default async function SettingsPage() {
     redirect("/login?callbackUrl=/settings")
   }
 
-  const user = await db.user.findUnique({
+  let user = await db.user.findUnique({
     where: { id: session.user.id },
     select: {
       name: true,
@@ -26,6 +26,21 @@ export default async function SettingsPage() {
       currencyPreference: true,
     },
   })
+
+  // Fallback: if user not found by ID, try finding by email
+  if (!user && session.user.email) {
+    user = await db.user.findUnique({
+      where: { email: session.user.email },
+      select: {
+        name: true,
+        email: true,
+        image: true,
+        password: true,
+        institutionName: true,
+        currencyPreference: true,
+      },
+    })
+  }
 
   if (!user) {
     redirect("/login")

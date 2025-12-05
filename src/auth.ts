@@ -45,8 +45,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   callbacks: {
     async jwt({ token, user }) {
-      // When user logs in, attach currency preference
-      if (user?.id) {
+      // When user logs in, attach user id and currency preference
+      if (user) {
+        token.sub = user.id
         const dbUser = await db.user.findUnique({
           where: { id: user.id },
           select: { currencyPreference: true },
@@ -57,12 +58,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async session({ session, token }) {
       if (token.sub && session.user) {
-        // Fix for legacy test user ID
-        if (token.sub === "user-1") {
-          session.user.id = "mock-user-id";
-        } else {
-          session.user.id = token.sub;
-        }
+        session.user.id = token.sub;
       }
       if (session.user) {
         // @ts-ignore add custom field
