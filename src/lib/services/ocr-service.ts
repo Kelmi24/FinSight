@@ -4,7 +4,8 @@
  */
 
 import Tesseract from "tesseract.js"
-import * as pdfParse from "pdf-parse"
+// @ts-ignore - pdf-parse has mixed module exports
+import pdfParse from "pdf-parse"
 import { parseTransactionFromOCR } from "./ocr-parser"
 
 export interface OCRExtractionResult {
