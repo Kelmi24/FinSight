@@ -40,26 +40,31 @@ export async function registerUser(formData: FormData) {
     return { error: "Email and password are required" }
   }
 
-  // Check if user exists
-  const existingUser = await db.user.findUnique({
-    where: { email },
-  })
+  try {
+    // Check if user exists
+    const existingUser = await db.user.findUnique({
+      where: { email },
+    })
 
-  if (existingUser) {
-    return { error: "User already exists" }
+    if (existingUser) {
+      return { error: "User already exists" }
+    }
+
+    // Hash password
+    const hashedPassword = await hash(password, 10)
+
+    // Create user
+    await db.user.create({
+      data: {
+        name: name || email.split("@")[0],
+        email,
+        password: hashedPassword,
+      },
+    })
+  } catch (error) {
+    console.error("Registration error:", error)
+    return { error: "Failed to create account. Please try again." }
   }
-
-  // Hash password
-  const hashedPassword = await hash(password, 10)
-
-  // Create user
-  await db.user.create({
-    data: {
-      name: name || email.split("@")[0],
-      email,
-      password: hashedPassword,
-    },
-  })
 
   redirect("/login?success=true")
 }
