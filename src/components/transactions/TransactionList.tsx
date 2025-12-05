@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import {
   Table,
   TableBody,
@@ -9,9 +10,12 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Trash2 } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Trash2, Edit2, Receipt } from "lucide-react"
 import { deleteTransaction } from "@/lib/actions/transactions"
-// import { format } from "date-fns" // Removed to use native Intl
+import { useRouter } from "next/navigation"
+import { TransactionForm } from "./TransactionForm"
+import { EmptyState } from "@/components/ui/empty-state"
 
 // Simple date formatter if date-fns not installed yet
 const formatDate = (date: Date) => {
@@ -38,68 +42,148 @@ interface Transaction {
 
 interface TransactionListProps {
   transactions: Transaction[]
+  onDeleteSuccess?: () => void
 }
 
-export function TransactionList({ transactions }: TransactionListProps) {
+export function TransactionList({ transactions, onDeleteSuccess }: TransactionListProps) {
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const router = useRouter()
+
   async function handleDelete(id: string) {
-    if (confirm("Are you sure you want to delete this transaction?")) {
-      await deleteTransaction(id)
+    setIsDeleting(true)
+    const result = await deleteTransaction(id)
+    setIsDeleting(false)
+    setDeleteId(null)
+    
+    if (result.error) {
+      alert(result.error)
+    } else {
+      router.refresh()
+      if (onDeleteSuccess) {
+        onDeleteSuccess()
+      }
     }
   }
 
+  const editingTransaction = editingId
+    ? transactions.find(t => t.id === editingId)
+    : null
+
   return (
-    <div className="rounded-md border bg-white dark:bg-gray-950 dark:border-gray-800">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Date</TableHead>
-            <TableHead>Description</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead className="text-right">Amount</TableHead>
-            <TableHead className="w-[50px]"></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {transactions.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={6} className="h-24 text-center">
-                No transactions found.
-              </TableCell>
-            </TableRow>
-          ) : (
-            transactions.map((transaction) => (
-              <TableRow key={transaction.id}>
-                <TableCell>{formatDate(transaction.date)}</TableCell>
-                <TableCell>{transaction.description}</TableCell>
-                <TableCell>{transaction.category}</TableCell>
-                <TableCell className="capitalize">{transaction.type}</TableCell>
-                <TableCell
-                  className={`text-right font-medium ${
-                    transaction.type === "income"
-                      ? "text-green-600 dark:text-green-400"
-                      : "text-red-600 dark:text-red-400"
-                  }`}
-                >
-                  {transaction.type === "income" ? "+" : "-"}
-                  {formatCurrency(transaction.amount)}
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(transaction.id)}
-                    className="h-8 w-8 text-gray-500 hover:text-red-600"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Delete</span>
-                  </Button>
-                </TableCell>
+    <>
+      {transactions.length === 0 ? (
+        <EmptyState
+          title="No transactions found"
+          description="Add a transaction to start tracking your income and expenses."
+          icon={Receipt}
+          action={
+            <Button onClick={() => document.getElementById("add-transaction-trigger")?.click()}>
+              Add Transaction
+            </Button>
+          }
+        />
+      ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="whitespace-nowrap">Date</TableHead>
+                <TableHead className="whitespace-nowrap">Description</TableHead>
+                <TableHead className="whitespace-nowrap">Category</TableHead>
+                <TableHead className="whitespace-nowrap">Type</TableHead>
+                <TableHead className="text-right whitespace-nowrap">Amount</TableHead>
+                <TableHead className="w-[100px]"></TableHead>
               </TableRow>
-            ))
+            </TableHeader>
+            <TableBody>
+              {transactions.map((transaction) => (
+                <TableRow key={transaction.id}>
+                  <TableCell>{formatDate(transaction.date)}</TableCell>
+                  <TableCell>{transaction.description}</TableCell>
+                  <TableCell>{transaction.category}</TableCell>
+                  <TableCell className="capitalize">{transaction.type}</TableCell>
+                  <TableCell
+                    className={`text-right font-medium ${
+                      transaction.type === "income"
+                        ? "text-green-600 dark:text-green-400"
+                        : "text-red-600 dark:text-red-400"
+                    }`}
+                  >
+                    {transaction.type === "income" ? "+" : "-"}
+                    {formatCurrency(transaction.amount)}
+                  </TableCell>
+                  <TableCell className="flex gap-2 items-center justify-end">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setEditingId(transaction.id)}
+                      className="h-8 w-8 text-gray-600 hover:text-blue-600"
+                      title="Edit transaction"
+                    >
+                      <Edit2 className="h-4 w-4" />
+                      <span className="sr-only">Edit</span>
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      onClick={() => setDeleteId(transaction.id)}
+                      className="h-8 w-8 text-white"
+                      title="Delete transaction"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Delete</span>
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+      )}
+
+      {/* Edit Dialog */}
+      <Dialog open={editingId !== null} onOpenChange={(open) => !open && setEditingId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Transaction</DialogTitle>
+          </DialogHeader>
+          {editingTransaction && (
+            <TransactionForm
+              transaction={editingTransaction}
+              onSuccess={() => setEditingId(null)}
+            />
           )}
-        </TableBody>
-      </Table>
-    </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Dialog */}
+      <Dialog open={deleteId !== null} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete transaction?</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Are you sure you want to delete this transaction? This action cannot be undone.
+          </p>
+          <div className="flex gap-3 justify-end pt-4">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteId(null)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => deleteId && handleDelete(deleteId)}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

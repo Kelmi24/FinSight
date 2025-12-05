@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { DatePicker } from "@/components/ui/date-picker"
 import { createGoal, updateGoal } from "@/lib/actions/goals"
 
 interface Goal {
@@ -21,22 +22,32 @@ interface GoalFormProps {
 
 export function GoalForm({ goal, onSuccess }: GoalFormProps) {
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsLoading(true)
+    setError(null)
 
     const formData = new FormData(e.currentTarget)
     
     try {
+      let result
       if (goal) {
-        await updateGoal(goal.id, formData)
+        result = await updateGoal(goal.id, formData)
       } else {
-        await createGoal(formData)
+        result = await createGoal(formData)
       }
+      
+      if (result?.error) {
+        setError(result.error)
+        return
+      }
+      
       onSuccess()
     } catch (error) {
       console.error("Failed to save goal:", error)
+      setError("Failed to save goal. Please try again.")
     } finally {
       setIsLoading(false)
     }
@@ -83,13 +94,19 @@ export function GoalForm({ goal, onSuccess }: GoalFormProps) {
 
       <div className="space-y-2">
         <Label htmlFor="deadline">Target Date (Optional)</Label>
-        <Input
+        <DatePicker
           id="deadline"
           name="deadline"
-          type="date"
-          defaultValue={goal?.deadline ? new Date(goal.deadline).toISOString().split('T')[0] : ''}
+          value={goal?.deadline ? new Date(goal.deadline).toISOString().split('T')[0] : ''}
+          placeholder="Select target date"
         />
       </div>
+
+      {error && (
+        <div className="rounded-md bg-red-50 p-3 dark:bg-red-900/20">
+          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        </div>
+      )}
 
       <div className="flex justify-end pt-4">
         <Button type="submit" disabled={isLoading}>

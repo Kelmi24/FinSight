@@ -1,0 +1,108 @@
+"use client"
+
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { createBudget, updateBudget } from "@/lib/actions/budgets"
+import { CategorySelect } from "@/components/categories/CategorySelect"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useRouter } from "next/navigation"
+
+interface BudgetFormProps {
+  budget?: any
+  onSuccess?: () => void
+}
+
+export function BudgetForm({ budget, onSuccess }: BudgetFormProps) {
+  const router = useRouter()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setError(null)
+    setIsSubmitting(true)
+
+    const formData = new FormData(e.currentTarget)
+
+    try {
+      let result
+      if (budget) {
+        result = await updateBudget(budget.id, formData)
+      } else {
+        result = await createBudget(formData)
+      }
+
+      if (result.error) {
+        setError(result.error)
+      } else {
+        router.refresh()
+        onSuccess?.()
+      }
+    } catch (err) {
+      setError("Failed to save budget")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4 rounded-md bg-white dark:bg-gray-950 p-4 sm:p-6 border border-gray-100 dark:border-gray-800 transition-all duration-medium">
+      {error && (
+        <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 p-3 rounded">
+          {error}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="category">Category</Label>
+          <CategorySelect
+            name="category"
+            id="category"
+            type="expense"
+            defaultValue={budget?.category || ""}
+            required
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="amount">Monthly Limit ($)</Label>
+          <Input
+            id="amount"
+            name="amount"
+            type="number"
+            step="0.01"
+            min="0"
+            defaultValue={budget?.amount || ""}
+            placeholder="100.00"
+            required
+          />
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="period">Period</Label>
+        <Select name="period" defaultValue={budget?.period || "monthly"}>
+          <SelectTrigger id="period">
+            <SelectValue placeholder="Select period" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="weekly">Weekly</SelectItem>
+            <SelectItem value="monthly">Monthly</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex gap-3 justify-end pt-4">
+        <Button variant="outline" type="button" onClick={() => onSuccess?.()} disabled={isSubmitting}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Saving..." : budget ? "Update" : "Create"}
+        </Button>
+      </div>
+    </form>
+  )
+}

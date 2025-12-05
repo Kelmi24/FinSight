@@ -3,6 +3,7 @@
 import { Building2 } from "lucide-react"
 import { ConnectedAccount } from "@/components/plaid/ConnectedAccount"
 import { ConnectBankButton } from "@/components/plaid/ConnectBankButton"
+import { Card } from "@/components/ui/card"
 
 interface AccountsSectionProps {
   institutionName: string | null
@@ -10,13 +11,13 @@ interface AccountsSectionProps {
 
 export function AccountsSection({ institutionName }: AccountsSectionProps) {
   return (
-    <div className="rounded-lg border bg-white p-6 shadow-sm dark:bg-gray-950 dark:border-gray-800">
+    <Card>
       <div className="flex items-center gap-3 mb-6">
         <div className="rounded-full bg-green-100 p-2 dark:bg-green-900">
           <Building2 className="h-5 w-5 text-green-600 dark:text-green-400" />
         </div>
         <div>
-          <h2 className="text-xl font-semibold">Connected Accounts</h2>
+          <h2 className="text-2xl font-semibold tracking-tight">Connected Accounts</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Manage your linked bank accounts
           </p>
@@ -37,6 +38,6 @@ export function AccountsSection({ institutionName }: AccountsSectionProps) {
           </div>
         )}
       </div>
-    </div>
+    </Card>
   )
 }

@@ -1,98 +1,156 @@
 "use client"
 
 import * as React from "react"
-import { createTransaction } from "@/lib/actions/transactions"
+import { createTransaction, updateTransaction } from "@/lib/actions/transactions"
+import { createRecurringTransaction } from "@/lib/actions/recurring"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select } from "@/components/ui/select"
+import { CategorySelect } from "@/components/categories/CategorySelect"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { DatePicker } from "@/components/ui/date-picker"
 import { Loader2 } from "lucide-react"
 
 interface TransactionFormProps {
+  transaction?: any
   onSuccess?: () => void
 }
 
-export function TransactionForm({ onSuccess }: TransactionFormProps) {
+export function TransactionForm({ transaction, onSuccess }: TransactionFormProps) {
   const [isPending, startTransition] = React.useTransition()
   const [error, setError] = React.useState<string | null>(null)
+  const [transactionType, setTransactionType] = React.useState<"income" | "expense">(
+    transaction?.type || "expense"
+  )
+  
+  // Recurring state
+  const [isRecurring, setIsRecurring] = React.useState(false)
+  const [frequency, setFrequency] = React.useState("monthly")
+  const [date, setDate] = React.useState(
+    transaction
+      ? new Date(transaction.date).toISOString().split("T")[0]
+      : new Date().toISOString().split("T")[0]
+  )
 
   async function handleSubmit(formData: FormData) {
     setError(null)
     startTransition(async () => {
-      const result = await createTransaction(formData)
+      let result;
+      
+      if (isRecurring && !transaction) {
+        // Create recurring transaction
+        // Append recurring fields to formData
+        formData.append("frequency", frequency)
+        formData.append("startDate", date)
+        formData.append("type", transactionType)
+        
+        result = await createRecurringTransaction(formData)
+      } else {
+        // Create/Update one-time transaction
+        result = transaction
+          ? await updateTransaction(transaction.id, formData)
+          : await createTransaction(formData)
+      }
+      
       if (result.error) {
         setError(result.error)
       } else {
         onSuccess?.()
+        // Trigger a hard refresh to ensure data updates
+        setTimeout(() => window.location.reload(), 300)
       }
     })
   }
 
   return (
-    <form action={handleSubmit} className="space-y-4">
-      <div className="grid gap-2">
-        <Label htmlFor="type">Type</Label>
-        <Select name="type" id="type" required defaultValue="expense">
-          <option value="expense">Expense</option>
-          <option value="income">Income</option>
-        </Select>
+    <form action={handleSubmit} className="space-y-4 rounded-md bg-white dark:bg-gray-950 p-4 sm:p-6 border border-gray-100 dark:border-gray-800 transition-all duration-medium">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="type">Type</Label>
+          <Select
+            name="type"
+            value={transactionType}
+            onValueChange={(val) => setTransactionType(val as "income" | "expense")}
+            required
+          >
+            <SelectTrigger id="type">
+              <SelectValue placeholder="Select type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="expense">Expense</SelectItem>
+              <SelectItem value="income">Income</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="amount">Amount</Label>
+          <Input
+            type="number"
+            name="amount"
+            id="amount"
+            placeholder="0.00"
+            step="0.01"
+            min="0"
+            defaultValue={transaction?.amount || ""}
+            required
+          />
+        </div>
       </div>
 
-      <div className="grid gap-2">
-        <Label htmlFor="amount">Amount</Label>
-        <Input
-          type="number"
-          name="amount"
-          id="amount"
-          placeholder="0.00"
-          step="0.01"
-          min="0"
-          required
-        />
-      </div>
+      <div className="grid gap-4">
+        <div>
+          <Label htmlFor="description">Description</Label>
+          <Input
+            type="text"
+            name="description"
+            id="description"
+            placeholder="Groceries, Rent, Salary..."
+            defaultValue={transaction?.description || ""}
+            required
+          />
+        </div>
 
-      <div className="grid gap-2">
-        <Label htmlFor="description">Description</Label>
-        <Input
-          type="text"
-          name="description"
-          id="description"
-          placeholder="Groceries, Rent, Salary..."
-          required
-        />
-      </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="category">Category</Label>
+            <CategorySelect
+              name="category"
+              id="category"
+              type={transactionType}
+              defaultValue={transaction?.category || ""}
+              required
+            />
+          </div>
 
-      <div className="grid gap-2">
-        <Label htmlFor="category">Category</Label>
-        <Select name="category" id="category" required defaultValue="Food">
-          <option value="Food">Food</option>
-          <option value="Housing">Housing</option>
-          <option value="Transportation">Transportation</option>
-          <option value="Utilities">Utilities</option>
-          <option value="Entertainment">Entertainment</option>
-          <option value="Healthcare">Healthcare</option>
-          <option value="Income">Income</option>
-          <option value="Other">Other</option>
-        </Select>
-      </div>
-
-      <div className="grid gap-2">
-        <Label htmlFor="date">Date</Label>
-        <Input
-          type="date"
-          name="date"
-          id="date"
-          required
-          defaultValue={new Date().toISOString().split("T")[0]}
-        />
+          <div>
+            <Label htmlFor="date">Date</Label>
+            <DatePicker
+              name="date"
+              id="date"
+              required
+              value={date}
+              onChange={setDate}
+              placeholder="Select transaction date"
+              isRecurring={isRecurring}
+              onRecurringChange={setIsRecurring}
+              frequency={frequency}
+              onFrequencyChange={setFrequency}
+            />
+          </div>
+        </div>
       </div>
 
       {error && <p className="text-sm text-red-500">{error}</p>}
 
       <div className="flex justify-end">
-        <Button type="submit" disabled={isPending}>
-          {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Add Transaction
+        <Button type="submit" disabled={isPending} className="inline-flex items-center gap-2">
+          {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+          {transaction 
+            ? "Update Transaction" 
+            : isRecurring 
+              ? "Create Recurring Transaction" 
+              : "Add Transaction"}
         </Button>
       </div>
     </form>

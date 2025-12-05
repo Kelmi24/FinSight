@@ -4,7 +4,9 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { CustomSelect as Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/custom-select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { DatePicker } from "@/components/ui/date-picker"
+import { Card, CardContent } from "@/components/ui/card"
 
 export interface FilterValues {
   startDate: string
@@ -50,9 +52,9 @@ export function AnalyticsFilters({ onFilterChange, categories }: AnalyticsFilter
   }
 
   return (
-    <div className="rounded-lg border bg-white p-6 shadow-sm dark:bg-gray-950 dark:border-gray-800">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-lg">Filters</h3>
+    <>
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-lg font-semibold">Filters</h3>
         <Button variant="ghost" size="sm" onClick={handleReset}>
           Reset
         </Button>
@@ -61,21 +63,23 @@ export function AnalyticsFilters({ onFilterChange, categories }: AnalyticsFilter
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <div className="space-y-2">
           <Label htmlFor="startDate">Start Date</Label>
-          <Input
+          <DatePicker
             id="startDate"
-            type="date"
+            name="startDate"
             value={filters.startDate}
-            onChange={(e) => handleChange("startDate", e.target.value)}
+            onChange={(value) => handleChange("startDate", value)}
+            placeholder="Select start date"
           />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="endDate">End Date</Label>
-          <Input
+          <DatePicker
             id="endDate"
-            type="date"
+            name="endDate"
             value={filters.endDate}
-            onChange={(e) => handleChange("endDate", e.target.value)}
+            onChange={(value) => handleChange("endDate", value)}
+            placeholder="Select end date"
           />
         </div>
 
@@ -134,6 +138,6 @@ export function AnalyticsFilters({ onFilterChange, categories }: AnalyticsFilter
           />
         </div>
       </div>
-    </div>
+    </>
   )
 }

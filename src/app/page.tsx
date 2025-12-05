@@ -17,7 +17,7 @@ export default function Home() {
       <div className="grid gap-6 md:grid-cols-3">
         <Link
           href="/transactions"
-          className="group relative overflow-hidden rounded-lg border bg-white p-6 hover:shadow-lg transition-all dark:bg-gray-950 dark:border-gray-800"
+          className="group relative overflow-hidden rounded-md border bg-white p-6 hover:shadow-lg transition-all duration-medium dark:bg-gray-950 dark:border-gray-800"
         >
           <div className="flex items-center gap-4">
             <div className="rounded-full bg-blue-100 p-3 dark:bg-blue-900">
@@ -35,7 +35,7 @@ export default function Home() {
 
         <Link
           href="/dashboard"
-          className="group relative overflow-hidden rounded-lg border bg-white p-6 hover:shadow-lg transition-all dark:bg-gray-950 dark:border-gray-800"
+          className="group relative overflow-hidden rounded-md border bg-white p-6 hover:shadow-lg transition-all duration-medium dark:bg-gray-950 dark:border-gray-800"
         >
           <div className="flex items-center gap-4">
             <div className="rounded-full bg-green-100 p-3 dark:bg-green-900">
@@ -51,7 +51,7 @@ export default function Home() {
           </div>
         </Link>
 
-        <div className="relative overflow-hidden rounded-lg border bg-white p-6 opacity-50 dark:bg-gray-950 dark:border-gray-800">
+        <div className="relative overflow-hidden rounded-md border bg-white p-6 opacity-50 dark:bg-gray-950 dark:border-gray-800">
           <div className="flex items-center gap-4">
             <div className="rounded-full bg-purple-100 p-3 dark:bg-purple-900">
               <Target className="h-6 w-6 text-purple-600 dark:text-purple-400" />
@@ -66,7 +66,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="rounded-lg border bg-blue-50 p-6 dark:bg-blue-950/20 dark:border-blue-900">
+      <div className="rounded-md border bg-blue-50 p-6 dark:bg-blue-950/20 dark:border-blue-900">
         <h2 className="text-lg font-semibold mb-2">Getting Started</h2>
         <p className="text-gray-600 dark:text-gray-400 mb-4">
           Start by adding your first transaction to begin tracking your finances.

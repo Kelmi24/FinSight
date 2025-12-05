@@ -1,6 +1,7 @@
 "use client"
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
+import { Card } from "@/components/ui/card"
 
 interface TrendData {
   month: string
@@ -16,17 +17,17 @@ interface TrendChartProps {
 export function TrendChart({ data }: TrendChartProps) {
   if (data.length === 0) {
     return (
-      <div className="rounded-lg border bg-white p-6 shadow-sm dark:bg-gray-950 dark:border-gray-800">
+      <Card>
         <h3 className="font-semibold text-lg mb-4">Spending Trends</h3>
         <div className="flex h-[300px] items-center justify-center text-gray-500 dark:text-gray-400">
           No data available for the selected filters
         </div>
-      </div>
+      </Card>
     )
   }
 
   return (
-    <div className="rounded-lg border bg-white p-6 shadow-sm dark:bg-gray-950 dark:border-gray-800">
+    <Card>
       <h3 className="font-semibold text-lg mb-4">Spending Trends</h3>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={data}>
@@ -73,6 +74,6 @@ export function TrendChart({ data }: TrendChartProps) {
           />
         </LineChart>
       </ResponsiveContainer>
-    </div>
+    </Card>
   )
 }

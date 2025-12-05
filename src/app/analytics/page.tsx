@@ -1,15 +1,10 @@
-import { redirect } from "next/navigation"
-import { auth } from "@/auth"
 import { getFilteredTransactions, getSpendingTrends } from "@/lib/actions/analytics"
 import { AnalyticsClient } from "@/components/analytics/AnalyticsClient"
+import { Card } from "@/components/ui/card"
 import { db } from "@/lib/db"
 
 export default async function AnalyticsPage() {
-  const session = await auth()
-
-  if (!session?.user?.id) {
-    redirect("/api/auth/signin?callbackUrl=/analytics")
-  }
+  const userId = "mock-user-id"
 
   // Get initial data
   const [transactions, trends] = await Promise.all([
@@ -19,7 +14,7 @@ export default async function AnalyticsPage() {
 
   // Get unique categories for filter dropdown
   const allTransactions = await db.transaction.findMany({
-    where: { userId: session.user.id },
+    where: { userId },
     select: { category: true },
   })
 
@@ -28,10 +23,12 @@ export default async function AnalyticsPage() {
   ).sort()
 
   return (
-    <AnalyticsClient
-      initialTransactions={transactions}
-      initialTrends={trends}
-      categories={categories}
-    />
+    <div className="space-y-6 max-w-7xl mx-auto">
+      <AnalyticsClient
+        initialTransactions={transactions}
+        initialTrends={trends}
+        categories={categories}
+      />
+    </div>
   )
 }

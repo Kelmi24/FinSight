@@ -5,6 +5,8 @@ import { AnalyticsFilters, FilterValues } from "@/components/analytics/Analytics
 import { TrendChart } from "@/components/analytics/TrendChart"
 import { TransactionTable } from "@/components/analytics/TransactionTable"
 import { ExportButton } from "@/components/analytics/ExportButton"
+import { MonthOverMonthComparison } from "@/components/analytics/MonthOverMonthComparison"
+import { Card } from "@/components/ui/card"
 import { getFilteredTransactions, getSpendingTrends } from "@/lib/actions/analytics"
 
 interface Transaction {
@@ -56,33 +58,43 @@ export function AnalyticsClient({ initialTransactions, initialTrends, categories
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
-          <p className="text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
             Deep insights into your spending patterns.
           </p>
         </div>
-        <ExportButton transactions={transactions} />
+        <div className="w-full sm:w-auto">
+          <ExportButton transactions={transactions} />
+        </div>
       </div>
 
-      <AnalyticsFilters onFilterChange={handleFilterChange} categories={categories} />
+      {/* Filters Section */}
+      <Card>
+        <AnalyticsFilters onFilterChange={handleFilterChange} categories={categories} />
+      </Card>
 
       {isLoading ? (
         <div className="flex items-center justify-center p-12">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600" />
         </div>
       ) : (
-        <>
-          <TrendChart data={trends} />
+        <div className="space-y-6">
+          {/* Charts Section */}
+          <div className="grid gap-6 md:grid-cols-2">
+            <TrendChart data={trends} />
+            <MonthOverMonthComparison />
+          </div>
 
-          <div>
-            <h2 className="text-xl font-semibold mb-4">
+          {/* Transactions Section */}
+          <div className="space-y-4">
+            <h2 className="text-2xl font-semibold tracking-tight">
               Transactions ({transactions.length})
             </h2>
             <TransactionTable transactions={transactions} />
           </div>
-        </>
+        </div>
       )}
     </div>
   )

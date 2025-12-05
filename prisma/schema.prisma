@@ -18,9 +18,11 @@ model User {
   sessions      Session[]
   
   // Domain Models
-  transactions  Transaction[]
-  budgets       Budget[]
-  goals         Goal[]
+  transactions          Transaction[]
+  recurringTransactions RecurringTransaction[]
+  budgets               Budget[]
+  goals                 Goal[]
+  categories            Category[]
 
   // Plaid Integration
   plaidAccessToken String?
@@ -81,6 +83,22 @@ model Transaction {
   updatedAt   DateTime @updatedAt
 }
 
+model RecurringTransaction {
+  id            String   @id @default(cuid())
+  amount        Float
+  description   String
+  category      String
+  type          String   // "income" or "expense"
+  frequency     String   // "weekly", "monthly", "yearly"
+  startDate     DateTime
+  endDate       DateTime?
+  lastGenerated DateTime?
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
 model Budget {
   id          String   @id @default(cuid())
   userId      String
@@ -106,4 +124,20 @@ model Goal {
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  type      String   // "income", "expense", or "both"
+  color     String?  // Optional hex color for UI
+  icon      String?  // Optional icon name
+  isDefault Boolean  @default(false)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, name])
 }

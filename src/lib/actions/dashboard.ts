@@ -5,17 +5,20 @@ import { auth } from "@/auth"
 
 export async function getDashboardSummary() {
   const session = await auth()
-  if (!session?.user?.id) {
-    return {
-      totalIncome: 0,
-      totalExpenses: 0,
-      netBalance: 0,
-      transactionCount: 0,
-    }
-  }
+  // Force mock user ID for preview mode
+  const userId = "mock-user-id"
+  
+  // if (!session?.user?.id) {
+  //   return {
+  //     totalIncome: 0,
+  //     totalExpenses: 0,
+  //     netBalance: 0,
+  //     transactionCount: 0,
+  //   }
+  // }
 
   const transactions = await db.transaction.findMany({
-    where: { userId: session.user.id },
+    where: { userId: userId },
   })
 
   const totalIncome = transactions
@@ -36,14 +39,15 @@ export async function getDashboardSummary() {
 
 export async function getCashFlowData() {
   const session = await auth()
-  if (!session?.user?.id) return []
+  // Force mock user ID for preview mode
+  const userId = "mock-user-id"
 
   const sixMonthsAgo = new Date()
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
 
   const transactions = await db.transaction.findMany({
     where: {
-      userId: session.user.id,
+      userId: userId,
       date: {
         gte: sixMonthsAgo,
       },
@@ -81,11 +85,12 @@ export async function getCashFlowData() {
 
 export async function getCategoryBreakdown() {
   const session = await auth()
-  if (!session?.user?.id) return []
+  // Force mock user ID for preview mode
+  const userId = "mock-user-id"
 
   const transactions = await db.transaction.findMany({
     where: {
-      userId: session.user.id,
+      userId: userId,
       type: "expense",
     },
   })

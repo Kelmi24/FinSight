@@ -16,7 +16,7 @@ export function TransactionDialog() {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>
+      <Button id="add-transaction-trigger" onClick={() => setOpen(true)}>
         <Plus className="mr-2 h-4 w-4" />
         Add Transaction
       </Button>

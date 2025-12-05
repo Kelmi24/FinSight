@@ -21,7 +21,7 @@ export function AppearanceSection() {
   return (
     <div className="rounded-lg border bg-white p-6 shadow-sm dark:bg-gray-950 dark:border-gray-800">
       <div className="mb-6">
-        <h2 className="text-xl font-semibold">Appearance</h2>
+        <h2 className="text-2xl font-semibold tracking-tight">Appearance</h2>
         <p className="text-sm text-gray-500 dark:text-gray-400">
           Customize how FinSight AI looks
         </p>

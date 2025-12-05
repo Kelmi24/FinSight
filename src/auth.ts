@@ -20,9 +20,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       authorize: async (credentials) => {
         // MOCK USER FOR TESTING
         return {
-          id: "user-1",
-          name: "Test User",
-          email: "test@example.com",
+          id: "mock-user-id",
+          name: "Demo User",
+          email: "demo@example.com",
         }
       },
     }),
@@ -33,7 +33,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async session({ session, token }) {
       if (token.sub && session.user) {
-        session.user.id = token.sub;
+        // Fix for legacy test user ID
+        if (token.sub === "user-1") {
+          session.user.id = "mock-user-id";
+        } else {
+          session.user.id = token.sub;
+        }
       }
       return session;
     },

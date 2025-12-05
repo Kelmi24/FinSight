@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { updateProfile } from "@/lib/actions/settings"
 import { User } from "lucide-react"
+import { Card } from "@/components/ui/card"
 
 interface ProfileSectionProps {
   user: {
@@ -36,13 +37,13 @@ export function ProfileSection({ user }: ProfileSectionProps) {
   }
 
   return (
-    <div className="rounded-lg border bg-white p-6 shadow-sm dark:bg-gray-950 dark:border-gray-800">
+    <Card>
       <div className="flex items-center gap-3 mb-6">
         <div className="rounded-full bg-blue-100 p-2 dark:bg-blue-900">
           <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
         </div>
         <div>
-          <h2 className="text-xl font-semibold">Profile Information</h2>
+          <h2 className="text-2xl font-semibold tracking-tight">Profile Information</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Update your personal details
           </p>
@@ -91,6 +92,6 @@ export function ProfileSection({ user }: ProfileSectionProps) {
           </Button>
         </div>
       </form>
-    </div>
+    </Card>
   )
 }

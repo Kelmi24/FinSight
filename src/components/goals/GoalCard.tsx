@@ -3,8 +3,11 @@
 import { useState } from "react"
 import { Pencil, Trash2, Target } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { GoalDialog } from "./GoalDialog"
 import { deleteGoal } from "@/lib/actions/goals"
+import { useRouter } from "next/navigation"
+import { Card } from "@/components/ui/card"
 
 interface Goal {
   id: string
@@ -19,18 +22,20 @@ interface GoalCardProps {
 }
 
 export function GoalCard({ goal }: GoalCardProps) {
+  const router = useRouter()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
 
   const progress = Math.min((goal.currentAmount / goal.targetAmount) * 100, 100)
   const remaining = goal.targetAmount - goal.currentAmount
 
   const handleDelete = async () => {
-    if (confirm("Are you sure you want to delete this goal?")) {
-      setIsDeleting(true)
-      await deleteGoal(goal.id)
-      setIsDeleting(false)
-    }
+    setIsDeleting(true)
+    await deleteGoal(goal.id)
+    setIsDeleting(false)
+    setDeleteOpen(false)
+    router.refresh()
   }
 
   const formatCurrency = (amount: number) => {
@@ -52,14 +57,14 @@ export function GoalCard({ goal }: GoalCardProps) {
 
   return (
     <>
-      <div className="rounded-lg border bg-white p-6 shadow-sm dark:bg-gray-950 dark:border-gray-800">
+      <Card>
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="rounded-full bg-purple-100 p-2 dark:bg-purple-900">
               <Target className="h-5 w-5 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
-              <h3 className="font-semibold">{goal.name}</h3>
+              <h3 className="text-lg font-semibold">{goal.name}</h3>
               {goal.deadline && (
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   Target: {formatDate(goal.deadline)}
@@ -80,7 +85,7 @@ export function GoalCard({ goal }: GoalCardProps) {
               variant="ghost"
               size="sm"
               className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20"
-              onClick={handleDelete}
+              onClick={() => setDeleteOpen(true)}
               disabled={isDeleting}
             >
               <Trash2 className="h-4 w-4" />
@@ -110,13 +115,40 @@ export function GoalCard({ goal }: GoalCardProps) {
             <span>{remaining > 0 ? `${formatCurrency(remaining)} to go` : "Goal reached!"}</span>
           </div>
         </div>
-      </div>
+      </Card>
 
       <GoalDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         goal={goal}
       />
+
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete goal?</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Are you sure you want to delete "{goal.name}"? This action cannot be undone.
+          </p>
+          <div className="flex gap-3 justify-end pt-4">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteOpen(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

@@ -9,24 +9,13 @@ import { CashFlowChart } from "@/components/dashboard/CashFlowChart"
 import { CategoryChart } from "@/components/dashboard/CategoryChart"
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions"
 import { DollarSign, TrendingUp, TrendingDown, Receipt } from "lucide-react"
-
-import { auth } from "@/auth"
-import { db } from "@/lib/db"
 import { ConnectedAccount } from "@/components/plaid/ConnectedAccount"
 import { ConnectBankButton } from "@/components/plaid/ConnectBankButton"
 
-import { redirect } from "next/navigation"
-
 export default async function DashboardPage() {
-  const session = await auth()
-  
-  if (!session?.user?.id) {
-    redirect("/api/auth/signin?callbackUrl=/dashboard")
+  const user = {
+    institutionName: null,
   }
-
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-  })
 
   const [summary, cashFlowData, categoryData, transactions] = await Promise.all([
     getDashboardSummary(),
@@ -45,25 +34,28 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div className="space-y-6 max-w-7xl mx-auto">
+      <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-gray-500 dark:text-gray-400">
-            Your financial overview at a glance.
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 sm:text-base">
+            A quick overview of your recent activity, balances and trends.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          {user?.institutionName ? (
-            <ConnectedAccount institutionName={user.institutionName} />
-          ) : (
-            <ConnectBankButton />
-          )}
+        <div className="w-full sm:w-auto flex items-center gap-3">
+          <div className="hidden sm:block text-sm text-gray-500 dark:text-gray-400">Connected accounts</div>
+          <div>
+            {user?.institutionName ? (
+              <ConnectedAccount institutionName={user.institutionName} />
+            ) : (
+              <ConnectBankButton />
+            )}
+          </div>
         </div>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           title="Total Income"
           value={formatCurrency(summary.totalIncome)}

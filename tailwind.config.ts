@@ -3,9 +3,7 @@ import type { Config } from "tailwindcss";
 const config: Config = {
   darkMode: "class",
   content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
@@ -44,10 +42,54 @@ const config: Config = {
           foreground: "hsl(var(--card-foreground))",
         },
       },
+      fontSize: {
+        xs: ['var(--fs-xs)', { lineHeight: 'var(--lh-normal)' }],
+        sm: ['var(--fs-sm)', { lineHeight: 'var(--lh-normal)' }],
+        base: ['var(--fs-base)', { lineHeight: 'var(--lh-normal)' }],
+        lg: ['var(--fs-lg)', { lineHeight: 'var(--lh-normal)' }],
+        xl: ['var(--fs-xl)', { lineHeight: 'var(--lh-normal)' }],
+        '2xl': ['var(--fs-2xl)', { lineHeight: 'var(--lh-normal)' }],
+        '3xl': ['var(--fs-3xl)', { lineHeight: 'var(--lh-tight)' }],
+      },
+      spacing: {
+        'xs': 'var(--space-xs)',
+        'sm': 'var(--space-sm)',
+        'md': 'var(--space-md)',
+        'lg': 'var(--space-lg)',
+        'xl': 'var(--space-xl)',
+        '2xl': 'var(--space-2xl)',
+        '3xl': 'var(--space-3xl)',
+      },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        sm: 'var(--radius-sm)',
+        md: 'var(--radius-md)',
+        lg: 'var(--radius-lg)',
+        xl: 'var(--radius-xl)',
+        full: 'var(--radius-full)',
+        DEFAULT: 'var(--radius-md)'
+      },
+      boxShadow: {
+        sm: 'var(--shadow-sm)',
+        md: 'var(--shadow-md)',
+        lg: 'var(--shadow-lg)',
+        xl: 'var(--shadow-xl)',
+        '2xl': 'var(--shadow-2xl)',
+        DEFAULT: 'var(--shadow-md)',
+      },
+      zIndex: {
+        base: 'var(--z-base)',
+        dropdown: 'var(--z-dropdown)',
+        sticky: 'var(--z-sticky)',
+        fixed: 'var(--z-fixed)',
+        'modal-backdrop': 'var(--z-modal-backdrop)',
+        modal: 'var(--z-modal)',
+        popover: 'var(--z-popover)',
+        tooltip: 'var(--z-tooltip)',
+      },
+      transitionDuration: {
+        fast: '150ms',
+        medium: '200ms',
+        slow: '300ms',
       },
     },
   },

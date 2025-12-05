@@ -10,7 +10,7 @@ export function GoalPageHeader() {
 
   return (
     <>
-      <Button onClick={() => setIsDialogOpen(true)}>
+      <Button id="create-goal-trigger" onClick={() => setIsDialogOpen(true)}>
         <Plus className="mr-2 h-4 w-4" />
         Add Goal
       </Button>

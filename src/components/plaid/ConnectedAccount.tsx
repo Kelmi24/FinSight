@@ -5,6 +5,7 @@ import { Building2, Trash2, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { unlinkAccount, syncMockTransactions } from "@/lib/actions/plaid-mock"
 import { useRouter } from "next/navigation"
+import { Card } from "@/components/ui/card"
 
 interface ConnectedAccountProps {
   institutionName: string
@@ -32,7 +33,7 @@ export function ConnectedAccount({ institutionName }: ConnectedAccountProps) {
   }
 
   return (
-    <div className="rounded-lg border bg-white p-6 shadow-sm dark:bg-gray-950 dark:border-gray-800">
+    <Card>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="rounded-full bg-blue-100 p-3 dark:bg-blue-900">
@@ -67,6 +68,6 @@ export function ConnectedAccount({ institutionName }: ConnectedAccountProps) {
           </Button>
         </div>
       </div>
-    </div>
+    </Card>
   )
 }
