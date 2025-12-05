@@ -18,24 +18,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       authorize: async (credentials) => {
-        // MOCK USER FOR TESTING - Ensure user exists in DB
-        const user = await db.user.upsert({
-          where: { email: "demo@example.com" },
-          update: {},
-          create: {
-            id: "mock-user-id",
-            name: "Demo User",
-            email: "demo@example.com",
-            image: "https://github.com/shadcn.png",
-          },
+        const email = credentials.email as string
+        const password = credentials.password as string
+
+        if (!email || !password) return null
+
+        const user = await db.user.findUnique({
+          where: { email },
         })
-        
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          image: user.image,
-        }
+
+        if (!user || !user.password) return null
+
+        // @ts-ignore - bcryptjs types might conflict slightly in strict mode but works at runtime
+        const bcrypt = require("bcryptjs")
+        const passwordsMatch = await bcrypt.compare(password, user.password)
+
+        if (!passwordsMatch) return null
+
+        return user
       },
     }),
   ],

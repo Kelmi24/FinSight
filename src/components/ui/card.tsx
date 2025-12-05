@@ -37,3 +37,7 @@ export function CardContent({ children, className }: { children: React.ReactNode
 export function CardDescription({ children, className }: { children: React.ReactNode; className?: string }) {
   return <p className={cn("text-sm text-muted-foreground", className)}>{children}</p>
 }
+
+export function CardFooter({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <div className={cn("flex items-center p-6 pt-0", className)}>{children}</div>
+}
