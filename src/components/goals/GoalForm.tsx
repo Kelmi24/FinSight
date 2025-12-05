@@ -54,7 +54,7 @@ export function GoalForm({ goal, onSuccess }: GoalFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div className="space-y-2">
         <Label htmlFor="name">Goal Name</Label>
         <Input
@@ -66,7 +66,7 @@ export function GoalForm({ goal, onSuccess }: GoalFormProps) {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="targetAmount">Target Amount</Label>
           <Input

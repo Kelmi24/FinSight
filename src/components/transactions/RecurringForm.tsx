@@ -53,7 +53,7 @@ export function RecurringForm({ recurring, onSuccess }: RecurringFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {/* Hidden inputs for Select values - Radix Select doesn't submit via FormData */}
       <input type="hidden" name="type" value={transactionType} />
       <input type="hidden" name="frequency" value={frequency} />
@@ -75,7 +75,7 @@ export function RecurringForm({ recurring, onSuccess }: RecurringFormProps) {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="type">Type</Label>
           <Select
@@ -104,7 +104,7 @@ export function RecurringForm({ recurring, onSuccess }: RecurringFormProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="amount">Amount ($)</Label>
           <Input
@@ -136,7 +136,7 @@ export function RecurringForm({ recurring, onSuccess }: RecurringFormProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="startDate">Start Date</Label>
           <DatePicker
