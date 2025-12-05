@@ -2,18 +2,28 @@ import { auth } from "@/auth"
 
 export default auth((req) => {
   const isLoggedIn = !!req.auth
-  const isOnDashboard = req.nextUrl.pathname.startsWith('/dashboard') || 
-                        req.nextUrl.pathname.startsWith('/transactions') ||
-                        req.nextUrl.pathname.startsWith('/budgets') ||
-                        req.nextUrl.pathname.startsWith('/goals') ||
-                        req.nextUrl.pathname.startsWith('/analytics') ||
-                        req.nextUrl.pathname.startsWith('/settings')
+  const { pathname } = req.nextUrl
+  
+  // Protect dashboard routes
+  const isOnDashboard = pathname.startsWith('/dashboard') || 
+                        pathname.startsWith('/transactions') ||
+                        pathname.startsWith('/budgets') ||
+                        pathname.startsWith('/goals') ||
+                        pathname.startsWith('/analytics') ||
+                        pathname.startsWith('/settings')
   
   if (isOnDashboard && !isLoggedIn) {
     return Response.redirect(new URL('/login', req.nextUrl))
   }
+
+  // Redirect authenticated users away from auth pages
+  const isAuthPage = pathname === '/login' || pathname === '/register'
+  if (isAuthPage && isLoggedIn) {
+    return Response.redirect(new URL('/dashboard', req.nextUrl))
+  }
 })
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|login|register|seed|$).*)"],
+  // Update matcher to INCLUDE login/register so we can redirect away from them
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|seed|$).*)"],
 }
