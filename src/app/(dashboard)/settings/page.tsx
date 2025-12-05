@@ -6,6 +6,7 @@ import { SecuritySection } from "@/components/settings/SecuritySection"
 import { AppearanceSection } from "@/components/settings/AppearanceSection"
 import { AccountsSection } from "@/components/settings/AccountsSection"
 import { DataManagementSection } from "@/components/settings/DataManagementSection"
+import { PreferencesSection } from "@/components/settings/PreferencesSection"
 
 export default async function SettingsPage() {
   const session = await auth()
@@ -22,6 +23,7 @@ export default async function SettingsPage() {
       image: true,
       password: true,
       institutionName: true,
+      currencyPreference: true,
     },
   })
 
@@ -47,6 +49,8 @@ export default async function SettingsPage() {
         {hasPassword && <SecuritySection />}
         
         <AppearanceSection />
+
+        <PreferencesSection initialCurrency={(user as any).currencyPreference} />
         
         <AccountsSection institutionName={user.institutionName} />
         

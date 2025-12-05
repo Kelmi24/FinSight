@@ -5,6 +5,7 @@ import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { hash, compare } from "bcryptjs"
+import { DEFAULT_CURRENCY, CurrencyCode } from "@/lib/currency"
 
 export async function updateProfile(formData: FormData) {
   const session = await auth()
@@ -30,6 +31,34 @@ export async function updateProfile(formData: FormData) {
   } catch (error) {
     console.error("Failed to update profile:", error)
     return { error: "Failed to update profile" }
+  }
+}
+
+export async function updateCurrencyPreference(currency: CurrencyCode) {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return { error: "Not authenticated" }
+  }
+
+  const nextCurrency = currency || DEFAULT_CURRENCY
+
+  try {
+    await db.user.update({
+      where: { id: session.user.id },
+      data: { currencyPreference: nextCurrency },
+    })
+
+    revalidatePath("/dashboard")
+    revalidatePath("/transactions")
+    revalidatePath("/analytics")
+    revalidatePath("/goals")
+    revalidatePath("/budgets")
+    revalidatePath("/settings")
+    return { success: "Currency preference updated" }
+  } catch (error) {
+    console.error("Failed to update currency preference:", error)
+    return { error: "Failed to update currency" }
   }
 }
 

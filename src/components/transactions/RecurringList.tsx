@@ -8,13 +8,7 @@ import { RecurringDialog } from "./RecurringDialog"
 import { EmptyState } from "@/components/ui/empty-state"
 import { deleteRecurringTransaction } from "@/lib/actions/recurring"
 import { useRouter } from "next/navigation"
-
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount)
-}
+import { useCurrency } from "@/providers/currency-provider"
 
 interface RecurringListProps {
   recurring: any[]
@@ -26,6 +20,7 @@ export function RecurringList({ recurring, onDeleteSuccess }: RecurringListProps
   const [editingRecurring, setEditingRecurring] = useState<any | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const { formatCurrency } = useCurrency()
 
   const handleDelete = async (id: string) => {
     setIsDeleting(true)

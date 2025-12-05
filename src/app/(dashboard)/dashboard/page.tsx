@@ -11,8 +11,12 @@ import { RecentTransactions } from "@/components/dashboard/RecentTransactions"
 import { DollarSign, TrendingUp, TrendingDown, Receipt } from "lucide-react"
 import { ConnectedAccount } from "@/components/plaid/ConnectedAccount"
 import { ConnectBankButton } from "@/components/plaid/ConnectBankButton"
+import { formatCurrency as baseFormatCurrency, DEFAULT_CURRENCY } from "@/lib/currency"
+import { auth } from "@/auth"
 
 export default async function DashboardPage() {
+  const session = await auth()
+  const currency = (session?.user as any)?.currencyPreference || DEFAULT_CURRENCY
   const user = {
     institutionName: null,
   }
@@ -24,14 +28,7 @@ export default async function DashboardPage() {
     getTransactions(),
   ])
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
-  }
+  const formatCurrency = (amount: number) => baseFormatCurrency(amount, currency, { minimumFractionDigits: 0 })
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">

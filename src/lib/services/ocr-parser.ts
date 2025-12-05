@@ -156,7 +156,7 @@ function parseAmount(text: string): ParsedTransaction["amount"] {
   }
 
   // Detect currency
-  let currency = "USD"
+  let currency = "IDR"
   for (const [symbol, code] of Object.entries(CURRENCY_MAP)) {
     if (text.includes(symbol) || text.includes(code.toLowerCase())) {
       currency = code

@@ -8,13 +8,7 @@ import { BudgetDialog } from "./BudgetDialog"
 import { EmptyState } from "@/components/ui/empty-state"
 import { deleteBudget } from "@/lib/actions/budgets"
 import { useRouter } from "next/navigation"
-
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount)
-}
+import { useCurrency } from "@/providers/currency-provider"
 
 interface BudgetWithSpending {
   id: string
@@ -34,6 +28,7 @@ export function BudgetList({ budgets }: BudgetListProps) {
   const [editingBudget, setEditingBudget] = useState<any | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const { formatCurrency } = useCurrency()
 
   const handleDelete = async (id: string) => {
     setIsDeleting(true)
