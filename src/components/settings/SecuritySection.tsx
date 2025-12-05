@@ -67,13 +67,15 @@ export function SecuritySection() {
           <DialogTrigger asChild>
             <Button variant="outline">Change Password</Button>
           </DialogTrigger>
-          <DialogContent className="max-w-sm sm:max-w-md">
-            <DialogHeader>
-              <div className="mx-auto sm:mx-0 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 mb-2">
-                <Lock className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+          <DialogContent className="max-w-[400px]">
+            <DialogHeader className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
+                  <Lock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <DialogTitle className="text-lg font-semibold">Change Password</DialogTitle>
               </div>
-              <DialogTitle className="text-xl">Change Password</DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="text-sm">
                 Enter your current password and choose a new one.
               </DialogDescription>
             </DialogHeader>
@@ -162,17 +164,17 @@ export function SecuritySection() {
                 </div>
               </div>
 
-              <DialogFooter className="flex-col-reverse sm:flex-row gap-2 pt-4">
+              <DialogFooter className="flex-row gap-3 pt-4">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setOpen(false)}
                   disabled={isSubmitting}
-                  className="w-full sm:w-auto"
+                  className="flex-1"
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
+                <Button type="submit" disabled={isSubmitting} className="flex-1">
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />

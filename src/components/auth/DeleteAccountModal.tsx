@@ -26,22 +26,24 @@ export function DeleteAccountModal() {
       <DialogTrigger asChild>
         <Button variant="destructive">Delete Account</Button>
       </DialogTrigger>
-      <DialogContent className="max-w-sm sm:max-w-md">
-        <DialogHeader className="text-center sm:text-left">
-          <div className="mx-auto sm:mx-0 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30 mb-4">
-            <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
+      <DialogContent className="max-w-[400px]">
+        <DialogHeader className="space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+              <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+            </div>
+            <DialogTitle className="text-lg font-semibold">Delete Account</DialogTitle>
           </div>
-          <DialogTitle className="text-xl">Delete Account</DialogTitle>
-          <DialogDescription className="pt-2 text-gray-600 dark:text-gray-400">
+          <DialogDescription className="text-sm text-gray-600 dark:text-gray-400">
             This action cannot be undone. This will permanently delete your account and remove all your data from our servers.
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="flex-col-reverse sm:flex-row gap-2 pt-4">
+        <DialogFooter className="flex-row gap-3 pt-4">
           <Button 
             variant="outline" 
             onClick={() => setOpen(false)} 
             disabled={isDeleting}
-            className="w-full sm:w-auto"
+            className="flex-1"
           >
             Cancel
           </Button>
@@ -49,7 +51,7 @@ export function DeleteAccountModal() {
             variant="destructive" 
             onClick={handleDelete} 
             disabled={isDeleting}
-            className="w-full sm:w-auto"
+            className="flex-1"
           >
             {isDeleting ? (
               <>
