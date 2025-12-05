@@ -22,21 +22,27 @@ export function SecuritySection() {
     setIsSubmitting(true)
 
     const formData = new FormData(e.currentTarget)
+    const form = e.currentTarget
 
     try {
       const result = await changePassword(formData)
       
-      if (result.error) {
+      if (result?.error) {
         toast.error(result.error)
-      } else {
+        setIsSubmitting(false)
+      } else if (result?.success) {
         toast.success("Password changed successfully!")
+        form.reset()
         setOpen(false)
-        // Reset form
-        e.currentTarget.reset()
+        setIsSubmitting(false)
+        // Reset password visibility states
+        setShowCurrentPassword(false)
+        setShowNewPassword(false)
+        setShowConfirmPassword(false)
       }
     } catch (error) {
+      console.error("Password change error:", error)
       toast.error("Failed to change password")
-    } finally {
       setIsSubmitting(false)
     }
   }
