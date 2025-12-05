@@ -143,8 +143,7 @@ export async function removeProfileImage() {
 }
 
 export async function logout() {
-  await signOut({ redirect: false })
-  redirect("/login")
+  await signOut({ redirectTo: "/login" })
 }
 
 export async function deleteAccount() {
