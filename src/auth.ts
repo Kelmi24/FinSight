@@ -27,11 +27,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           where: { email },
         })
 
-        if (!user || !user.password) return null
+        if (!user || !(user as any).password) return null
 
         // @ts-ignore - bcryptjs types might conflict slightly in strict mode but works at runtime
         const bcrypt = require("bcryptjs")
-        const passwordsMatch = await bcrypt.compare(password, user.password)
+        const passwordsMatch = await bcrypt.compare(password, (user as any).password)
 
         if (!passwordsMatch) return null
 
