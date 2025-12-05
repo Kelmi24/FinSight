@@ -29,12 +29,12 @@ export function DeleteAccountModal() {
       <DialogContent className="max-w-[400px]">
         <DialogHeader className="space-y-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
-              <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
             </div>
             <DialogTitle className="text-lg font-semibold">Delete Account</DialogTitle>
           </div>
-          <DialogDescription className="text-sm text-gray-600 dark:text-gray-400">
+          <DialogDescription className="text-sm text-gray-600">
             This action cannot be undone. This will permanently delete your account and remove all your data from our servers.
           </DialogDescription>
         </DialogHeader>

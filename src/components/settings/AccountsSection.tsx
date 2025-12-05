@@ -13,12 +13,12 @@ export function AccountsSection({ institutionName }: AccountsSectionProps) {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-6">
-        <div className="rounded-full bg-green-100 p-2 dark:bg-green-900">
-          <Building2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+        <div className="rounded-full bg-green-100 p-2">
+          <Building2 className="h-5 w-5 text-green-600" />
         </div>
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight">Connected Accounts</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <h2 className="text-2xl font-semibold tracking-tight text-gray-900">Connected Accounts</h2>
+          <p className="text-sm text-gray-500">
             Manage your linked bank accounts
           </p>
         </div>
@@ -28,10 +28,10 @@ export function AccountsSection({ institutionName }: AccountsSectionProps) {
         {institutionName ? (
           <ConnectedAccount institutionName={institutionName} />
         ) : (
-          <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 p-8 dark:border-gray-700">
+          <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 p-8">
             <Building2 className="h-12 w-12 text-gray-400 mb-3" />
-            <h3 className="font-medium mb-1">No accounts connected</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 text-center">
+            <h3 className="font-medium text-gray-900 mb-1">No accounts connected</h3>
+            <p className="text-sm text-gray-500 mb-4 text-center">
               Connect your bank account to automatically sync transactions
             </p>
             <ConnectBankButton />

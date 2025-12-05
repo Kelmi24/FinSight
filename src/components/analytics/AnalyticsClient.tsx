@@ -61,7 +61,7 @@ export function AnalyticsClient({ initialTransactions, initialTrends, categories
       <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-1 text-sm text-gray-600">
             Deep insights into your spending patterns.
           </p>
         </div>
@@ -77,7 +77,7 @@ export function AnalyticsClient({ initialTransactions, initialTrends, categories
 
       {isLoading ? (
         <div className="flex items-center justify-center p-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-primary-600" />
         </div>
       ) : (
         <div className="space-y-6">

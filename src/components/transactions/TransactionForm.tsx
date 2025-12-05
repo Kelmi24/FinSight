@@ -63,7 +63,7 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
   }
 
   return (
-    <form action={handleSubmit} className="space-y-4 rounded-md bg-white dark:bg-gray-950 p-4 sm:p-6 border border-gray-100 dark:border-gray-800 transition-all duration-medium">
+    <form action={handleSubmit} className="space-y-4 rounded-xl bg-white p-4 sm:p-6 border border-gray-200 transition-all">
       {/* Hidden input for type - Radix Select doesn't submit via FormData */}
       <input type="hidden" name="type" value={transactionType} />
       

@@ -49,12 +49,12 @@ export function BudgetForm({ budget, onSuccess }: BudgetFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-md bg-white dark:bg-gray-950 p-4 sm:p-6 border border-gray-100 dark:border-gray-800 transition-all duration-medium">
+    <form onSubmit={handleSubmit} className="space-y-4 rounded-xl bg-white p-4 sm:p-6 border border-gray-200 transition-all">
       {/* Hidden input for period - Radix Select doesn't submit via FormData */}
       <input type="hidden" name="period" value={period} />
       
       {error && (
-        <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 p-3 rounded">
+        <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">
           {error}
         </div>
       )}

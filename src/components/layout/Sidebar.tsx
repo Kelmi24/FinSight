@@ -43,25 +43,42 @@ export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <div className="flex h-full w-64 flex-col border-r bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 dark:border-gray-800 shadow-sm">
+    <div className="flex h-full w-64 flex-col border-r border-gray-200 bg-white">
       <div className="flex-1 space-y-1 p-4">
         {routes.map((route) => (
           <Link
             key={route.href}
             href={route.href}
             className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 group",
+              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-200",
               pathname === route.href
-                ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md"
-                : "text-gray-600 hover:bg-white hover:text-blue-600 hover:shadow-sm dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400 dark:hover:shadow-sm"
+                ? "bg-primary-50 text-primary-600"
+                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             )}
           >
-            <route.icon className="h-5 w-5 transition-transform group-hover:scale-110" />
+            <route.icon className={cn(
+              "h-5 w-5",
+              pathname === route.href ? "text-primary-600" : "text-gray-400"
+            )} />
             {route.label}
           </Link>
         ))}
       </div>
-      <div className="border-t border-gray-200 dark:border-gray-800 p-4 bg-gray-50 dark:bg-gray-900">
+      
+      {/* Invite & Earn Card - CopperX style */}
+      <div className="mx-4 mb-4 rounded-xl bg-gray-50 p-4">
+        <div className="flex -space-x-2 mb-3">
+          <div className="h-8 w-8 rounded-full bg-primary-200 border-2 border-white" />
+          <div className="h-8 w-8 rounded-full bg-primary-300 border-2 border-white" />
+          <div className="h-8 w-8 rounded-full bg-primary-400 border-2 border-white" />
+        </div>
+        <p className="text-sm font-semibold text-gray-900">Invite and Earn</p>
+        <p className="text-xs text-gray-500 mt-1">
+          Earn 10% of their fees plus $25 in points for every friend you invite.
+        </p>
+      </div>
+      
+      <div className="border-t border-gray-200 p-4">
         <ThemeToggle />
       </div>
     </div>

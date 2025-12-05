@@ -103,8 +103,8 @@ export function GoalForm({ goal, onSuccess }: GoalFormProps) {
       </div>
 
       {error && (
-        <div className="rounded-md bg-red-50 p-3 dark:bg-red-900/20">
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        <div className="rounded-lg bg-red-50 p-3">
+          <p className="text-sm text-red-600">{error}</p>
         </div>
       )}
 

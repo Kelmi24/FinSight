@@ -50,12 +50,12 @@ export function SecuritySection() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-6">
-        <div className="rounded-full bg-blue-100 p-2 dark:bg-blue-900">
-          <Lock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+        <div className="rounded-full bg-primary-50 p-2">
+          <Lock className="h-5 w-5 text-primary-600" />
         </div>
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight">Security</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <h2 className="text-2xl font-semibold tracking-tight text-gray-900">Security</h2>
+          <p className="text-sm text-gray-500">
             Manage your account security settings
           </p>
         </div>
@@ -76,8 +76,8 @@ export function SecuritySection() {
           <DialogContent className="max-w-[400px]">
             <DialogHeader className="space-y-3">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
-                  <Lock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-50">
+                  <Lock className="h-5 w-5 text-primary-600" />
                 </div>
                 <DialogTitle className="text-lg font-semibold">Change Password</DialogTitle>
               </div>
@@ -102,7 +102,7 @@ export function SecuritySection() {
                   <button
                     type="button"
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
                     {showCurrentPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -129,7 +129,7 @@ export function SecuritySection() {
                   <button
                     type="button"
                     onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
                     {showNewPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -159,7 +159,7 @@ export function SecuritySection() {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
                     {showConfirmPassword ? (
                       <EyeOff className="h-4 w-4" />

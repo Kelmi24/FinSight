@@ -45,28 +45,28 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
 
       <CardContent>
         {transactions.length === 0 ? (
-          <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+          <div className="text-center text-gray-500 py-8">
             <p className="mb-2">No transactions yet.</p>
             <p className="text-sm">Add your first transaction to get started.</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-1">
             {transactions.slice(0, 5).map((transaction) => (
               <div
                 key={transaction.id}
-                className="flex items-center justify-between py-2 border-b last:border-0 dark:border-gray-800"
+                className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0"
               >
                 <div className="flex-1">
-                  <p className="font-medium">{transaction.description}</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="font-medium text-gray-900">{transaction.description}</p>
+                  <p className="text-sm text-gray-500">
                     {transaction.category} • {formatDate(transaction.date)}
                   </p>
                 </div>
                 <p
                   className={`font-semibold ${
                     transaction.type === "income"
-                      ? "text-green-600 dark:text-green-400"
-                      : "text-red-600 dark:text-red-400"
+                      ? "text-green-600"
+                      : "text-red-600"
                   }`}
                 >
                   {transaction.type === "income" ? "+" : "-"}

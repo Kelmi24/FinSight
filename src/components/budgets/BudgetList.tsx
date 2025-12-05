@@ -71,11 +71,11 @@ export function BudgetList({ budgets }: BudgetListProps) {
           const percentUsed = parseFloat(budget.percentUsed)
           return (
             <div key={budget.id}>
-              <div className="rounded-md border bg-white dark:bg-gray-950 dark:border-gray-800 p-6 space-y-4 hover:shadow-lg transition-all duration-medium">
+              <div className="rounded-xl border border-gray-200 bg-white p-6 space-y-4 hover:shadow-md transition-all">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-semibold text-lg">{budget.category}</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <h3 className="font-semibold text-lg text-gray-900">{budget.category}</h3>
+                    <p className="text-sm text-gray-600">
                       {formatCurrency(budget.spent)} of {formatCurrency(budget.amount)}
                     </p>
                   </div>
@@ -104,16 +104,16 @@ export function BudgetList({ budgets }: BudgetListProps) {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                      <span className="text-xs font-medium text-gray-600">
                         {percentUsed}% Used
                       </span>
                       {percentUsed >= 100 && (
-                        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-700">
                           Over Budget
                         </span>
                       )}
                       {percentUsed >= 80 && percentUsed < 100 && (
-                        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
+                        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-700">
                           Warning
                         </span>
                       )}
@@ -121,10 +121,10 @@ export function BudgetList({ budgets }: BudgetListProps) {
                     <span
                       className={`text-xs font-semibold ${
                         percentUsed >= 100
-                          ? "text-red-600 dark:text-red-400"
+                          ? "text-red-600"
                           : percentUsed >= 80
-                            ? "text-yellow-600 dark:text-yellow-400"
-                            : "text-green-600 dark:text-green-400"
+                            ? "text-yellow-600"
+                            : "text-green-600"
                       }`}
                     >
                       {budget.remaining >= 0
@@ -132,7 +132,7 @@ export function BudgetList({ budgets }: BudgetListProps) {
                         : `$${Math.abs(budget.remaining).toFixed(2)} over`}
                     </span>
                   </div>
-                  <div className="w-full h-3 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                  <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
                     <div
                       className={`h-full bg-gradient-to-r ${getProgressColor(percentUsed)} transition-all duration-500`}
                       style={{ width: `${Math.min(percentUsed, 100)}%` }}
@@ -158,7 +158,7 @@ export function BudgetList({ budgets }: BudgetListProps) {
           <DialogHeader>
             <DialogTitle>Delete budget?</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-gray-600">
             Are you sure you want to delete this budget? This action cannot be undone.
           </p>
           <div className="flex gap-3 justify-end pt-4">

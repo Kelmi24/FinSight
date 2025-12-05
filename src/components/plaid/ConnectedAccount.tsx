@@ -36,12 +36,12 @@ export function ConnectedAccount({ institutionName }: ConnectedAccountProps) {
     <Card>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="rounded-full bg-blue-100 p-3 dark:bg-blue-900">
-            <Building2 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+          <div className="rounded-full bg-primary-50 p-3">
+            <Building2 className="h-6 w-6 text-primary-600" />
           </div>
           <div>
-            <h3 className="font-semibold text-lg">{institutionName}</h3>
-            <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
+            <h3 className="font-semibold text-lg text-gray-900">{institutionName}</h3>
+            <p className="text-sm text-green-600 flex items-center gap-1">
               <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
               Connected
             </p>
@@ -60,7 +60,7 @@ export function ConnectedAccount({ institutionName }: ConnectedAccountProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20"
+            className="text-red-600 hover:text-red-700 hover:bg-red-50"
             onClick={handleUnlink}
             disabled={isUnlinking}
           >

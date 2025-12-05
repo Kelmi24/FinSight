@@ -18,8 +18,8 @@ export function TrendChart({ data }: TrendChartProps) {
   if (data.length === 0) {
     return (
       <Card>
-        <h3 className="font-semibold text-lg mb-4">Spending Trends</h3>
-        <div className="flex h-[300px] items-center justify-center text-gray-500 dark:text-gray-400">
+        <h3 className="font-semibold text-lg text-gray-900 mb-4">Spending Trends</h3>
+        <div className="flex h-[300px] items-center justify-center text-gray-500">
           No data available for the selected filters
         </div>
       </Card>
@@ -28,10 +28,10 @@ export function TrendChart({ data }: TrendChartProps) {
 
   return (
     <Card>
-      <h3 className="font-semibold text-lg mb-4">Spending Trends</h3>
+      <h3 className="font-semibold text-lg text-gray-900 mb-4">Spending Trends</h3>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-800" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
           <XAxis
             dataKey="month"
             className="text-xs"
@@ -44,9 +44,10 @@ export function TrendChart({ data }: TrendChartProps) {
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: "hsl(var(--background))",
-              border: "1px solid hsl(var(--border))",
-              borderRadius: "0.5rem",
+              backgroundColor: "#ffffff",
+              border: "1px solid #E5E7EB",
+              borderRadius: "12px",
+              boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
             }}
             formatter={(value: number) => `$${value.toFixed(2)}`}
           />
@@ -68,7 +69,7 @@ export function TrendChart({ data }: TrendChartProps) {
           <Line
             type="monotone"
             dataKey="net"
-            stroke="#3b82f6"
+            stroke="#4F46E5"
             strokeWidth={2}
             name="Net"
           />

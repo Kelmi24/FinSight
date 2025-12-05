@@ -13,28 +13,28 @@ interface KpiCardProps {
 
 export function KpiCard({ title, value, icon: Icon, trend }: KpiCardProps) {
   return (
-    <Card className="hover:scale-[1.02] transition-transform duration-medium">
+    <Card>
       <CardContent>
         <div className="flex items-center justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <p className="text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+            <p className="text-sm font-medium text-gray-500 capitalize">
               {title}
             </p>
-            <p className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight truncate bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">{value}</p>
+            <p className="mt-2 text-2xl sm:text-3xl font-semibold text-gray-900 tracking-tight truncate">{value}</p>
             {trend && (
               <p
-                className={`mt-2 text-xs sm:text-sm font-medium flex items-center gap-1 ${
+                className={`mt-2 text-sm font-medium flex items-center gap-1 ${
                   trend.isPositive
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-red-600 dark:text-red-400"
+                    ? "text-green-600"
+                    : "text-red-600"
                 }`}
               >
                 {trend.value}
               </p>
             )}
           </div>
-          <div className="rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 p-3 sm:p-4 flex-shrink-0 shadow-lg dark:from-blue-600 dark:to-indigo-700">
-            <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+          <div className="rounded-xl bg-primary-50 p-3 sm:p-4 flex-shrink-0">
+            <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />
           </div>
         </div>
       </CardContent>

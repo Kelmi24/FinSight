@@ -64,7 +64,7 @@ export function UserMenu({ user }: UserMenuProps) {
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded-full p-1 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+        className="flex items-center gap-2 rounded-full p-1 transition-colors duration-200 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
@@ -72,15 +72,16 @@ export function UserMenu({ user }: UserMenuProps) {
           <img
             src={user.image}
             alt={user.name || "User"}
-            className="h-9 w-9 rounded-full object-cover ring-2 ring-white dark:ring-gray-800"
+            className="h-9 w-9 rounded-full object-cover ring-2 ring-white"
           />
         ) : (
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-sm font-semibold text-white ring-2 ring-white dark:ring-gray-800">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-600 text-sm font-semibold text-white ring-2 ring-white">
             {initials}
           </div>
         )}
+        <span className="hidden sm:block text-sm font-medium text-gray-700">{user.name || "User"}</span>
         <ChevronDown
-          className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${
+          className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
           }`}
         />
@@ -88,9 +89,9 @@ export function UserMenu({ user }: UserMenuProps) {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 origin-top-right animate-in fade-in-0 zoom-in-95 rounded-xl border border-gray-200 bg-white p-2 shadow-xl dark:border-gray-700 dark:bg-gray-900">
+        <div className="absolute right-0 mt-2 w-64 origin-top-right rounded-xl border border-gray-200 bg-white p-2 shadow-dropdown animate-fade-in">
           {/* User Info Header */}
-          <div className="border-b border-gray-100 px-3 py-3 dark:border-gray-800">
+          <div className="border-b border-gray-100 px-3 py-3">
             <div className="flex items-center gap-3">
               {user.image ? (
                 <img
@@ -99,15 +100,15 @@ export function UserMenu({ user }: UserMenuProps) {
                   className="h-10 w-10 rounded-full object-cover"
                 />
               ) : (
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-sm font-semibold text-white">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-600 text-sm font-semibold text-white">
                   {initials}
                 </div>
               )}
               <div className="flex-1 overflow-hidden">
-                <p className="truncate font-medium text-gray-900 dark:text-gray-100">
+                <p className="truncate font-medium text-gray-900">
                   {user.name || "User"}
                 </p>
-                <p className="truncate text-sm text-gray-500 dark:text-gray-400">
+                <p className="truncate text-sm text-gray-500">
                   {user.email}
                 </p>
               </div>
@@ -119,19 +120,19 @@ export function UserMenu({ user }: UserMenuProps) {
             <Link
               href="/settings"
               onClick={() => setIsOpen(false)}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-50"
             >
-              <Settings className="h-4 w-4" />
+              <Settings className="h-4 w-4 text-gray-400" />
               Settings
             </Link>
           </div>
 
           {/* Logout */}
-          <div className="border-t border-gray-100 pt-2 dark:border-gray-800">
+          <div className="border-t border-gray-100 pt-2">
             <button
               onClick={handleLogout}
               disabled={isLoggingOut}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-950/20"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
             >
               <LogOut className="h-4 w-4" />
               {isLoggingOut ? "Logging out..." : "Log out"}

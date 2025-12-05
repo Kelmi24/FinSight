@@ -11,7 +11,7 @@ interface CategoryChartProps {
 }
 
 const COLORS = [
-  "#3b82f6", // blue
+  "#4F46E5", // indigo (primary)
   "#10b981", // green
   "#f59e0b", // amber
   "#ef4444", // red
@@ -24,8 +24,8 @@ const COLORS = [
 export function CategoryChart({ data }: CategoryChartProps) {
   if (data.length === 0) {
     return (
-      <div className="flex h-[300px] items-center justify-center rounded-md border-2 border-dashed border-gray-300 bg-gradient-to-br from-gray-50 to-gray-100 dark:border-gray-700 dark:from-gray-900 dark:to-gray-950">
-        <p className="text-gray-600 dark:text-gray-400 font-medium">
+      <div className="flex h-[300px] items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50">
+        <p className="text-gray-500 font-medium">
           No expense data available.
         </p>
       </div>
@@ -35,7 +35,7 @@ export function CategoryChart({ data }: CategoryChartProps) {
   return (
     <Card>
       <CardContent>
-        <h3 className="text-lg font-semibold mb-4">📊 Spending Breakdown</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Spending Breakdown</h3>
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie
@@ -58,10 +58,10 @@ export function CategoryChart({ data }: CategoryChartProps) {
             </Pie>
             <Tooltip 
               contentStyle={{
-                backgroundColor: "rgba(255, 255, 255, 0.95)",
-                border: "2px solid #e5e7eb",
-                borderRadius: "0.875rem",
-                boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
+                backgroundColor: "#ffffff",
+                border: "1px solid #E5E7EB",
+                borderRadius: "12px",
+                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
               }}
               formatter={(value: number) => `$${value.toLocaleString()}`} 
             />

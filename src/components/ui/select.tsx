@@ -22,16 +22,16 @@
    <SelectPrimitive.Trigger
      ref={ref}
      className={cn(
-       "flex h-10 w-full items-center justify-between rounded-lg border-2 border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 dark:border-gray-700 dark:bg-gray-900 dark:ring-offset-gray-950 dark:placeholder:text-gray-400 dark:focus:ring-blue-900/30 dark:focus:border-blue-400",
-       "hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200",
-       "data-[state=open]:border-blue-500 data-[state=open]:ring-2 data-[state=open]:ring-blue-100 dark:data-[state=open]:border-blue-400",
+       "flex h-10 w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 ring-offset-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-primary-500 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50 [&>span]:line-clamp-1",
+       "hover:border-gray-400 transition-colors duration-200",
+       "data-[state=open]:border-primary-500 data-[state=open]:ring-2 data-[state=open]:ring-primary-100",
        className
      )}
      {...props}
    >
      {children}
      <SelectPrimitive.Icon asChild>
-       <ChevronDown className="h-4 w-4 opacity-50 transition-transform duration-200 data-[state=open]:rotate-180" />
+       <ChevronDown className="h-4 w-4 text-gray-400 transition-transform duration-200 data-[state=open]:rotate-180" />
      </SelectPrimitive.Icon>
    </SelectPrimitive.Trigger>
  ))
@@ -47,7 +47,7 @@
      <SelectPrimitive.Content
        ref={ref}
        className={cn(
-         "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-xl border border-gray-200 bg-white text-gray-950 shadow-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-50",
+         "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-xl border border-gray-200 bg-white text-gray-900 shadow-dropdown data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
          position === "popper" &&
            "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
          className
@@ -76,16 +76,16 @@
    <SelectPrimitive.Item
      ref={ref}
      className={cn(
-       "relative flex w-full cursor-default select-none items-center rounded-lg py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-gray-100 focus:text-gray-900 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-gray-800 dark:focus:text-gray-50",
-       "cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-150 mx-1",
-       "data-[state=checked]:bg-blue-50 data-[state=checked]:text-blue-700 dark:data-[state=checked]:bg-blue-900/20 dark:data-[state=checked]:text-blue-400",
+       "relative flex w-full cursor-pointer select-none items-center rounded-lg py-2 pl-8 pr-2 text-sm outline-none focus:bg-gray-100 focus:text-gray-900 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+       "hover:bg-gray-50 transition-colors duration-150 mx-1",
+       "data-[state=checked]:bg-primary-50 data-[state=checked]:text-primary-700",
        className
      )}
      {...props}
    >
      <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
        <SelectPrimitive.ItemIndicator>
-         <Check className="h-4 w-4" />
+         <Check className="h-4 w-4 text-primary-600" />
        </SelectPrimitive.ItemIndicator>
      </span>
  

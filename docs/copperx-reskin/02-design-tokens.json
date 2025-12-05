@@ -1,0 +1,355 @@
+{
+  "metadata": {
+    "name": "CopperX Design System",
+    "version": "1.0.0",
+    "description": "Design tokens extracted from CopperX UI for FinSight reskin",
+    "generatedAt": "2025-12-06"
+  },
+  "colors": {
+    "brand": {
+      "primary": {
+        "50": "#EEF2FF",
+        "100": "#E0E7FF",
+        "200": "#C7D2FE",
+        "300": "#A5B4FC",
+        "400": "#818CF8",
+        "500": "#6366F1",
+        "600": "#4F46E5",
+        "700": "#4338CA",
+        "800": "#3730A3",
+        "900": "#312E81"
+      },
+      "secondary": {
+        "50": "#F8FAFC",
+        "100": "#F1F5F9",
+        "200": "#E2E8F0",
+        "300": "#CBD5E1",
+        "400": "#94A3B8",
+        "500": "#64748B",
+        "600": "#475569",
+        "700": "#334155",
+        "800": "#1E293B",
+        "900": "#0F172A"
+      }
+    },
+    "background": {
+      "page": "#F9FAFB",
+      "card": "#FFFFFF",
+      "sidebar": "#FFFFFF",
+      "input": "#FFFFFF",
+      "hover": "#F3F4F6",
+      "selected": "#EEF2FF",
+      "overlay": "rgba(0, 0, 0, 0.5)"
+    },
+    "text": {
+      "primary": "#111827",
+      "secondary": "#374151",
+      "muted": "#6B7280",
+      "placeholder": "#9CA3AF",
+      "inverse": "#FFFFFF",
+      "link": "#4F46E5",
+      "linkHover": "#4338CA"
+    },
+    "border": {
+      "default": "#E5E7EB",
+      "input": "#D1D5DB",
+      "focus": "#4F46E5",
+      "divider": "#F3F4F6"
+    },
+    "status": {
+      "success": {
+        "bg": "#ECFDF5",
+        "text": "#059669",
+        "border": "#A7F3D0"
+      },
+      "error": {
+        "bg": "#FEF2F2",
+        "text": "#DC2626",
+        "border": "#FECACA"
+      },
+      "warning": {
+        "bg": "#FFFBEB",
+        "text": "#D97706",
+        "border": "#FDE68A"
+      },
+      "info": {
+        "bg": "#EFF6FF",
+        "text": "#2563EB",
+        "border": "#BFDBFE"
+      }
+    },
+    "dark": {
+      "background": {
+        "page": "#0F172A",
+        "card": "#1E293B",
+        "sidebar": "#1E293B",
+        "input": "#1E293B",
+        "hover": "#334155",
+        "selected": "#312E81"
+      },
+      "text": {
+        "primary": "#F9FAFB",
+        "secondary": "#E5E7EB",
+        "muted": "#9CA3AF",
+        "placeholder": "#6B7280"
+      },
+      "border": {
+        "default": "#334155",
+        "input": "#475569",
+        "focus": "#6366F1",
+        "divider": "#1E293B"
+      }
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "sans": "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+      "mono": "'JetBrains Mono', 'Fira Code', 'SF Mono', Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace"
+    },
+    "fontSize": {
+      "xs": "0.75rem",
+      "sm": "0.875rem",
+      "base": "1rem",
+      "lg": "1.125rem",
+      "xl": "1.25rem",
+      "2xl": "1.5rem",
+      "3xl": "1.875rem",
+      "4xl": "2.25rem",
+      "5xl": "3rem"
+    },
+    "fontWeight": {
+      "normal": "400",
+      "medium": "500",
+      "semibold": "600",
+      "bold": "700"
+    },
+    "lineHeight": {
+      "none": "1",
+      "tight": "1.25",
+      "snug": "1.375",
+      "normal": "1.5",
+      "relaxed": "1.625",
+      "loose": "2"
+    },
+    "letterSpacing": {
+      "tighter": "-0.05em",
+      "tight": "-0.025em",
+      "normal": "0",
+      "wide": "0.025em",
+      "wider": "0.05em",
+      "widest": "0.1em"
+    }
+  },
+  "spacing": {
+    "0": "0",
+    "0.5": "0.125rem",
+    "1": "0.25rem",
+    "1.5": "0.375rem",
+    "2": "0.5rem",
+    "2.5": "0.625rem",
+    "3": "0.75rem",
+    "3.5": "0.875rem",
+    "4": "1rem",
+    "5": "1.25rem",
+    "6": "1.5rem",
+    "7": "1.75rem",
+    "8": "2rem",
+    "9": "2.25rem",
+    "10": "2.5rem",
+    "11": "2.75rem",
+    "12": "3rem",
+    "14": "3.5rem",
+    "16": "4rem",
+    "20": "5rem",
+    "24": "6rem",
+    "28": "7rem",
+    "32": "8rem"
+  },
+  "borderRadius": {
+    "none": "0",
+    "sm": "0.125rem",
+    "DEFAULT": "0.25rem",
+    "md": "0.375rem",
+    "lg": "0.5rem",
+    "xl": "0.75rem",
+    "2xl": "1rem",
+    "3xl": "1.5rem",
+    "full": "9999px"
+  },
+  "boxShadow": {
+    "none": "none",
+    "sm": "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+    "DEFAULT": "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)",
+    "md": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)",
+    "lg": "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)",
+    "xl": "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
+    "2xl": "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+    "inner": "inset 0 2px 4px 0 rgba(0, 0, 0, 0.05)",
+    "card": "0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06)",
+    "cardHover": "0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06)",
+    "modal": "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+    "dropdown": "0 10px 40px rgba(0, 0, 0, 0.15)"
+  },
+  "animation": {
+    "duration": {
+      "fast": "150ms",
+      "normal": "200ms",
+      "slow": "300ms",
+      "slower": "500ms"
+    },
+    "easing": {
+      "default": "cubic-bezier(0.4, 0, 0.2, 1)",
+      "in": "cubic-bezier(0.4, 0, 1, 1)",
+      "out": "cubic-bezier(0, 0, 0.2, 1)",
+      "inOut": "cubic-bezier(0.4, 0, 0.2, 1)",
+      "bounce": "cubic-bezier(0.68, -0.55, 0.265, 1.55)"
+    }
+  },
+  "zIndex": {
+    "base": "0",
+    "dropdown": "1000",
+    "sticky": "1100",
+    "fixed": "1200",
+    "modalBackdrop": "1300",
+    "modal": "1400",
+    "popover": "1500",
+    "tooltip": "1600"
+  },
+  "components": {
+    "button": {
+      "primary": {
+        "background": "#4F46E5",
+        "backgroundHover": "#4338CA",
+        "text": "#FFFFFF",
+        "border": "transparent",
+        "borderRadius": "0.5rem",
+        "fontWeight": "500",
+        "fontSize": "0.875rem",
+        "paddingX": "1rem",
+        "paddingY": "0.625rem",
+        "shadow": "0 1px 2px rgba(0, 0, 0, 0.05)"
+      },
+      "secondary": {
+        "background": "#FFFFFF",
+        "backgroundHover": "#F9FAFB",
+        "text": "#374151",
+        "border": "#D1D5DB",
+        "borderRadius": "0.5rem"
+      },
+      "ghost": {
+        "background": "transparent",
+        "backgroundHover": "#F3F4F6",
+        "text": "#374151",
+        "border": "transparent"
+      },
+      "destructive": {
+        "background": "#DC2626",
+        "backgroundHover": "#B91C1C",
+        "text": "#FFFFFF"
+      },
+      "sizes": {
+        "sm": {
+          "height": "2rem",
+          "paddingX": "0.75rem",
+          "fontSize": "0.75rem"
+        },
+        "md": {
+          "height": "2.5rem",
+          "paddingX": "1rem",
+          "fontSize": "0.875rem"
+        },
+        "lg": {
+          "height": "2.75rem",
+          "paddingX": "1.5rem",
+          "fontSize": "1rem"
+        }
+      }
+    },
+    "input": {
+      "background": "#FFFFFF",
+      "backgroundDisabled": "#F9FAFB",
+      "border": "#D1D5DB",
+      "borderFocus": "#4F46E5",
+      "borderRadius": "0.5rem",
+      "text": "#111827",
+      "placeholder": "#9CA3AF",
+      "fontSize": "0.875rem",
+      "paddingX": "0.875rem",
+      "paddingY": "0.625rem",
+      "height": "2.5rem",
+      "focusRing": "0 0 0 3px rgba(79, 70, 229, 0.1)"
+    },
+    "card": {
+      "background": "#FFFFFF",
+      "border": "#E5E7EB",
+      "borderRadius": "1rem",
+      "padding": "1.5rem",
+      "shadow": "0 1px 3px rgba(0, 0, 0, 0.08)",
+      "shadowHover": "0 4px 12px rgba(0, 0, 0, 0.1)"
+    },
+    "modal": {
+      "background": "#FFFFFF",
+      "border": "#E5E7EB",
+      "borderRadius": "1rem",
+      "padding": "1.5rem",
+      "shadow": "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+      "maxWidth": "28rem",
+      "overlayBackground": "rgba(0, 0, 0, 0.5)"
+    },
+    "sidebar": {
+      "width": "16rem",
+      "background": "#FFFFFF",
+      "borderRight": "#E5E7EB",
+      "itemPaddingX": "0.75rem",
+      "itemPaddingY": "0.625rem",
+      "itemBorderRadius": "0.5rem",
+      "itemActiveBackground": "#EEF2FF",
+      "itemActiveText": "#4F46E5",
+      "itemHoverBackground": "#F9FAFB"
+    },
+    "table": {
+      "headerBackground": "#F9FAFB",
+      "headerText": "#6B7280",
+      "headerFontSize": "0.75rem",
+      "headerFontWeight": "600",
+      "rowBorder": "#F3F4F6",
+      "rowHoverBackground": "#F9FAFB",
+      "cellPaddingX": "1rem",
+      "cellPaddingY": "0.875rem"
+    },
+    "badge": {
+      "borderRadius": "9999px",
+      "paddingX": "0.625rem",
+      "paddingY": "0.125rem",
+      "fontSize": "0.75rem",
+      "fontWeight": "500"
+    },
+    "tabs": {
+      "activeIndicatorColor": "#4F46E5",
+      "activeText": "#4F46E5",
+      "inactiveText": "#6B7280",
+      "fontSize": "0.875rem",
+      "fontWeight": "500"
+    },
+    "dropdown": {
+      "background": "#FFFFFF",
+      "border": "#E5E7EB",
+      "borderRadius": "0.75rem",
+      "shadow": "0 10px 40px rgba(0, 0, 0, 0.15)",
+      "itemPadding": "0.5rem 0.75rem",
+      "itemHoverBackground": "#F9FAFB",
+      "itemBorderRadius": "0.5rem"
+    },
+    "avatar": {
+      "borderRadius": "9999px",
+      "sizes": {
+        "sm": "2rem",
+        "md": "2.5rem",
+        "lg": "3rem",
+        "xl": "4rem"
+      },
+      "fallbackBackground": "#4F46E5",
+      "fallbackText": "#FFFFFF"
+    }
+  }
+}

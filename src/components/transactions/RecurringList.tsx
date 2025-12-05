@@ -82,11 +82,11 @@ export function RecurringList({ recurring, onDeleteSuccess }: RecurringListProps
           {recurring.map((rec) => (
             <div
               key={rec.id}
-              className="rounded-lg border bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800/50 p-4 flex items-center justify-between"
+              className="rounded-xl border border-primary-100 bg-primary-50 p-4 flex items-center justify-between"
             >
               <div>
-                <p className="font-medium">{rec.description}</p>
-                <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <p className="font-medium text-gray-900">{rec.description}</p>
+                <div className="flex items-center gap-3 text-sm text-gray-600 mt-1">
                   <span>{frequencyLabel(rec.frequency)}</span>
                   <span>•</span>
                   <span className={rec.type === "income" ? "text-green-600" : "text-red-600"}>
@@ -94,7 +94,7 @@ export function RecurringList({ recurring, onDeleteSuccess }: RecurringListProps
                     {formatCurrency(rec.amount)}
                   </span>
                   <span>•</span>
-                  <span className="text-xs bg-blue-100 dark:bg-blue-900/50 px-2 py-1 rounded">
+                  <span className="text-xs bg-primary-100 px-2 py-1 rounded">
                     {rec.category}
                   </span>
                 </div>
@@ -136,7 +136,7 @@ export function RecurringList({ recurring, onDeleteSuccess }: RecurringListProps
           <DialogHeader>
             <DialogTitle>Delete recurring transaction?</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-gray-600">
             Are you sure you want to delete this recurring transaction? This action cannot be undone.
           </p>
           <div className="flex gap-3 justify-end pt-4">

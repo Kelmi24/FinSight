@@ -107,8 +107,8 @@ export function TransactionList({ transactions, onDeleteSuccess }: TransactionLi
                   <TableCell
                     className={`text-right font-medium ${
                       transaction.type === "income"
-                        ? "text-green-600 dark:text-green-400"
-                        : "text-red-600 dark:text-red-400"
+                        ? "text-green-600"
+                        : "text-red-600"
                     }`}
                   >
                     {transaction.type === "income" ? "+" : "-"}
@@ -119,7 +119,7 @@ export function TransactionList({ transactions, onDeleteSuccess }: TransactionLi
                       variant="outline"
                       size="icon"
                       onClick={() => setEditingId(transaction.id)}
-                      className="h-8 w-8 text-gray-600 hover:text-blue-600"
+                      className="h-8 w-8 text-gray-600 hover:text-primary-600"
                       title="Edit transaction"
                     >
                       <Edit2 className="h-4 w-4" />
@@ -163,7 +163,7 @@ export function TransactionList({ transactions, onDeleteSuccess }: TransactionLi
           <DialogHeader>
             <DialogTitle>Delete transaction?</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-gray-600">
             Are you sure you want to delete this transaction? This action cannot be undone.
           </p>
           <div className="flex gap-3 justify-end pt-4">

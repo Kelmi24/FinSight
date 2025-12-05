@@ -19,24 +19,24 @@ export function AppearanceSection() {
   }
 
   return (
-    <div className="rounded-lg border bg-white p-6 shadow-sm dark:bg-gray-950 dark:border-gray-800">
+    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
       <div className="mb-6">
-        <h2 className="text-2xl font-semibold tracking-tight">Appearance</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <h2 className="text-2xl font-semibold tracking-tight text-gray-900">Appearance</h2>
+        <p className="text-sm text-gray-500">
           Customize how FinSight AI looks
         </p>
       </div>
 
       <div className="space-y-4">
         <div>
-          <label className="text-sm font-medium mb-3 block">Theme</label>
+          <label className="text-sm font-medium mb-3 block text-gray-700">Theme</label>
           <div className="grid grid-cols-3 gap-3">
             <button
               onClick={() => setTheme("light")}
               className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-colors ${
                 theme === "light"
-                  ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20"
-                  : "border-gray-200 hover:border-gray-300 dark:border-gray-800 dark:hover:border-gray-700"
+                  ? "border-primary-600 bg-primary-50"
+                  : "border-gray-200 hover:border-gray-300"
               }`}
             >
               <Sun className="h-5 w-5" />
@@ -47,8 +47,8 @@ export function AppearanceSection() {
               onClick={() => setTheme("dark")}
               className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-colors ${
                 theme === "dark"
-                  ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20"
-                  : "border-gray-200 hover:border-gray-300 dark:border-gray-800 dark:hover:border-gray-700"
+                  ? "border-primary-600 bg-primary-50"
+                  : "border-gray-200 hover:border-gray-300"
               }`}
             >
               <Moon className="h-5 w-5" />
@@ -59,8 +59,8 @@ export function AppearanceSection() {
               onClick={() => setTheme("system")}
               className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-colors ${
                 theme === "system"
-                  ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20"
-                  : "border-gray-200 hover:border-gray-300 dark:border-gray-800 dark:hover:border-gray-700"
+                  ? "border-primary-600 bg-primary-50"
+                  : "border-gray-200 hover:border-gray-300"
               }`}
             >
               <div className="flex h-5 w-5 items-center justify-center">

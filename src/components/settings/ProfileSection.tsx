@@ -114,17 +114,17 @@ export function ProfileSection({ user }: ProfileSectionProps) {
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Profile Photo Section */}
-        <div className="flex flex-col sm:flex-row items-center gap-4 pb-4 border-b border-gray-100 dark:border-gray-800">
+        <div className="flex flex-col sm:flex-row items-center gap-4 pb-4 border-b border-gray-200">
           <div className="relative group">
             {/* Avatar */}
             {currentImage ? (
               <img
                 src={currentImage}
                 alt={user.name || "Profile"}
-                className="h-24 w-24 rounded-full object-cover ring-4 ring-gray-100 dark:ring-gray-800"
+                className="h-24 w-24 rounded-full object-cover ring-4 ring-gray-100"
               />
             ) : (
-              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-2xl font-semibold text-white ring-4 ring-gray-100 dark:ring-gray-800">
+              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary-600 text-2xl font-semibold text-white ring-4 ring-gray-100">
                 {initials}
               </div>
             )}
@@ -163,7 +163,7 @@ export function ProfileSection({ user }: ProfileSectionProps) {
                 size="sm"
                 onClick={handleRemoveImage}
                 disabled={isUploadingImage || isRemovingImage}
-                className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/20"
+                className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
               >
                 {isRemovingImage ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

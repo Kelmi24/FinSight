@@ -63,7 +63,7 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
             </TableCell>
             <TableCell>{transaction.description}</TableCell>
             <TableCell>
-              <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">
+              <span className="inline-flex items-center rounded-full bg-primary-50 px-2 py-1 text-xs font-medium text-primary-700">
                 {transaction.category}
               </span>
             </TableCell>
@@ -71,8 +71,8 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
               <span
                 className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
                   transaction.type === "income"
-                    ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400"
-                    : "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+                    ? "bg-green-50 text-green-700"
+                    : "bg-red-50 text-red-700"
                 }`}
               >
                 {transaction.type}

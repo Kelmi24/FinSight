@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
-import { AlertCircle, CheckCircle, Eye, EyeOff, Loader2 } from "lucide-react"
+import { AlertCircle, ArrowLeft, CheckCircle, Eye, EyeOff, Loader2 } from "lucide-react"
 
 function SubmitButton() {
   const { pending } = useFormStatus()
@@ -19,7 +19,7 @@ function SubmitButton() {
           Resetting...
         </>
       ) : (
-        "Reset Password"
+        "Reset password"
       )}
     </Button>
   )
@@ -55,14 +55,14 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     return (
       <div className="space-y-6">
         <div className="flex flex-col items-center text-center space-y-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
-            <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+            <CheckCircle className="h-8 w-8 text-green-600" />
           </div>
           <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900">
               Password reset successful!
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-gray-600">
               Your password has been updated. You can now sign in with your new password.
             </p>
           </div>
@@ -70,7 +70,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         
         <Link href="/login" className="block">
           <Button className="w-full">
-            Continue to Login
+            Continue to login
           </Button>
         </Link>
       </div>
@@ -94,7 +94,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
             tabIndex={-1}
           >
             {showPassword ? (
@@ -104,7 +104,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
             )}
           </button>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400">
+        <p className="text-xs text-gray-500">
           Must be at least 6 characters
         </p>
       </div>
@@ -124,7 +124,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           <button
             type="button"
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
             tabIndex={-1}
           >
             {showConfirmPassword ? (
@@ -137,7 +137,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       </div>
       
       {errorMessage && (
-        <div className="flex items-center space-x-2 text-red-600 bg-red-50 dark:bg-red-950/30 dark:text-red-400 p-3 rounded-lg text-sm border border-red-200 dark:border-red-900">
+        <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg text-sm border border-red-200">
           <AlertCircle className="h-4 w-4 flex-shrink-0" />
           <p>{errorMessage}</p>
         </div>
@@ -148,8 +148,9 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       <div className="text-center">
         <Link 
           href="/login" 
-          className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+          className="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900"
         >
+          <ArrowLeft className="mr-2 h-4 w-4" />
           Back to login
         </Link>
       </div>

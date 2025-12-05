@@ -62,7 +62,7 @@ export function TransactionFilters({ onFilter }: TransactionFiltersProps) {
         <Button
           variant="outline"
           onClick={() => setIsOpen(!isOpen)}
-          className={`text-sm flex items-center gap-2 ${hasFilters ? "ring-2 ring-blue-500" : ""}`}
+          className={`text-sm flex items-center gap-2 ${hasFilters ? "ring-2 ring-primary-500" : ""}`}
           size="sm"
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10H7"/><path d="M21 6H3"/><path d="M21 14H11"/></svg>
