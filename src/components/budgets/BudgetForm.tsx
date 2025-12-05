@@ -8,8 +8,6 @@ import { createBudget, updateBudget } from "@/lib/actions/budgets"
 import { CategorySelect } from "@/components/categories/CategorySelect"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useRouter } from "next/navigation"
-import { useCurrency } from "@/providers/currency-provider"
-import { getCurrencySymbol } from "@/lib/currency"
 
 interface BudgetFormProps {
   budget?: any
@@ -18,7 +16,6 @@ interface BudgetFormProps {
 
 export function BudgetForm({ budget, onSuccess }: BudgetFormProps) {
   const router = useRouter()
-  const { currency } = useCurrency()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [period, setPeriod] = useState(budget?.period || "monthly")
@@ -75,7 +72,7 @@ export function BudgetForm({ budget, onSuccess }: BudgetFormProps) {
         </div>
 
         <div>
-          <Label htmlFor="amount">Monthly Limit ({getCurrencySymbol(currency)})</Label>
+          <Label htmlFor="amount">Monthly Limit ($)</Label>
           <Input
             id="amount"
             name="amount"

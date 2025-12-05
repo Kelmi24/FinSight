@@ -8,7 +8,13 @@ import { BudgetDialog } from "./BudgetDialog"
 import { EmptyState } from "@/components/ui/empty-state"
 import { deleteBudget } from "@/lib/actions/budgets"
 import { useRouter } from "next/navigation"
-import { useCurrency } from "@/providers/currency-provider"
+
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(amount)
+}
 
 interface BudgetWithSpending {
   id: string
@@ -25,7 +31,6 @@ interface BudgetListProps {
 
 export function BudgetList({ budgets }: BudgetListProps) {
   const router = useRouter()
-  const { formatCurrency } = useCurrency()
   const [editingBudget, setEditingBudget] = useState<any | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -123,8 +128,8 @@ export function BudgetList({ budgets }: BudgetListProps) {
                       }`}
                     >
                       {budget.remaining >= 0
-                        ? `${formatCurrency(Math.abs(budget.remaining))} remaining`
-                        : `${formatCurrency(Math.abs(budget.remaining))} over`}
+                        ? `$${Math.abs(budget.remaining).toFixed(2)} remaining`
+                        : `$${Math.abs(budget.remaining).toFixed(2)} over`}
                     </span>
                   </div>
                   <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">

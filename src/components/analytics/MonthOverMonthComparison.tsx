@@ -3,7 +3,6 @@
 import { getSpendingTrends } from "@/lib/actions/analytics"
 import { useEffect, useState } from "react"
 import { TrendingUp, TrendingDown } from "lucide-react"
-import { useCurrency } from "@/providers/currency-provider"
 
 interface MonthComparison {
   month: string
@@ -14,7 +13,6 @@ interface MonthComparison {
 }
 
 export function MonthOverMonthComparison() {
-  const { formatCurrency } = useCurrency()
   const [comparison, setComparison] = useState<MonthComparison | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -49,7 +47,7 @@ export function MonthOverMonthComparison() {
   }
 
   const isIncrease = comparison.change > 0
-  const formattedChange = formatCurrency(Math.abs(comparison.change))
+  const formattedChange = Math.abs(comparison.change).toFixed(2)
   const formattedPercent = Math.abs(comparison.changePercent).toFixed(1)
 
   return (
@@ -59,7 +57,7 @@ export function MonthOverMonthComparison() {
       <div className="space-y-4">
         <div>
           <p className="text-sm text-gray-600">{comparison.month}</p>
-          <p className="text-2xl font-bold text-gray-900">{formatCurrency(comparison.currentSpending)}</p>
+          <p className="text-2xl font-bold text-gray-900">${comparison.currentSpending.toFixed(2)}</p>
         </div>
 
         <div className={`flex items-center gap-2 p-3 rounded-lg ${
@@ -78,7 +76,7 @@ export function MonthOverMonthComparison() {
                 ? 'text-red-600' 
                 : 'text-green-600'
             }`}>
-              {isIncrease ? '↑' : '↓'} {formattedChange} ({formattedPercent}%)
+              {isIncrease ? '↑' : '↓'} ${formattedChange} ({formattedPercent}%)
             </p>
             <p className="text-xs text-gray-600">
               vs previous month
