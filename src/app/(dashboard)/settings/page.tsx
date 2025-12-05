@@ -7,31 +7,24 @@ import { AccountsSection } from "@/components/settings/AccountsSection"
 import { DataManagementSection } from "@/components/settings/DataManagementSection"
 
 export default async function SettingsPage() {
-  // Temporarily disabled for preview
-  // const session = await auth()
-  // if (!session?.user?.id) {
-  //   redirect("/api/auth/signin?callbackUrl=/settings")
-  // }
-
-  // Mock user for preview
-  const user = {
-    name: "Test User",
-    email: "test@example.com",
-    institutionName: null, // or "Chase Bank (Mock)" to preview connected state
+  const session = await auth()
+  
+  if (!session?.user?.id) {
+    redirect("/login?callbackUrl=/settings")
   }
 
-  // const user = await db.user.findUnique({
-  //   where: { id: session.user.id },
-  //   select: {
-  //     name: true,
-  //     email: true,
-  //     institutionName: true,
-  //   },
-  // })
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      name: true,
+      email: true,
+      institutionName: true,
+    },
+  })
 
-  // if (!user) {
-  //   redirect("/api/auth/signin")
-  // }
+  if (!user) {
+    redirect("/login")
+  }
 
   return (
     <div className="space-y-6">

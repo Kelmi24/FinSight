@@ -2,11 +2,12 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { updateProfile } from "@/lib/actions/settings"
-import { User } from "lucide-react"
-import { Card } from "@/components/ui/card"
+import { updateProfile } from "@/lib/actions/user"
+import { useFormStatus } from "react-dom"
+import { toast } from "sonner"
 
 interface ProfileSectionProps {
   user: {
@@ -15,83 +16,87 @@ interface ProfileSectionProps {
   }
 }
 
+function SubmitButton() {
+  const { pending } = useFormStatus()
+  return (
+    <Button disabled={pending}>
+      {pending ? "Saving..." : "Save Changes"}
+    </Button>
+  )
+}
+
 export function ProfileSection({ user }: ProfileSectionProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+  const [isEditing, setIsEditing] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setMessage(null)
-
-    const formData = new FormData(e.currentTarget)
+  const handleSubmit = async (formData: FormData) => {
     const result = await updateProfile(formData)
-
     if (result.error) {
-      setMessage({ type: "error", text: result.error })
+     toast.error(result.error)
     } else {
-      setMessage({ type: "success", text: "Profile updated successfully!" })
+      toast.success("Profile updated successfully!")
+      setIsEditing(false)
     }
-
-    setIsLoading(false)
   }
 
   return (
     <Card>
-      <div className="flex items-center gap-3 mb-6">
-        <div className="rounded-full bg-blue-100 p-2 dark:bg-blue-900">
-          <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-        </div>
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight">Profile Information</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Update your personal details
-          </p>
-        </div>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="name">Name</Label>
-          <Input
-            id="name"
-            name="name"
-            defaultValue={user.name || ""}
-            placeholder="Your name"
-            required
-          />
-        </div>
-
+      <CardHeader>
+        <CardTitle>Profile</CardTitle>
+        <CardDescription>
+          Manage your public profile information.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            defaultValue={user.email || ""}
-            placeholder="your.email@example.com"
-            required
+          <Input 
+            id="email" 
+            value={user.email || ""} 
+            disabled 
+            className="bg-muted"
           />
+          <p className="text-xs text-muted-foreground">
+            Email addresses cannot be changed at this time.
+          </p>
         </div>
 
-        {message && (
-          <div
-            className={`rounded-md p-3 text-sm ${
-              message.type === "success"
-                ? "bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-400"
-                : "bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-400"
-            }`}
-          >
-            {message.text}
+        {isEditing ? (
+          <form action={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Display Name</Label>
+              <Input 
+                id="name" 
+                name="name" 
+                defaultValue={user.name || ""} 
+                placeholder="Your Name"
+                required
+              />
+            </div>
+            <div className="flex gap-2">
+              <SubmitButton />
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setIsEditing(false)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Display Name</Label>
+              <div className="p-2 border rounded-md bg-muted/20">
+                {user.name || "Not set"}
+              </div>
+            </div>
+            <Button onClick={() => setIsEditing(true)} variant="outline">
+              Edit Profile
+            </Button>
           </div>
         )}
-
-        <div className="flex justify-end pt-2">
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
-        </div>
-      </form>
+      </CardContent>
     </Card>
   )
 }
