@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { createPortal } from "react-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -48,8 +49,10 @@ export function CategorySelect({
   const [newCategoryName, setNewCategoryName] = useState("")
   const [selectedColor, setSelectedColor] = useState(PRESET_COLORS[0])
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 })
   const dialogRef = useRef<HTMLDialogElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     loadCategories()
@@ -65,6 +68,18 @@ export function CategorySelect({
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
+
+  // Update dropdown position when opened
+  useEffect(() => {
+    if (isOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect()
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 8,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      })
+    }
+  }, [isOpen])
 
   async function loadCategories() {
     setIsLoading(true)
@@ -147,6 +162,7 @@ export function CategorySelect({
       <div ref={containerRef} className="relative">
         {/* Custom dropdown trigger */}
         <button
+          ref={triggerRef}
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           disabled={isLoading}
@@ -180,15 +196,23 @@ export function CategorySelect({
           )} />
         </button>
 
-        {/* Dropdown panel */}
-        {isOpen && !isLoading && (
-          <div className={cn(
-            "absolute z-50 mt-2 w-full rounded-xl",
-            "bg-white border border-gray-200 shadow-xl",
-            "dark:bg-gray-900 dark:border-gray-700",
-            "animate-in fade-in-0 zoom-in-95 duration-200",
-            "max-h-80 overflow-hidden"
-          )}>
+        {/* Dropdown panel - rendered in portal to avoid dialog clipping */}
+        {isOpen && !isLoading && typeof document !== 'undefined' && createPortal(
+          <div 
+            className={cn(
+              "fixed z-[100] rounded-xl",
+              "bg-white border border-gray-200 shadow-xl",
+              "dark:bg-gray-900 dark:border-gray-700",
+              "animate-in fade-in-0 zoom-in-95 duration-200",
+              "max-h-80 overflow-hidden"
+            )}
+            style={{
+              top: dropdownPosition.top,
+              left: dropdownPosition.left,
+              width: dropdownPosition.width,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Categories list */}
             <div className="max-h-60 overflow-y-auto py-2">
               {categories.length === 0 ? (
@@ -303,7 +327,8 @@ export function CategorySelect({
                 Add new category
               </button>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
 
