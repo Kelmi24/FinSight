@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { ProfileSection } from "@/components/settings/ProfileSection"
+import { SecuritySection } from "@/components/settings/SecuritySection"
 import { AppearanceSection } from "@/components/settings/AppearanceSection"
 import { AccountsSection } from "@/components/settings/AccountsSection"
 import { DataManagementSection } from "@/components/settings/DataManagementSection"
@@ -18,6 +19,7 @@ export default async function SettingsPage() {
     select: {
       name: true,
       email: true,
+      password: true,
       institutionName: true,
     },
   })
@@ -25,6 +27,9 @@ export default async function SettingsPage() {
   if (!user) {
     redirect("/login")
   }
+
+  // Check if user has a password (credentials auth vs OAuth)
+  const hasPassword = !!(user as any).password
 
   return (
     <div className="space-y-6">
@@ -37,6 +42,8 @@ export default async function SettingsPage() {
 
       <div className="grid gap-6">
         <ProfileSection user={user} />
+        
+        {hasPassword && <SecuritySection />}
         
         <AppearanceSection />
         
