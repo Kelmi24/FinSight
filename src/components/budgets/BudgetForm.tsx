@@ -18,6 +18,7 @@ export function BudgetForm({ budget, onSuccess }: BudgetFormProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [period, setPeriod] = useState(budget?.period || "monthly")
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -49,6 +50,9 @@ export function BudgetForm({ budget, onSuccess }: BudgetFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 rounded-md bg-white dark:bg-gray-950 p-4 sm:p-6 border border-gray-100 dark:border-gray-800 transition-all duration-medium">
+      {/* Hidden input for period - Radix Select doesn't submit via FormData */}
+      <input type="hidden" name="period" value={period} />
+      
       {error && (
         <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 p-3 rounded">
           {error}
@@ -84,7 +88,7 @@ export function BudgetForm({ budget, onSuccess }: BudgetFormProps) {
 
       <div>
         <Label htmlFor="period">Period</Label>
-        <Select name="period" defaultValue={budget?.period || "monthly"}>
+        <Select value={period} onValueChange={setPeriod}>
           <SelectTrigger id="period">
             <SelectValue placeholder="Select period" />
           </SelectTrigger>

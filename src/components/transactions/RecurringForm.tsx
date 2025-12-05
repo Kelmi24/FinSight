@@ -22,6 +22,7 @@ export function RecurringForm({ recurring, onSuccess }: RecurringFormProps) {
   const [transactionType, setTransactionType] = useState<"income" | "expense">(
     recurring?.type || "expense"
   )
+  const [frequency, setFrequency] = useState(recurring?.frequency || "monthly")
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -53,6 +54,10 @@ export function RecurringForm({ recurring, onSuccess }: RecurringFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Hidden inputs for Select values - Radix Select doesn't submit via FormData */}
+      <input type="hidden" name="type" value={transactionType} />
+      <input type="hidden" name="frequency" value={frequency} />
+      
       {error && (
         <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 p-3 rounded">
           {error}
@@ -74,7 +79,6 @@ export function RecurringForm({ recurring, onSuccess }: RecurringFormProps) {
         <div>
           <Label htmlFor="type">Type</Label>
           <Select
-            name="type"
             value={transactionType}
             onValueChange={(val) => setTransactionType(val as "income" | "expense")}
           >
@@ -117,7 +121,7 @@ export function RecurringForm({ recurring, onSuccess }: RecurringFormProps) {
 
         <div>
           <Label htmlFor="frequency">Frequency</Label>
-          <Select name="frequency" defaultValue={recurring?.frequency || "monthly"}>
+          <Select value={frequency} onValueChange={setFrequency}>
             <SelectTrigger id="frequency">
               <SelectValue placeholder="Select frequency" />
             </SelectTrigger>

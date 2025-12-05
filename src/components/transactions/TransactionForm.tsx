@@ -64,14 +64,15 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
 
   return (
     <form action={handleSubmit} className="space-y-4 rounded-md bg-white dark:bg-gray-950 p-4 sm:p-6 border border-gray-100 dark:border-gray-800 transition-all duration-medium">
+      {/* Hidden input for type - Radix Select doesn't submit via FormData */}
+      <input type="hidden" name="type" value={transactionType} />
+      
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="type">Type</Label>
           <Select
-            name="type"
             value={transactionType}
             onValueChange={(val) => setTransactionType(val as "income" | "expense")}
-            required
           >
             <SelectTrigger id="type">
               <SelectValue placeholder="Select type" />
