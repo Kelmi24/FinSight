@@ -6,7 +6,12 @@ import { revalidatePath } from "next/cache"
 
 export async function getRecurringTransactions() {
   const session = await auth()
-  const userId = "mock-user-id"
+  
+  if (!session?.user?.id) {
+    return []
+  }
+
+  const userId = session.user.id
 
   const recurring = await db.recurringTransaction.findMany({
     where: { userId },
@@ -18,7 +23,12 @@ export async function getRecurringTransactions() {
 
 export async function createRecurringTransaction(formData: FormData) {
   const session = await auth()
-  const userId = "mock-user-id"
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+
+  const userId = session.user.id
 
   const description = formData.get("description") as string
   const amount = parseFloat(formData.get("amount") as string)
@@ -52,7 +62,12 @@ export async function createRecurringTransaction(formData: FormData) {
 
 export async function updateRecurringTransaction(id: string, formData: FormData) {
   const session = await auth()
-  const userId = "mock-user-id"
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+
+  const userId = session.user.id
 
   const description = formData.get("description") as string
   const amount = parseFloat(formData.get("amount") as string)
@@ -66,10 +81,15 @@ export async function updateRecurringTransaction(id: string, formData: FormData)
     return { error: "Invalid input" }
   }
 
+  // Verify ownership
+  const existing = await db.recurringTransaction.findFirst({ where: { id, userId } })
+  if (!existing) {
+      return { error: "Transaction not found or unauthorized" }
+  }
+
   await db.recurringTransaction.update({
     where: {
       id,
-      userId,
     },
     data: {
       description,
@@ -89,13 +109,23 @@ export async function updateRecurringTransaction(id: string, formData: FormData)
 
 export async function deleteRecurringTransaction(id: string) {
   const session = await auth()
-  const userId = "mock-user-id"
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+
+  const userId = session.user.id
 
   try {
+    // Verify ownership
+    const existing = await db.recurringTransaction.findFirst({ where: { id, userId } })
+    if (!existing) {
+        return { error: "Transaction not found or unauthorized" }
+    }
+
     await db.recurringTransaction.delete({
       where: {
         id,
-        userId,
       },
     })
 

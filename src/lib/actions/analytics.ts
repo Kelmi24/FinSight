@@ -14,10 +14,15 @@ export interface AnalyticsFilters {
 
 export async function getFilteredTransactions(filters: AnalyticsFilters) {
   const session = await auth()
-  const userId = "mock-user-id"
+  
+  if (!session?.user?.id) {
+    return []
+  }
+
+  const userId = session.user.id
 
   const where: any = {
-    userId,
+    userId: userId,
   }
 
   if (filters.startDate) {
@@ -104,7 +109,12 @@ export async function getCategoryTrends(filters: AnalyticsFilters) {
 
 export async function getTopSpendingCategories(limit = 5) {
   const session = await auth()
-  const userId = session?.user?.id || "mock-user-id"; if (false) return []
+  
+  if (!session?.user?.id) {
+    return []
+  }
+
+  const userId = session.user.id
 
   const transactions = await db.transaction.findMany({
     where: {

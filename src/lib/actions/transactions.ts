@@ -11,8 +11,12 @@ export async function getTransactions(filters?: {
   type?: string
 }) {
   const session = await auth()
-  // Force mock user ID for preview mode
-  const userId = "mock-user-id"
+  
+  if (!session?.user?.id) {
+    return []
+  }
+  
+  const userId = session.user.id
 
   const where: any = { userId }
 
@@ -40,8 +44,12 @@ export async function getTransactions(filters?: {
 
 export async function createTransaction(formData: FormData) {
   const session = await auth()
-  // Force mock user ID for preview mode to avoid stale session issues
-  const userId = "mock-user-id"
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+
+  const userId = session.user.id
 
   const amount = parseFloat(formData.get("amount") as string)
   const description = formData.get("description") as string
@@ -76,8 +84,12 @@ export async function createTransaction(formData: FormData) {
 
 export async function deleteTransaction(id: string) {
   const session = await auth()
-  // Force mock user ID for preview mode
-  const userId = "mock-user-id"
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+  
+  const userId = session.user.id
 
   try {
     await db.transaction.delete({
@@ -98,7 +110,12 @@ export async function deleteTransaction(id: string) {
 
 export async function updateTransaction(id: string, formData: FormData) {
   const session = await auth()
-  const userId = "mock-user-id"
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+
+  const userId = session.user.id
 
   const amount = parseFloat(formData.get("amount") as string)
   const description = formData.get("description") as string
@@ -111,6 +128,15 @@ export async function updateTransaction(id: string, formData: FormData) {
   }
 
   try {
+    // Verify ownership before update
+    const existingTransaction = await db.transaction.findFirst({
+        where: { id, userId }
+    })
+    
+    if (!existingTransaction) {
+        return { error: "Transaction not found or unauthorized" }
+    }
+
     await db.transaction.update({
       where: { id },
       data: {

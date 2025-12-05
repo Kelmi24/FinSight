@@ -9,7 +9,12 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export async function linkMockAccount() {
   const session = await auth()
-  const userId = session?.user?.id || "mock-user-id"; if (false) return { error: "Unauthorized" }
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+
+  const userId = session.user.id
 
   await delay(1500) // Simulate network request
 
@@ -29,7 +34,12 @@ export async function linkMockAccount() {
 
 export async function syncMockTransactions() {
   const session = await auth()
-  const userId = session?.user?.id || "mock-user-id"; if (false) return { error: "Unauthorized" }
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+
+  const userId = session.user.id
 
   const user = await db.user.findUnique({
     where: { id: userId },
@@ -47,14 +57,14 @@ export async function syncMockTransactions() {
       description: "Starbucks",
       amount: 5.40,
       date: new Date(),
-      category: "Food & Drink",
+      category: "Food & Dining", // Fixed category name to match default seed
       type: "expense",
     },
     {
       description: "Uber Ride",
       amount: 24.50,
       date: new Date(Date.now() - 86400000 * 1), // 1 day ago
-      category: "Transport",
+      category: "Transportation", // Fixed category name
       type: "expense",
     },
     {
@@ -68,7 +78,7 @@ export async function syncMockTransactions() {
       description: "Payroll Deposit",
       amount: 2500.00,
       date: new Date(Date.now() - 86400000 * 5), // 5 days ago
-      category: "Income",
+      category: "Salary", // Fixed category name to match default seed
       type: "income",
     },
   ]
@@ -90,7 +100,12 @@ export async function syncMockTransactions() {
 
 export async function unlinkAccount() {
   const session = await auth()
-  const userId = session?.user?.id || "mock-user-id"; if (false) return { error: "Unauthorized" }
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+
+  const userId = session.user.id
 
   await db.user.update({
     where: { id: userId },

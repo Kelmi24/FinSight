@@ -6,7 +6,12 @@ import { revalidatePath } from "next/cache"
 
 export async function getGoals() {
   const session = await auth()
-  const userId = session?.user?.id || "mock-user-id"; if (false) return []
+  
+  if (!session?.user?.id) {
+    return []
+  }
+  
+  const userId = session.user.id
 
   const goals = await db.goal.findMany({
     where: { userId: userId },
@@ -18,17 +23,19 @@ export async function getGoals() {
 
 export async function createGoal(formData: FormData) {
   const session = await auth()
-  const userId = session?.user?.id || "mock-user-id"; if (false) return { error: "Unauthorized" }
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+
+  const userId = session.user.id
 
   const name = formData.get("name") as string
   const targetAmount = parseFloat(formData.get("targetAmount") as string)
   const currentAmount = parseFloat(formData.get("currentAmount") as string) || 0
   const deadline = formData.get("deadline") as string
 
-  console.log("Creating goal with data:", { name, targetAmount, currentAmount, deadline, userId })
-
   if (!name || isNaN(targetAmount)) {
-    console.error("Invalid input:", { name, targetAmount })
     return { error: "Invalid input" }
   }
 
@@ -45,17 +52,20 @@ export async function createGoal(formData: FormData) {
 
     revalidatePath("/goals")
     revalidatePath("/dashboard")
-    console.log("Goal created successfully")
     return { success: true }
   } catch (error) {
-    console.error("Database error creating goal:", error)
     return { error: "Database error: " + (error as Error).message }
   }
 }
 
 export async function updateGoal(id: string, formData: FormData) {
   const session = await auth()
-  const userId = session?.user?.id || "mock-user-id"; if (false) return { error: "Unauthorized" }
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+  
+  const userId = session.user.id
 
   const name = formData.get("name") as string
   const targetAmount = parseFloat(formData.get("targetAmount") as string)
@@ -66,10 +76,15 @@ export async function updateGoal(id: string, formData: FormData) {
     return { error: "Invalid input" }
   }
 
+  // Verify ownership
+  const existing = await db.goal.findFirst({ where: { id, userId } })
+  if (!existing) {
+      return { error: "Goal not found or unauthorized" }
+  }
+
   await db.goal.update({
     where: {
       id,
-      userId: userId,
     },
     data: {
       name,
@@ -86,12 +101,22 @@ export async function updateGoal(id: string, formData: FormData) {
 
 export async function deleteGoal(id: string) {
   const session = await auth()
-  const userId = session?.user?.id || "mock-user-id"; if (false) return { error: "Unauthorized" }
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+  
+  const userId = session.user.id
+  
+  // Verify ownership
+  const existing = await db.goal.findFirst({ where: { id, userId } })
+  if (!existing) {
+      return { error: "Goal not found or unauthorized" }
+  }
 
   await db.goal.delete({
     where: {
       id,
-      userId: userId,
     },
   })
 

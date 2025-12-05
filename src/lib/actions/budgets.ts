@@ -6,7 +6,12 @@ import { revalidatePath } from "next/cache"
 
 export async function getBudgets() {
   const session = await auth()
-  const userId = "mock-user-id"
+  
+  if (!session?.user?.id) {
+    return []
+  }
+
+  const userId = session.user.id
 
   const budgets = await db.budget.findMany({
     where: { userId },
@@ -49,7 +54,12 @@ export async function getBudgets() {
 
 export async function createBudget(formData: FormData) {
   const session = await auth()
-  const userId = "mock-user-id"
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+
+  const userId = session.user.id
 
   const category = formData.get("category") as string
   const amount = parseFloat(formData.get("amount") as string)
@@ -84,14 +94,27 @@ export async function createBudget(formData: FormData) {
 
 export async function updateBudget(id: string, formData: FormData) {
   const session = await auth()
-  const userId = "mock-user-id"
-
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+  
+  // We should verify ownership here strictly speaking, but for now trusting the update where: id is risky if IDs are guessable 
+  // (CUIDs are not easily guessable but good practice to include userId in where)
+  const userId = session.user.id
+  
   const category = formData.get("category") as string
   const amount = parseFloat(formData.get("amount") as string)
   const period = formData.get("period") as string || "monthly"
 
   if (!category || isNaN(amount) || amount <= 0) {
     return { error: "Invalid input" }
+  }
+
+  // Verify ownership
+  const existing = await db.budget.findFirst({ where: { id, userId } })
+  if (!existing) {
+      return { error: "Budget not found or unauthorized" }
   }
 
   await db.budget.update({
@@ -110,7 +133,18 @@ export async function updateBudget(id: string, formData: FormData) {
 
 export async function deleteBudget(id: string) {
   const session = await auth()
-  const userId = "mock-user-id"
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+
+  const userId = session.user.id
+
+  // Ensure ownership
+  const existing = await db.budget.findFirst({ where: { id, userId } })
+  if (!existing) {
+      return { error: "Budget not found or unauthorized" }
+  }
 
   await db.budget.delete({
     where: { id },

@@ -22,8 +22,12 @@ const DEFAULT_CATEGORIES = [
 
 export async function getCategories(type?: "income" | "expense") {
   const session = await auth()
-  // Use mock user ID for development/preview mode
-  const userId = session?.user?.id || "mock-user-id"
+  
+  if (!session?.user?.id) {
+    return { categories: [] }
+  }
+  
+  const userId = session.user.id
 
   try {
     const whereClause: any = { userId }
@@ -56,8 +60,12 @@ export async function getCategories(type?: "income" | "expense") {
 
 export async function createCategory(formData: FormData) {
   const session = await auth()
-  // Use mock user ID for development/preview mode
-  const userId = session?.user?.id || "mock-user-id"
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+  
+  const userId = session.user.id
 
   const name = formData.get("name") as string
   const type = formData.get("type") as string

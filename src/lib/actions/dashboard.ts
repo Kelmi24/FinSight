@@ -5,17 +5,17 @@ import { auth } from "@/auth"
 
 export async function getDashboardSummary() {
   const session = await auth()
-  // Force mock user ID for preview mode
-  const userId = "mock-user-id"
   
-  // if (!session?.user?.id) {
-  //   return {
-  //     totalIncome: 0,
-  //     totalExpenses: 0,
-  //     netBalance: 0,
-  //     transactionCount: 0,
-  //   }
-  // }
+  if (!session?.user?.id) {
+    return {
+      totalIncome: 0,
+      totalExpenses: 0,
+      netBalance: 0,
+      transactionCount: 0,
+    }
+  }
+
+  const userId = session.user.id
 
   const transactions = await db.transaction.findMany({
     where: { userId: userId },
@@ -39,8 +39,12 @@ export async function getDashboardSummary() {
 
 export async function getCashFlowData() {
   const session = await auth()
-  // Force mock user ID for preview mode
-  const userId = "mock-user-id"
+  
+  if (!session?.user?.id) {
+    return []
+  }
+
+  const userId = session.user.id
 
   const sixMonthsAgo = new Date()
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
@@ -85,8 +89,12 @@ export async function getCashFlowData() {
 
 export async function getCategoryBreakdown() {
   const session = await auth()
-  // Force mock user ID for preview mode
-  const userId = "mock-user-id"
+  
+  if (!session?.user?.id) {
+    return []
+  }
+
+  const userId = session.user.id
 
   const transactions = await db.transaction.findMany({
     where: {
@@ -107,6 +115,8 @@ export async function getCategoryBreakdown() {
     .map(([category, amount]) => ({
       category,
       amount,
+      period: 'total', // Added to match expectation or just standard key
     }))
+    .map(({category, amount}) => ({category, amount})) // Cleanup extra key if not needed, but sticking to logic
     .sort((a, b) => b.amount - a.amount)
 }

@@ -6,7 +6,12 @@ import { revalidatePath } from "next/cache"
 
 export async function updateProfile(formData: FormData) {
   const session = await auth()
-  const userId = session?.user?.id || "mock-user-id"; if (false) return { error: "Unauthorized" }
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+
+  const userId = session.user.id
 
   const name = formData.get("name") as string
   const email = formData.get("email") as string
@@ -30,7 +35,12 @@ export async function updateProfile(formData: FormData) {
 
 export async function deleteAllTransactions() {
   const session = await auth()
-  const userId = session?.user?.id || "mock-user-id"; if (false) return { error: "Unauthorized" }
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+
+  const userId = session.user.id
 
   try {
     await db.transaction.deleteMany({
@@ -48,7 +58,12 @@ export async function deleteAllTransactions() {
 
 export async function deleteAllGoals() {
   const session = await auth()
-  const userId = session?.user?.id || "mock-user-id"; if (false) return { error: "Unauthorized" }
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+
+  const userId = session.user.id
 
   try {
     await db.goal.deleteMany({
@@ -65,7 +80,12 @@ export async function deleteAllGoals() {
 
 export async function exportUserData() {
   const session = await auth()
-  const userId = session?.user?.id || "mock-user-id"; if (false) return { error: "Unauthorized" }
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+
+  const userId = session.user.id
 
   try {
     const [user, transactions, goals] = await Promise.all([
