@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { createPortal } from "react-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -50,36 +50,73 @@ export function CategorySelect({
   const [selectedColor, setSelectedColor] = useState(PRESET_COLORS[0])
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 })
+  const [mounted, setMounted] = useState(false)
   const dialogRef = useRef<HTMLDialogElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     loadCategories()
   }, [type])
 
+  // Calculate dropdown position
+  const updatePosition = useCallback(() => {
+    if (triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect()
+      setDropdownPosition({
+        top: rect.bottom + 8,
+        left: rect.left,
+        width: rect.width,
+      })
+    }
+  }, [])
+
+  // Handle click outside
   useEffect(() => {
+    if (!isOpen) return
+    
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      const target = event.target as Node
+      if (
+        containerRef.current && 
+        !containerRef.current.contains(target) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(target)
+      ) {
         setIsOpen(false)
         setShowDeleteConfirm(null)
       }
     }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+    
+    // Use timeout to avoid immediate close on the same click that opens
+    const timeoutId = setTimeout(() => {
+      document.addEventListener("mousedown", handleClickOutside)
+    }, 0)
+    
+    return () => {
+      clearTimeout(timeoutId)
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [isOpen])
 
   // Update dropdown position when opened
   useEffect(() => {
-    if (isOpen && triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect()
-      setDropdownPosition({
-        top: rect.bottom + window.scrollY + 8,
-        left: rect.left + window.scrollX,
-        width: rect.width,
-      })
+    if (isOpen) {
+      updatePosition()
+      // Also update on scroll/resize
+      window.addEventListener('scroll', updatePosition, true)
+      window.addEventListener('resize', updatePosition)
+      return () => {
+        window.removeEventListener('scroll', updatePosition, true)
+        window.removeEventListener('resize', updatePosition)
+      }
     }
-  }, [isOpen])
+  }, [isOpen, updatePosition])
 
   async function loadCategories() {
     setIsLoading(true)
@@ -170,10 +207,8 @@ export function CategorySelect({
             "flex h-10 w-full items-center justify-between rounded-lg border-2",
             "bg-white px-3 py-2 text-sm transition-all duration-200",
             "border-gray-200 hover:border-gray-300",
-            "focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100",
-            "dark:bg-gray-900 dark:border-gray-700 dark:hover:border-gray-600",
-            "dark:focus:border-blue-400 dark:focus:ring-blue-900/30",
-            isOpen && "border-blue-500 ring-2 ring-blue-100 dark:border-blue-400",
+            "focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100",
+            isOpen && "border-indigo-500 ring-2 ring-indigo-100",
             className
           )}
         >
@@ -186,7 +221,7 @@ export function CategorySelect({
             ) : (
               <Tag className="h-4 w-4 text-gray-400" />
             )}
-            <span className={selectedValue ? "text-gray-900 dark:text-gray-100" : "text-gray-400"}>
+            <span className={selectedValue ? "text-gray-900" : "text-gray-400"}>
               {isLoading ? "Loading..." : selectedValue || "Select a category"}
             </span>
           </div>
@@ -197,21 +232,20 @@ export function CategorySelect({
         </button>
 
         {/* Dropdown panel - rendered in portal to avoid dialog clipping */}
-        {isOpen && !isLoading && typeof document !== 'undefined' && createPortal(
+        {isOpen && !isLoading && mounted && createPortal(
           <div 
+            ref={dropdownRef}
             className={cn(
-              "fixed z-[100] rounded-xl",
-              "bg-white border border-gray-200 shadow-xl",
-              "dark:bg-gray-900 dark:border-gray-700",
-              "animate-in fade-in-0 zoom-in-95 duration-200",
-              "max-h-80 overflow-hidden"
+              "fixed z-[9999] rounded-xl",
+              "bg-white border border-gray-200 shadow-dropdown",
+              "max-h-80 overflow-hidden",
+              "animate-fade-in"
             )}
             style={{
               top: dropdownPosition.top,
               left: dropdownPosition.left,
-              width: dropdownPosition.width,
+              width: Math.max(dropdownPosition.width, 200),
             }}
-            onClick={(e) => e.stopPropagation()}
           >
             {/* Categories list */}
             <div className="max-h-60 overflow-y-auto py-2">
@@ -227,8 +261,8 @@ export function CategorySelect({
                   >
                     {showDeleteConfirm === cat.id ? (
                       // Delete confirmation
-                      <div className="flex items-center justify-between px-3 py-2 bg-red-50 dark:bg-red-900/20">
-                        <span className="text-sm text-red-700 dark:text-red-400">Delete "{cat.name}"?</span>
+                      <div className="flex items-center justify-between px-3 py-2 bg-red-50">
+                        <span className="text-sm text-red-700">Delete "{cat.name}"?</span>
                         <div className="flex gap-1">
                           <button
                             type="button"
@@ -236,7 +270,7 @@ export function CategorySelect({
                               e.stopPropagation()
                               setShowDeleteConfirm(null)
                             }}
-                            className="px-2 py-1 text-xs rounded bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+                            className="px-2 py-1 text-xs rounded bg-gray-200 hover:bg-gray-300"
                           >
                             No
                           </button>
@@ -258,25 +292,25 @@ export function CategorySelect({
                       <div
                         className={cn(
                           "flex items-center justify-between px-3 py-2 cursor-pointer",
-                          "hover:bg-gray-50 dark:hover:bg-gray-800/50",
+                          "hover:bg-gray-50",
                           "transition-colors duration-150",
-                          selectedValue === cat.name && "bg-blue-50 dark:bg-blue-900/20"
+                          selectedValue === cat.name && "bg-indigo-50"
                         )}
                         onClick={() => handleSelectCategory(cat.name)}
                       >
                         <div className="flex items-center gap-3">
                           <span
-                            className="w-3 h-3 rounded-full ring-1 ring-gray-200 dark:ring-gray-600"
+                            className="w-3 h-3 rounded-full ring-1 ring-gray-200"
                             style={{ backgroundColor: cat.color || "#9CA3AF" }}
                           />
                           <span className={cn(
                             "text-sm",
-                            selectedValue === cat.name ? "font-medium text-blue-700 dark:text-blue-400" : "text-gray-700 dark:text-gray-300"
+                            selectedValue === cat.name ? "font-medium text-indigo-700" : "text-gray-700"
                           )}>
                             {cat.name}
                           </span>
                           {cat.isDefault && (
-                            <span className="text-[10px] uppercase tracking-wide text-gray-400 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">
+                            <span className="text-[10px] uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
                               Default
                             </span>
                           )}
@@ -293,7 +327,6 @@ export function CategorySelect({
                             className={cn(
                               "p-1 rounded opacity-0 group-hover:opacity-100",
                               "text-gray-400 hover:text-red-500 hover:bg-red-50",
-                              "dark:hover:bg-red-900/20 dark:hover:text-red-400",
                               "transition-all duration-150"
                             )}
                             title="Delete category"
@@ -309,7 +342,7 @@ export function CategorySelect({
             </div>
 
             {/* Add new category button */}
-            <div className="border-t border-gray-100 dark:border-gray-800 p-2">
+            <div className="border-t border-gray-100 p-2">
               <button
                 type="button"
                 onClick={() => {
@@ -318,8 +351,8 @@ export function CategorySelect({
                 }}
                 className={cn(
                   "flex items-center gap-2 w-full px-3 py-2 rounded-lg",
-                  "text-sm font-medium text-blue-600 dark:text-blue-400",
-                  "hover:bg-blue-50 dark:hover:bg-blue-900/20",
+                  "text-sm font-medium text-indigo-600",
+                  "hover:bg-indigo-50",
                   "transition-colors duration-150"
                 )}
               >
@@ -354,16 +387,16 @@ export function CategorySelect({
               e.stopPropagation()
               closeDialog()
             }}
-            className="absolute right-4 top-4 rounded-md opacity-70 hover:opacity-100 hover:bg-gray-100 dark:hover:bg-gray-800 p-1"
+            className="absolute right-4 top-4 rounded-md opacity-70 hover:opacity-100 hover:bg-gray-100 p-1"
           >
             <X className="h-5 w-5" />
           </button>
 
-          <h2 className="text-lg font-semibold mb-4">Create New Category</h2>
+          <h2 className="text-lg font-semibold mb-4 text-gray-900">Create New Category</h2>
           
           <div className="space-y-4">
             {error && (
-              <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 p-3 rounded">
+              <div className="text-sm text-red-600 bg-red-50 p-3 rounded">
                 {error}
               </div>
             )}
@@ -400,7 +433,7 @@ export function CategorySelect({
                     className={cn(
                       "w-8 h-8 rounded-full transition-all duration-200",
                       selectedColor === color
-                        ? "ring-2 ring-offset-2 ring-gray-900 dark:ring-white scale-110"
+                        ? "ring-2 ring-offset-2 ring-indigo-600 scale-110"
                         : "hover:scale-105"
                     )}
                     style={{ backgroundColor: color }}
