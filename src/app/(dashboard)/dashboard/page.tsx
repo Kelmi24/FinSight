@@ -1,37 +1,23 @@
-import {
-  getDashboardSummary,
-  getCashFlowData,
-  getCategoryBreakdown,
-} from "@/lib/actions/dashboard"
-import { getTransactions } from "@/lib/actions/transactions"
-import { KpiCard } from "@/components/dashboard/KpiCard"
-import { CashFlowChart } from "@/components/dashboard/CashFlowChart"
-import { CategoryChart } from "@/components/dashboard/CategoryChart"
-import { RecentTransactions } from "@/components/dashboard/RecentTransactions"
-import { DollarSign, TrendingUp, TrendingDown, Receipt } from "lucide-react"
+import { DashboardFilters } from "@/components/dashboard/DashboardFilters"
+import { DashboardContent } from "@/components/dashboard/DashboardContent"
 import { ConnectedAccount } from "@/components/plaid/ConnectedAccount"
 import { ConnectBankButton } from "@/components/plaid/ConnectBankButton"
-import { formatCurrency as baseFormatCurrency, DEFAULT_CURRENCY } from "@/lib/currency"
+import { getCategories } from "@/lib/actions/dashboard"
 import { auth } from "@/auth"
 
 export default async function DashboardPage() {
   const session = await auth()
-  const currency = (session?.user as any)?.currencyPreference || DEFAULT_CURRENCY
+  const userId = session?.user?.id || "mock-user-id"
   const user = {
     institutionName: null,
   }
 
-  const [summary, cashFlowData, categoryData, transactions] = await Promise.all([
-    getDashboardSummary(),
-    getCashFlowData(),
-    getCategoryBreakdown(),
-    getTransactions(),
-  ])
-
-  const formatCurrency = (amount: number) => baseFormatCurrency(amount, currency, { minimumFractionDigits: 0 })
+  // Fetch categories for filter
+  const categories = await getCategories()
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Header */}
       <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
@@ -51,38 +37,11 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <KpiCard
-          title="Total Income"
-          value={formatCurrency(summary.totalIncome)}
-          icon={TrendingUp}
-        />
-        <KpiCard
-          title="Total Expenses"
-          value={formatCurrency(summary.totalExpenses)}
-          icon={TrendingDown}
-        />
-        <KpiCard
-          title="Net Balance"
-          value={formatCurrency(summary.netBalance)}
-          icon={DollarSign}
-        />
-        <KpiCard
-          title="Transactions"
-          value={summary.transactionCount}
-          icon={Receipt}
-        />
-      </div>
+      {/* Filters */}
+      <DashboardFilters categories={categories} />
 
-      {/* Charts */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <CashFlowChart data={cashFlowData} />
-        <CategoryChart data={categoryData} />
-      </div>
-
-      {/* Recent Transactions */}
-      <RecentTransactions transactions={transactions} />
+      {/* Dashboard Content (with real-time filter updates) */}
+      <DashboardContent userId={userId} />
     </div>
   )
 }

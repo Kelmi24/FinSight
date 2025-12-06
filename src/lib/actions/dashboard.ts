@@ -120,3 +120,21 @@ export async function getCategoryBreakdown() {
     .map(({category, amount}) => ({category, amount})) // Cleanup extra key if not needed, but sticking to logic
     .sort((a, b) => b.amount - a.amount)
 }
+
+export async function getCategories() {
+  const session = await auth()
+  
+  if (!session?.user?.id) {
+    return []
+  }
+
+  const userId = session.user.id
+
+  const transactions = await db.transaction.findMany({
+    where: { userId },
+    select: { category: true },
+    distinct: ['category'],
+  })
+
+  return transactions.map((t) => t.category).sort()
+}
