@@ -8,7 +8,7 @@ import { GoalDialog } from "./GoalDialog"
 import { deleteGoal } from "@/lib/actions/goals"
 import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
-import { useCurrency } from "@/providers/currency-provider"
+import { formatCurrency } from "@/lib/currency"
 
 interface Goal {
   id: string
@@ -16,6 +16,7 @@ interface Goal {
   targetAmount: number
   currentAmount: number
   deadline: Date | null
+  currency?: string
 }
 
 interface GoalCardProps {
@@ -24,7 +25,6 @@ interface GoalCardProps {
 
 export function GoalCard({ goal }: GoalCardProps) {
   const router = useRouter()
-  const { formatCurrency } = useCurrency()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -89,10 +89,10 @@ export function GoalCard({ goal }: GoalCardProps) {
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">
-              {formatCurrency(goal.currentAmount)} saved
+              {formatCurrency(goal.currentAmount, goal.currency as any)} saved
             </span>
             <span className="font-medium text-gray-900">
-              {formatCurrency(goal.targetAmount)} goal
+              {formatCurrency(goal.targetAmount, goal.currency as any)} goal
             </span>
           </div>
           

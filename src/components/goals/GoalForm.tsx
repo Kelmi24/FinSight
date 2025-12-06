@@ -6,12 +6,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { DatePicker } from "@/components/ui/date-picker"
 import { createGoal, updateGoal } from "@/lib/actions/goals"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface Goal {
   id: string
   name: string
   targetAmount: number
   currentAmount: number
+  currency?: string
   deadline: Date | null
 }
 
@@ -23,6 +25,7 @@ interface GoalFormProps {
 export function GoalForm({ goal, onSuccess }: GoalFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [selectedCurrency, setSelectedCurrency] = useState(goal?.currency || "USD")
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -55,6 +58,7 @@ export function GoalForm({ goal, onSuccess }: GoalFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <input type="hidden" name="currency" value={selectedCurrency} />
       <div className="space-y-2">
         <Label htmlFor="name">Goal Name</Label>
         <Input
@@ -64,6 +68,24 @@ export function GoalForm({ goal, onSuccess }: GoalFormProps) {
           defaultValue={goal?.name}
           required
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="currency">Currency</Label>
+        <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
+          <SelectTrigger id="currency">
+            <SelectValue placeholder="USD" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="USD">USD</SelectItem>
+            <SelectItem value="EUR">EUR</SelectItem>
+            <SelectItem value="GBP">GBP</SelectItem>
+            <SelectItem value="JPY">JPY</SelectItem>
+            <SelectItem value="CAD">CAD</SelectItem>
+            <SelectItem value="AUD">AUD</SelectItem>
+            <SelectItem value="IDR">IDR</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid grid-cols-2 gap-4">

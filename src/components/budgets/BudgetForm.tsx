@@ -19,6 +19,7 @@ interface BudgetFormProps {
 export function BudgetForm({ budget, onSuccess }: BudgetFormProps) {
   const router = useRouter()
   const { currency } = useCurrency()
+  const [selectedCurrency, setSelectedCurrency] = useState(budget?.currency || "USD")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [period, setPeriod] = useState(budget?.period || "monthly")
@@ -55,6 +56,7 @@ export function BudgetForm({ budget, onSuccess }: BudgetFormProps) {
     <form onSubmit={handleSubmit} className="space-y-4 rounded-xl bg-white p-4 sm:p-6 border border-gray-200 transition-all">
       {/* Hidden input for period - Radix Select doesn't submit via FormData */}
       <input type="hidden" name="period" value={period} />
+      <input type="hidden" name="currency" value={selectedCurrency} />
       
       {error && (
         <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">
@@ -74,18 +76,37 @@ export function BudgetForm({ budget, onSuccess }: BudgetFormProps) {
           />
         </div>
 
-        <div>
-          <Label htmlFor="amount">Monthly Limit ({getCurrencySymbol(currency)})</Label>
-          <Input
-            id="amount"
-            name="amount"
-            type="number"
-            step="0.01"
-            min="0"
-            defaultValue={budget?.amount || ""}
-            placeholder="100.00"
-            required
-          />
+        <div className="flex gap-2">
+          <div className="w-24">
+            <Label htmlFor="currency">Currency</Label>
+            <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
+              <SelectTrigger id="currency">
+                <SelectValue placeholder="USD" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="USD">USD</SelectItem>
+                <SelectItem value="EUR">EUR</SelectItem>
+                <SelectItem value="GBP">GBP</SelectItem>
+                <SelectItem value="JPY">JPY</SelectItem>
+                <SelectItem value="CAD">CAD</SelectItem>
+                <SelectItem value="AUD">AUD</SelectItem>
+                <SelectItem value="IDR">IDR</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex-1">
+            <Label htmlFor="amount">Monthly Limit</Label>
+            <Input
+              id="amount"
+              name="amount"
+              type="number"
+              step="0.01"
+              min="0"
+              defaultValue={budget?.amount || ""}
+              placeholder="100.00"
+              required
+            />
+          </div>
         </div>
       </div>
 

@@ -32,6 +32,7 @@ export async function createRecurringTransaction(formData: FormData) {
 
   const description = formData.get("description") as string
   const amount = parseFloat(formData.get("amount") as string)
+  const currency = (formData.get("currency") as string) || "USD"
   const category = formData.get("category") as string
   const type = formData.get("type") as string
   const frequency = formData.get("frequency") as string
@@ -42,18 +43,19 @@ export async function createRecurringTransaction(formData: FormData) {
     return { error: "Invalid input" }
   }
 
-  await db.recurringTransaction.create({
-    data: {
-      userId,
-      description,
-      amount,
-      category,
-      type,
-      frequency,
-      startDate,
-      endDate: endDate ? new Date(endDate) : null,
-    },
-  })
+  const data: any = {
+    userId,
+    description,
+    amount,
+    currency,
+    category,
+    type,
+    frequency,
+    startDate,
+    endDate: endDate ? new Date(endDate) : null,
+  }
+
+  await db.recurringTransaction.create({ data })
 
   revalidatePath("/transactions")
   revalidatePath("/dashboard")
@@ -71,6 +73,7 @@ export async function updateRecurringTransaction(id: string, formData: FormData)
 
   const description = formData.get("description") as string
   const amount = parseFloat(formData.get("amount") as string)
+  const currency = formData.get("currency") as string
   const category = formData.get("category") as string
   const type = formData.get("type") as string
   const frequency = formData.get("frequency") as string
@@ -87,19 +90,25 @@ export async function updateRecurringTransaction(id: string, formData: FormData)
       return { error: "Transaction not found or unauthorized" }
   }
 
+  const data: any = {
+    description,
+    amount,
+    category,
+    type,
+    frequency,
+    startDate,
+    endDate: endDate ? new Date(endDate) : null,
+  }
+
+  if (currency) {
+    data.currency = currency
+  }
+
   await db.recurringTransaction.update({
     where: {
       id,
     },
-    data: {
-      description,
-      amount,
-      category,
-      type,
-      frequency,
-      startDate,
-      endDate: endDate ? new Date(endDate) : null,
-    },
+    data,
   })
 
   revalidatePath("/transactions")

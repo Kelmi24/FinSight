@@ -7,7 +7,7 @@
  * - Currency symbol/metadata lookup
  */
 
-export type CurrencyCode = "IDR" | "USD" | "SGD" | "MYR" | "THB" | "INR"
+export type CurrencyCode = "IDR" | "USD" | "SGD" | "MYR" | "THB" | "INR" | "EUR" | "GBP" | "JPY" | "CAD" | "AUD"
 
 export const DEFAULT_CURRENCY: CurrencyCode = "IDR"
 
@@ -37,6 +37,46 @@ export const SUPPORTED_CURRENCIES: Record<CurrencyCode, CurrencyConfig> = {
     name: "US Dollar",
     locale: "en-US",
     symbol: "$",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  },
+  EUR: {
+    code: "EUR",
+    name: "Euro",
+    locale: "de-DE",
+    symbol: "€",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  },
+  GBP: {
+    code: "GBP",
+    name: "British Pound",
+    locale: "en-GB",
+    symbol: "£",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  },
+  JPY: {
+    code: "JPY",
+    name: "Japanese Yen",
+    locale: "ja-JP",
+    symbol: "¥",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  },
+  CAD: {
+    code: "CAD",
+    name: "Canadian Dollar",
+    locale: "en-CA",
+    symbol: "CA$",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  },
+  AUD: {
+    code: "AUD",
+    name: "Australian Dollar",
+    locale: "en-AU",
+    symbol: "A$",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   },

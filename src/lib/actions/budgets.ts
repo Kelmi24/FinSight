@@ -63,6 +63,7 @@ export async function createBudget(formData: FormData) {
 
   const category = formData.get("category") as string
   const amount = parseFloat(formData.get("amount") as string)
+  const currency = (formData.get("currency") as string) || "USD"
   const period = formData.get("period") as string || "monthly"
 
   if (!category || isNaN(amount) || amount <= 0) {
@@ -78,14 +79,15 @@ export async function createBudget(formData: FormData) {
     return { error: "Budget already exists for this category" }
   }
 
-  await db.budget.create({
-    data: {
-      userId,
-      category,
-      amount,
-      period,
-    },
-  })
+  const data: any = {
+    userId,
+    category,
+    amount,
+    currency,
+    period,
+  }
+
+  await db.budget.create({ data })
 
   revalidatePath("/budgets")
   revalidatePath("/dashboard")
@@ -105,6 +107,7 @@ export async function updateBudget(id: string, formData: FormData) {
   
   const category = formData.get("category") as string
   const amount = parseFloat(formData.get("amount") as string)
+  const currency = formData.get("currency") as string
   const period = formData.get("period") as string || "monthly"
 
   if (!category || isNaN(amount) || amount <= 0) {
@@ -117,13 +120,19 @@ export async function updateBudget(id: string, formData: FormData) {
       return { error: "Budget not found or unauthorized" }
   }
 
+  const data: any = {
+    category,
+    amount,
+    period,
+  }
+
+  if (currency) {
+    data.currency = currency
+  }
+
   await db.budget.update({
     where: { id },
-    data: {
-      category,
-      amount,
-      period,
-    },
+    data,
   })
 
   revalidatePath("/budgets")

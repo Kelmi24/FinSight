@@ -17,56 +17,35 @@ import { CurrencyCode } from "@/lib/currency"
  */
 export type ExchangeRateMatrix = Record<CurrencyCode, Record<CurrencyCode, number>>
 
-export const EXCHANGE_RATES: ExchangeRateMatrix = {
-  USD: {
-    USD: 1,
-    IDR: 16600, // 1 USD = 16,600 IDR
-    SGD: 1.35, // 1 USD = 1.35 SGD
-    MYR: 4.20, // 1 USD = 4.20 MYR
-    THB: 35.50, // 1 USD = 35.50 THB
-    INR: 83.20, // 1 USD = 83.20 INR
-  },
-  IDR: {
-    USD: 1 / 16600, // 1 IDR = ~0.00006 USD
-    IDR: 1,
-    SGD: 1.35 / 16600, // 1 IDR = ~0.0000813 SGD
-    MYR: 4.20 / 16600, // 1 IDR = ~0.000253 MYR
-    THB: 35.50 / 16600, // 1 IDR = ~0.00214 THB
-    INR: 83.20 / 16600, // 1 IDR = ~0.00501 INR
-  },
-  SGD: {
-    USD: 1 / 1.35, // 1 SGD = ~0.74 USD
-    IDR: 16600 / 1.35, // 1 SGD = ~12,296 IDR
-    SGD: 1,
-    MYR: 4.20 / 1.35, // 1 SGD = ~3.11 MYR
-    THB: 35.50 / 1.35, // 1 SGD = ~26.30 THB
-    INR: 83.20 / 1.35, // 1 SGD = ~61.63 INR
-  },
-  MYR: {
-    USD: 1 / 4.20, // 1 MYR = ~0.238 USD
-    IDR: 16600 / 4.20, // 1 MYR = ~3,952 IDR
-    SGD: 1.35 / 4.20, // 1 MYR = ~0.321 SGD
-    MYR: 1,
-    THB: 35.50 / 4.20, // 1 MYR = ~8.45 THB
-    INR: 83.20 / 4.20, // 1 MYR = ~19.81 INR
-  },
-  THB: {
-    USD: 1 / 35.50, // 1 THB = ~0.0282 USD
-    IDR: 16600 / 35.50, // 1 THB = ~467 IDR
-    SGD: 1.35 / 35.50, // 1 THB = ~0.038 SGD
-    MYR: 4.20 / 35.50, // 1 THB = ~0.118 MYR
-    THB: 1,
-    INR: 83.20 / 35.50, // 1 THB = ~2.34 INR
-  },
-  INR: {
-    USD: 1 / 83.20, // 1 INR = ~0.012 USD
-    IDR: 16600 / 83.20, // 1 INR = ~199 IDR
-    SGD: 1.35 / 83.20, // 1 INR = ~0.0162 SGD
-    MYR: 4.20 / 83.20, // 1 INR = ~0.0505 MYR
-    THB: 35.50 / 83.20, // 1 INR = ~0.427 THB
-    INR: 1,
-  },
+// Base USD-per-unit values (approximate Dec 2024 mid-market). This lets us derive a
+// complete matrix so every currency pair is present and TypeScript stays satisfied.
+const USD_PER_UNIT: Record<CurrencyCode, number> = {
+  USD: 1,
+  EUR: 1.08,   // 1 EUR ≈ 1.08 USD
+  GBP: 1.26,   // 1 GBP ≈ 1.26 USD
+  JPY: 0.007,  // 1 JPY ≈ 0.007 USD
+  CAD: 0.74,   // 1 CAD ≈ 0.74 USD
+  AUD: 0.67,   // 1 AUD ≈ 0.67 USD
+  SGD: 0.74,   // 1 SGD ≈ 0.74 USD
+  MYR: 0.238,  // 1 MYR ≈ 0.238 USD
+  THB: 0.0282, // 1 THB ≈ 0.0282 USD
+  INR: 0.012,  // 1 INR ≈ 0.012 USD
+  IDR: 1 / 16600, // 1 IDR ≈ 0.00006024 USD
 }
+
+export const EXCHANGE_RATES: ExchangeRateMatrix = Object.keys(USD_PER_UNIT).reduce(
+  (matrix, fromCode) => {
+    const from = fromCode as CurrencyCode
+    matrix[from] = Object.keys(USD_PER_UNIT).reduce((row, toCode) => {
+      const to = toCode as CurrencyCode
+      // amount * rate = converted amount
+      row[to] = USD_PER_UNIT[from] / USD_PER_UNIT[to]
+      return row
+    }, {} as Record<CurrencyCode, number>)
+    return matrix
+  },
+  {} as ExchangeRateMatrix
+)
 
 /**
  * Convert an amount from one currency to another

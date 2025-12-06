@@ -79,6 +79,7 @@ model VerificationToken {
 model Transaction {
   id          String   @id @default(cuid())
   amount      Float
+  currency    String   @default("USD")
   description String
   category    String
   date        DateTime
@@ -92,6 +93,7 @@ model Transaction {
 model RecurringTransaction {
   id            String   @id @default(cuid())
   amount        Float
+  currency      String   @default("USD")
   description   String
   category      String
   type          String   // "income" or "expense"
@@ -110,6 +112,7 @@ model Budget {
   userId      String
   category    String
   amount      Float
+  currency    String   @default("USD")
   period      String   // "monthly", "weekly"
   
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -124,6 +127,7 @@ model Goal {
   name        String
   targetAmount Float
   currentAmount Float @default(0)
+  currency    String   @default("USD")
   deadline    DateTime?
   
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)

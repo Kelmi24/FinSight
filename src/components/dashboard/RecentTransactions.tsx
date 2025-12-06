@@ -4,7 +4,7 @@ import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { useCurrency } from "@/providers/currency-provider"
+import { formatCurrency } from "@/lib/currency"
 
 interface Transaction {
   id: string
@@ -13,6 +13,7 @@ interface Transaction {
   category: string
   type: string
   amount: number
+  currency?: string
 }
 
 interface RecentTransactionsProps {
@@ -27,7 +28,6 @@ const formatDate = (date: Date) => {
 }
 
 export function RecentTransactions({ transactions }: RecentTransactionsProps) {
-  const { formatCurrency } = useCurrency()
   
   return (
     <Card>
@@ -68,7 +68,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
                   }`}
                 >
                   {transaction.type === "income" ? "+" : "-"}
-                  {formatCurrency(transaction.amount)}
+                  {formatCurrency(transaction.amount, transaction.currency as any)}
                 </p>
               </div>
             ))}

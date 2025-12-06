@@ -22,6 +22,7 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
   const [transactionType, setTransactionType] = React.useState<"income" | "expense">(
     transaction?.type || "expense"
   )
+  const [currency, setCurrency] = React.useState(transaction?.currency || "USD")
   
   // Recurring state
   const [isRecurring, setIsRecurring] = React.useState(false)
@@ -66,6 +67,7 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
     <form action={handleSubmit} className="space-y-4 rounded-xl bg-white p-4 sm:p-6 border border-gray-200 transition-all">
       {/* Hidden input for type - Radix Select doesn't submit via FormData */}
       <input type="hidden" name="type" value={transactionType} />
+      <input type="hidden" name="currency" value={currency} />
       
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
@@ -84,18 +86,37 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
           </Select>
         </div>
 
-        <div>
-          <Label htmlFor="amount">Amount</Label>
-          <Input
-            type="number"
-            name="amount"
-            id="amount"
-            placeholder="0.00"
-            step="0.01"
-            min="0"
-            defaultValue={transaction?.amount || ""}
-            required
-          />
+        <div className="flex gap-2">
+          <div className="w-24">
+            <Label htmlFor="currency">Currency</Label>
+            <Select value={currency} onValueChange={setCurrency}>
+              <SelectTrigger id="currency">
+                <SelectValue placeholder="USD" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="USD">USD</SelectItem>
+                <SelectItem value="EUR">EUR</SelectItem>
+                <SelectItem value="GBP">GBP</SelectItem>
+                <SelectItem value="JPY">JPY</SelectItem>
+                <SelectItem value="CAD">CAD</SelectItem>
+                <SelectItem value="AUD">AUD</SelectItem>
+                <SelectItem value="IDR">IDR</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex-1">
+            <Label htmlFor="amount">Amount</Label>
+            <Input
+              type="number"
+              name="amount"
+              id="amount"
+              placeholder="0.00"
+              step="0.01"
+              min="0"
+              defaultValue={transaction?.amount || ""}
+              required
+            />
+          </div>
         </div>
       </div>
 

@@ -8,7 +8,7 @@ import { BudgetDialog } from "./BudgetDialog"
 import { EmptyState } from "@/components/ui/empty-state"
 import { deleteBudget } from "@/lib/actions/budgets"
 import { useRouter } from "next/navigation"
-import { useCurrency } from "@/providers/currency-provider"
+import { formatCurrency } from "@/lib/currency"
 
 interface BudgetWithSpending {
   id: string
@@ -17,6 +17,7 @@ interface BudgetWithSpending {
   spent: number
   remaining: number
   percentUsed: string
+  currency?: string
 }
 
 interface BudgetListProps {
@@ -25,20 +26,9 @@ interface BudgetListProps {
 
 export function BudgetList({ budgets }: BudgetListProps) {
   const router = useRouter()
-  const { formatCurrency, currency, convertAmount } = useCurrency()
   const [editingBudget, setEditingBudget] = useState<any | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
-
-  // Convert budget amounts when currency changes
-  const convertedBudgets = useMemo(() => {
-    return budgets.map(budget => ({
-      ...budget,
-      amount: convertAmount(budget.amount, "USD", currency),
-      spent: convertAmount(budget.spent, "USD", currency),
-      remaining: convertAmount(budget.remaining, "USD", currency),
-    }))
-  }, [budgets, currency, convertAmount])
 
   const handleDelete = async (id: string) => {
     setIsDeleting(true)
@@ -72,7 +62,7 @@ export function BudgetList({ budgets }: BudgetListProps) {
   return (
     <>
       <div className="grid gap-4">
-        {convertedBudgets.map((budget) => {
+        {budgets.map((budget) => {
           const percentUsed = parseFloat(budget.percentUsed)
           return (
             <div key={budget.id}>
@@ -81,7 +71,7 @@ export function BudgetList({ budgets }: BudgetListProps) {
                   <div>
                     <h3 className="font-semibold text-lg text-gray-900">{budget.category}</h3>
                     <p className="text-sm text-gray-600">
-                      {formatCurrency(budget.spent)} of {formatCurrency(budget.amount)}
+                      {formatCurrency(budget.spent, budget.currency)} of {formatCurrency(budget.amount, budget.currency)}
                     </p>
                   </div>
                   <div className="flex gap-2">

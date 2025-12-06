@@ -33,6 +33,7 @@ export async function createGoal(formData: FormData) {
   const name = formData.get("name") as string
   const targetAmount = parseFloat(formData.get("targetAmount") as string)
   const currentAmount = parseFloat(formData.get("currentAmount") as string) || 0
+  const currency = (formData.get("currency") as string) || "USD"
   const deadline = formData.get("deadline") as string
 
   if (!name || isNaN(targetAmount)) {
@@ -46,6 +47,7 @@ export async function createGoal(formData: FormData) {
         name,
         targetAmount,
         currentAmount,
+        currency,
         deadline: deadline ? new Date(deadline) : null,
       },
     })
@@ -70,6 +72,7 @@ export async function updateGoal(id: string, formData: FormData) {
   const name = formData.get("name") as string
   const targetAmount = parseFloat(formData.get("targetAmount") as string)
   const currentAmount = parseFloat(formData.get("currentAmount") as string)
+  const currency = formData.get("currency") as string
   const deadline = formData.get("deadline") as string
 
   if (!name || isNaN(targetAmount) || isNaN(currentAmount)) {
@@ -82,16 +85,22 @@ export async function updateGoal(id: string, formData: FormData) {
       return { error: "Goal not found or unauthorized" }
   }
 
+  const data: any = {
+    name,
+    targetAmount,
+    currentAmount,
+    deadline: deadline ? new Date(deadline) : null,
+  }
+
+  if (currency) {
+    data.currency = currency
+  }
+
   await db.goal.update({
     where: {
       id,
     },
-    data: {
-      name,
-      targetAmount,
-      currentAmount,
-      deadline: deadline ? new Date(deadline) : null,
-    },
+    data,
   })
 
   revalidatePath("/goals")

@@ -52,6 +52,7 @@ export async function createTransaction(formData: FormData) {
   const userId = session.user.id
 
   const amount = parseFloat(formData.get("amount") as string)
+  const currency = formData.get("currency") as string || "USD"
   const description = formData.get("description") as string
   const category = formData.get("category") as string
   const type = formData.get("type") as string
@@ -62,16 +63,17 @@ export async function createTransaction(formData: FormData) {
   }
 
   try {
-    await db.transaction.create({
-      data: {
-        userId,
-        amount,
-        description,
-        category,
-        type,
-        date,
-      },
-    })
+    const data: any = {
+      userId,
+      amount,
+      currency,
+      description,
+      category,
+      type,
+      date,
+    }
+
+    await db.transaction.create({ data })
     revalidatePath("/transactions")
     revalidatePath("/dashboard")
     revalidatePath("/")
@@ -116,6 +118,7 @@ export async function updateTransaction(id: string, formData: FormData) {
   const userId = session.user.id
 
   const amount = parseFloat(formData.get("amount") as string)
+  const currency = formData.get("currency") as string // Optional update
   const description = formData.get("description") as string
   const category = formData.get("category") as string
   const type = formData.get("type") as string
@@ -135,15 +138,21 @@ export async function updateTransaction(id: string, formData: FormData) {
         return { error: "Transaction not found or unauthorized" }
     }
 
+    const data: any = {
+      amount,
+      description,
+      category,
+      type,
+      date,
+    }
+
+    if (currency) {
+      data.currency = currency
+    }
+
     await db.transaction.update({
       where: { id },
-      data: {
-        amount,
-        description,
-        category,
-        type,
-        date,
-      },
+      data,
     })
     revalidatePath("/transactions")
     revalidatePath("/dashboard")

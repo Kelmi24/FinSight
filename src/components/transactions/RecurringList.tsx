@@ -8,7 +8,7 @@ import { RecurringDialog } from "./RecurringDialog"
 import { EmptyState } from "@/components/ui/empty-state"
 import { deleteRecurringTransaction } from "@/lib/actions/recurring"
 import { useRouter } from "next/navigation"
-import { useCurrency } from "@/providers/currency-provider"
+import { formatCurrency } from "@/lib/currency"
 
 interface RecurringListProps {
   recurring: any[]
@@ -17,18 +17,9 @@ interface RecurringListProps {
 
 export function RecurringList({ recurring, onDeleteSuccess }: RecurringListProps) {
   const router = useRouter()
-  const { formatCurrency, currency, convertAmount } = useCurrency()
   const [editingRecurring, setEditingRecurring] = useState<any | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
-
-  // Convert recurring amounts when currency changes
-  const convertedRecurring = useMemo(() => {
-    return recurring.map(rec => ({
-      ...rec,
-      amount: convertAmount(rec.amount, "USD", currency),
-    }))
-  }, [recurring, currency, convertAmount])
 
   const handleDelete = async (id: string) => {
     setIsDeleting(true)
@@ -82,7 +73,7 @@ export function RecurringList({ recurring, onDeleteSuccess }: RecurringListProps
           Recurring Transactions
         </h3>
         <div className="grid gap-3">
-          {convertedRecurring.map((rec) => (
+          {recurring.map((rec) => (
             <div
               key={rec.id}
               className="rounded-xl border border-primary-100 bg-primary-50 p-4 flex items-center justify-between"
@@ -94,7 +85,7 @@ export function RecurringList({ recurring, onDeleteSuccess }: RecurringListProps
                   <span>•</span>
                   <span className={rec.type === "income" ? "text-green-600" : "text-red-600"}>
                     {rec.type === "income" ? "+" : "-"}
-                    {formatCurrency(rec.amount)}
+                    {formatCurrency(rec.amount, rec.currency)}
                   </span>
                   <span>•</span>
                   <span className="text-xs bg-primary-100 px-2 py-1 rounded">
