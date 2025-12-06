@@ -51,7 +51,6 @@ export async function updateCurrencyPreference(currency: CurrencyCode) {
 
     revalidatePath("/dashboard")
     revalidatePath("/transactions")
-    revalidatePath("/analytics")
     revalidatePath("/goals")
     revalidatePath("/budgets")
     revalidatePath("/settings")

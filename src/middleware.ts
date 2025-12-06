@@ -9,7 +9,6 @@ export default auth((req) => {
                         pathname.startsWith('/transactions') ||
                         pathname.startsWith('/budgets') ||
                         pathname.startsWith('/goals') ||
-                        pathname.startsWith('/analytics') ||
                         pathname.startsWith('/settings')
   
   if (isOnDashboard && !isLoggedIn) {

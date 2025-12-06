@@ -49,7 +49,6 @@ export async function deleteAllTransactions() {
 
     revalidatePath("/dashboard")
     revalidatePath("/transactions")
-    revalidatePath("/analytics")
     return { success: true }
   } catch (error) {
     return { error: "Failed to delete transactions" }

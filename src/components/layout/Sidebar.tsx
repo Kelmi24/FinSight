@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, PieChart, ArrowRightLeft, Target, Settings, Wallet } from "lucide-react"
+import { LayoutDashboard, ArrowRightLeft, Target, Settings, Wallet } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ThemeToggle } from "./ThemeToggle"
 
@@ -21,11 +21,6 @@ const routes = [
     label: "Budgets",
     icon: Wallet,
     href: "/budgets",
-  },
-  {
-    label: "Analytics",
-    icon: PieChart,
-    href: "/analytics",
   },
   {
     label: "Goals",

@@ -74,7 +74,6 @@ export async function createTransaction(formData: FormData) {
     })
     revalidatePath("/transactions")
     revalidatePath("/dashboard")
-    revalidatePath("/analytics")
     revalidatePath("/")
     return { success: true }
   } catch (error) {
@@ -100,7 +99,6 @@ export async function deleteTransaction(id: string) {
     })
     revalidatePath("/transactions")
     revalidatePath("/dashboard")
-    revalidatePath("/analytics")
     revalidatePath("/")
     return { success: true }
   } catch (error) {
@@ -149,7 +147,6 @@ export async function updateTransaction(id: string, formData: FormData) {
     })
     revalidatePath("/transactions")
     revalidatePath("/dashboard")
-    revalidatePath("/analytics")
     revalidatePath("/")
     return { success: true }
   } catch (error) {
