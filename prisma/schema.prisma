@@ -92,6 +92,8 @@ model Transaction {
 
 model RecurringTransaction {
   id            String   @id @default(cuid())
+  name          String?
+  notes         String?
   amount        Float
   currency      String   @default("USD")
   description   String
@@ -101,6 +103,10 @@ model RecurringTransaction {
   startDate     DateTime
   endDate       DateTime?
   lastGenerated DateTime?
+  nextDueDate   DateTime
+  lastConfirmedAt DateTime?
+  status        String   @default("pending")
+  reminderEnabled Boolean @default(false)
   userId        String
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt     DateTime @default(now())

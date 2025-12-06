@@ -27,6 +27,8 @@ export function RecurringForm({ recurring, onSuccess }: RecurringFormProps) {
   )
   const [frequency, setFrequency] = useState(recurring?.frequency || "monthly")
   const [amountInput, setAmountInput] = useState(recurring?.amount?.toString() || "")
+  const [name, setName] = useState(recurring?.name || recurring?.description || "")
+  const [notes, setNotes] = useState(recurring?.notes || "")
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -65,6 +67,8 @@ export function RecurringForm({ recurring, onSuccess }: RecurringFormProps) {
       <input type="hidden" name="frequency" value={frequency} />
       {/* Use user's preferred currency from settings; no picker on form */}
       <input type="hidden" name="currency" value={currency} />
+      {/* Keep description aligned to name for server-side expectations */}
+      <input type="hidden" name="description" value={name} />
       
       {error && (
         <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">
@@ -73,13 +77,27 @@ export function RecurringForm({ recurring, onSuccess }: RecurringFormProps) {
       )}
 
       <div>
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="name">Name</Label>
         <Input
-          id="description"
-          name="description"
-          defaultValue={recurring?.description || ""}
-          placeholder="e.g., Monthly Netflix subscription"
+          id="name"
+          name="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="e.g., Salary, Rent, Netflix"
           required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="notes">Notes (optional)</Label>
+        <textarea
+          id="notes"
+          name="notes"
+          className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+          placeholder="Payroll ref, bill account number, etc."
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          rows={3}
         />
       </div>
 
