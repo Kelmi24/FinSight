@@ -2,6 +2,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Footer } from "@/components/layout/Footer";
 import { CurrencyProvider } from "@/providers/currency-provider";
+import { FilterProvider } from "@/providers/filter-provider";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { DEFAULT_CURRENCY } from "@/lib/currency";
@@ -27,14 +28,16 @@ export default async function DashboardLayout({
 
   return (
     <CurrencyProvider initialCurrency={currencyPreference}>
-      <div className="flex min-h-screen flex-col bg-[#F9FAFB]">
-        <Navbar />
-        <div className="flex flex-1">
-          <Sidebar />
-          <main className="flex-1 p-6">{children}</main>
+      <FilterProvider>
+        <div className="flex min-h-screen flex-col bg-[#F9FAFB]">
+          <Navbar />
+          <div className="flex flex-1">
+            <Sidebar />
+            <main className="flex-1 p-6">{children}</main>
+          </div>
+          <Footer />
         </div>
-        <Footer />
-      </div>
+      </FilterProvider>
     </CurrencyProvider>
   );
 }
