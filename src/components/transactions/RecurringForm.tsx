@@ -10,7 +10,6 @@ import { CategorySelect } from "@/components/categories/CategorySelect"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useRouter } from "next/navigation"
 import { useCurrency } from "@/providers/currency-provider"
-import { getCurrencySymbol } from "@/lib/currency"
 
 interface RecurringFormProps {
   recurring?: any
@@ -20,7 +19,6 @@ interface RecurringFormProps {
 export function RecurringForm({ recurring, onSuccess }: RecurringFormProps) {
   const router = useRouter()
   const { currency } = useCurrency()
-  const [selectedCurrency, setSelectedCurrency] = useState(recurring?.currency || "USD")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [transactionType, setTransactionType] = useState<"income" | "expense">(
@@ -61,7 +59,8 @@ export function RecurringForm({ recurring, onSuccess }: RecurringFormProps) {
       {/* Hidden inputs for Select values - Radix Select doesn't submit via FormData */}
       <input type="hidden" name="type" value={transactionType} />
       <input type="hidden" name="frequency" value={frequency} />
-      <input type="hidden" name="currency" value={selectedCurrency} />
+      {/* Use user's preferred currency from settings; no picker on form */}
+      <input type="hidden" name="currency" value={currency} />
       
       {error && (
         <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">
@@ -110,37 +109,18 @@ export function RecurringForm({ recurring, onSuccess }: RecurringFormProps) {
       </div>
 
       <div className="grid grid-cols-1 gap-3">
-        <div className="flex gap-2">
-          <div className="w-24">
-            <Label htmlFor="currency">Currency</Label>
-            <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
-              <SelectTrigger id="currency">
-                <SelectValue placeholder="USD" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="USD">USD</SelectItem>
-                <SelectItem value="EUR">EUR</SelectItem>
-                <SelectItem value="GBP">GBP</SelectItem>
-                <SelectItem value="JPY">JPY</SelectItem>
-                <SelectItem value="CAD">CAD</SelectItem>
-                <SelectItem value="AUD">AUD</SelectItem>
-                <SelectItem value="IDR">IDR</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex-1">
-            <Label htmlFor="amount">Amount</Label>
-            <Input
-              id="amount"
-              name="amount"
-              type="number"
-              step="0.01"
-              min="0"
-              defaultValue={recurring?.amount || ""}
-              placeholder="0.00"
-              required
-            />
-          </div>
+        <div>
+          <Label htmlFor="amount">Amount</Label>
+          <Input
+            id="amount"
+            name="amount"
+            type="number"
+            step="0.01"
+            min="0"
+            defaultValue={recurring?.amount || ""}
+            placeholder="0.00"
+            required
+          />
         </div>
 
         <div>
