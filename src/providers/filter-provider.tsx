@@ -135,11 +135,7 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
     return count;
   }, [filters]);
 
-  // Don't render until hydrated (prevents hydration mismatch)
-  if (!isHydrated) {
-    return <>{children}</>;
-  }
-
+  // Always provide context, even during hydration (use default values until hydrated)
   return (
     <FilterContext.Provider
       value={{
