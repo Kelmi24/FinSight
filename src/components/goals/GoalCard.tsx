@@ -8,6 +8,7 @@ import { GoalDialog } from "./GoalDialog"
 import { deleteGoal } from "@/lib/actions/goals"
 import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
+import { useCurrency } from "@/providers/currency-provider"
 
 interface Goal {
   id: string
@@ -23,6 +24,7 @@ interface GoalCardProps {
 
 export function GoalCard({ goal }: GoalCardProps) {
   const router = useRouter()
+  const { formatCurrency } = useCurrency()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -36,15 +38,6 @@ export function GoalCard({ goal }: GoalCardProps) {
     setIsDeleting(false)
     setDeleteOpen(false)
     router.refresh()
-  }
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
   }
 
   const formatDate = (date: Date) => {

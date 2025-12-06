@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
 } from "recharts"
 import { Card, CardContent } from "@/components/ui/card"
+import { useCurrency } from "@/providers/currency-provider"
 
 interface CashFlowChartProps {
   data: Array<{
@@ -21,6 +22,8 @@ interface CashFlowChartProps {
 }
 
 export function CashFlowChart({ data }: CashFlowChartProps) {
+  const { formatCurrency } = useCurrency()
+  
   if (data.length === 0) {
     return (
       <div className="flex h-[300px] items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50">
@@ -48,7 +51,7 @@ export function CashFlowChart({ data }: CashFlowChartProps) {
               fontSize={12}
               stroke="#9CA3AF"
               tickLine={false}
-              tickFormatter={(value) => `$${value.toLocaleString()}`}
+              tickFormatter={(value) => formatCurrency(value)}
             />
             <Tooltip
               contentStyle={{
@@ -57,7 +60,7 @@ export function CashFlowChart({ data }: CashFlowChartProps) {
                 borderRadius: "12px",
                 boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
               }}
-              formatter={(value: number) => `$${value.toLocaleString()}`}
+              formatter={(value: number) => formatCurrency(value)}
             />
             <Legend wrapperStyle={{ paddingTop: "1rem" }} />
             <Line

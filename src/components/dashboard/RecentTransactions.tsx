@@ -1,7 +1,10 @@
+"use client"
+
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { useCurrency } from "@/providers/currency-provider"
 
 interface Transaction {
   id: string
@@ -23,14 +26,9 @@ const formatDate = (date: Date) => {
   }).format(new Date(date))
 }
 
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount)
-}
-
 export function RecentTransactions({ transactions }: RecentTransactionsProps) {
+  const { formatCurrency } = useCurrency()
+  
   return (
     <Card>
       <CardHeader>

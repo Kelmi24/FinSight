@@ -2,6 +2,7 @@
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import { Card } from "@/components/ui/card"
+import { useCurrency } from "@/providers/currency-provider"
 
 interface TrendData {
   month: string
@@ -15,6 +16,8 @@ interface TrendChartProps {
 }
 
 export function TrendChart({ data }: TrendChartProps) {
+  const { formatCurrency } = useCurrency()
+  
   if (data.length === 0) {
     return (
       <Card>
@@ -40,7 +43,7 @@ export function TrendChart({ data }: TrendChartProps) {
           <YAxis
             className="text-xs"
             tick={{ fill: "currentColor" }}
-            tickFormatter={(value) => `$${value.toLocaleString()}`}
+            tickFormatter={(value) => formatCurrency(value)}
           />
           <Tooltip
             contentStyle={{
@@ -49,7 +52,7 @@ export function TrendChart({ data }: TrendChartProps) {
               borderRadius: "12px",
               boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
             }}
-            formatter={(value: number) => `$${value.toFixed(2)}`}
+            formatter={(value: number) => formatCurrency(value)}
           />
           <Legend />
           <Line

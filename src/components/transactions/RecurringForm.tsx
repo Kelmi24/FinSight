@@ -9,6 +9,8 @@ import { createRecurringTransaction, updateRecurringTransaction } from "@/lib/ac
 import { CategorySelect } from "@/components/categories/CategorySelect"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useRouter } from "next/navigation"
+import { useCurrency } from "@/providers/currency-provider"
+import { getCurrencySymbol } from "@/lib/currency"
 
 interface RecurringFormProps {
   recurring?: any
@@ -17,6 +19,7 @@ interface RecurringFormProps {
 
 export function RecurringForm({ recurring, onSuccess }: RecurringFormProps) {
   const router = useRouter()
+  const { currency } = useCurrency()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [transactionType, setTransactionType] = useState<"income" | "expense">(
@@ -106,7 +109,7 @@ export function RecurringForm({ recurring, onSuccess }: RecurringFormProps) {
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <Label htmlFor="amount">Amount ($)</Label>
+          <Label htmlFor="amount">Amount ({getCurrencySymbol(currency)})</Label>
           <Input
             id="amount"
             name="amount"

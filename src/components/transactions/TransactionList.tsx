@@ -16,19 +16,13 @@ import { deleteTransaction } from "@/lib/actions/transactions"
 import { useRouter } from "next/navigation"
 import { TransactionForm } from "./TransactionForm"
 import { EmptyState } from "@/components/ui/empty-state"
+import { useCurrency } from "@/providers/currency-provider"
 
 // Simple date formatter if date-fns not installed yet
 const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
   }).format(new Date(date))
-}
-
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount)
 }
 
 interface Transaction {
@@ -49,6 +43,7 @@ export function TransactionList({ transactions, onDeleteSuccess }: TransactionLi
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const { formatCurrency } = useCurrency()
 
   const router = useRouter()
 

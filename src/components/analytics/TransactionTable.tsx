@@ -3,6 +3,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { EmptyState } from "@/components/ui/empty-state"
 import { SearchX } from "lucide-react"
+import { useCurrency } from "@/providers/currency-provider"
 
 interface Transaction {
   id: string
@@ -18,12 +19,7 @@ interface TransactionTableProps {
 }
 
 export function TransactionTable({ transactions }: TransactionTableProps) {
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount)
-  }
+  const { formatCurrency } = useCurrency()
 
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString("en-US", {
