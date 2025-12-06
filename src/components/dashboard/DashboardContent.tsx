@@ -3,8 +3,13 @@
 import { useEffect, useState } from "react"
 import { useFilter } from "@/providers/filter-provider"
 import { useCurrency } from "@/providers/currency-provider"
-import { AnalyticsService } from "@/lib/services/analyticsService"
-import { auth } from "@/auth"
+import {
+  getSummaryMetrics,
+  getCashFlowDataFiltered,
+  getCategoryBreakdownFiltered,
+  getSpendingTrendsFiltered,
+  getRecentTransactionsFiltered,
+} from "@/lib/actions/dashboard-filtered"
 import { KpiCard } from "@/components/dashboard/KpiCard"
 import { CashFlowChart } from "@/components/dashboard/CashFlowChart"
 import { CategoryChart } from "@/components/dashboard/CategoryChart"
@@ -12,10 +17,6 @@ import { TrendChart } from "@/components/analytics/TrendChart"
 import { MonthOverMonthComparison } from "@/components/analytics/MonthOverMonthComparison"
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions"
 import { DollarSign, TrendingUp, TrendingDown, Receipt } from "lucide-react"
-
-interface DashboardContentProps {
-  userId: string
-}
 
 interface SummaryMetrics {
   totalIncome: number
@@ -51,7 +52,7 @@ interface Transaction {
   type: string
 }
 
-export function DashboardContent({ userId }: DashboardContentProps) {
+export function DashboardContent() {
   const { filters } = useFilter()
   const { currency } = useCurrency()
   
@@ -76,18 +77,18 @@ export function DashboardContent({ userId }: DashboardContentProps) {
       setIsLoading(true)
       try {
         const [summaryData, cashFlow, categories, trends, recentTxns] = await Promise.all([
-          AnalyticsService.getSummaryMetrics(userId, filters),
-          AnalyticsService.getCashFlowData(userId, filters),
-          AnalyticsService.getCategoryBreakdown(userId, filters),
-          AnalyticsService.getSpendingTrends(userId, filters),
-          AnalyticsService.getRecentTransactions(userId, filters, 10),
+          getSummaryMetrics(filters),
+          getCashFlowDataFiltered(filters),
+          getCategoryBreakdownFiltered(filters),
+          getSpendingTrendsFiltered(filters),
+          getRecentTransactionsFiltered(filters, 10),
         ])
 
         setSummary(summaryData)
         setCashFlowData(cashFlow)
         setCategoryData(categories)
         setTrendData(trends)
-        setRecentTransactions(recentTxns)
+        setRecentTransactions(recentTxns as Transaction[])
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error)
       } finally {
@@ -96,7 +97,7 @@ export function DashboardContent({ userId }: DashboardContentProps) {
     }
 
     fetchData()
-  }, [filters, userId])
+  }, [filters])
 
   if (isLoading) {
     return (
@@ -111,7 +112,7 @@ export function DashboardContent({ userId }: DashboardContentProps) {
   }
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6">
       {/* KPI Cards */}
       <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard

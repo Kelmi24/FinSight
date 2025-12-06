@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 
 /**
  * Dashboard filter interface for consistent filter structure across app
  */
 export interface DashboardFilters {
-  startDate: string | null; // ISO format: YYYY-MM-DD
-  endDate: string | null; // ISO format: YYYY-MM-DD
-  categories: string[]; // Category IDs
-  type: 'all' | 'income' | 'expense'; // Transaction type filter
+  startDate: string | null;
+  endDate: string | null;
+  categories: string[];
+  type: "all" | "income" | "expense";
   minAmount: number | null;
   maxAmount: number | null;
 }
@@ -21,7 +21,7 @@ export const DEFAULT_FILTERS: DashboardFilters = {
   startDate: null,
   endDate: null,
   categories: [],
-  type: 'all',
+  type: "all",
   minAmount: null,
   maxAmount: null,
 };
@@ -46,7 +46,7 @@ const FilterContext = createContext<FilterContextType | undefined>(undefined);
 /**
  * Storage key for localStorage
  */
-const FILTER_STORAGE_KEY = 'finsight-dashboard-filters';
+const FILTER_STORAGE_KEY = "finsight-dashboard-filters";
 
 /**
  * FilterProvider component - wraps dashboard with global filter state
@@ -64,7 +64,7 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
         setFiltersState(parsed);
       }
     } catch (error) {
-      console.error('Failed to load filters from localStorage:', error);
+      console.error("Failed to load filters from localStorage:", error);
     }
     setIsHydrated(true);
   }, []);
@@ -75,7 +75,7 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
       try {
         localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(filters));
       } catch (error) {
-        console.error('Failed to save filters to localStorage:', error);
+        console.error("Failed to save filters to localStorage:", error);
       }
     }
   }, [filters, isHydrated]);
@@ -94,7 +94,7 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
     key: K,
     value: DashboardFilters[K]
   ) => {
-    setFiltersState((prev) => ({
+    setFiltersState((prev: DashboardFilters) => ({
       ...prev,
       [key]: value,
     }));
@@ -115,7 +115,7 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
       filters.startDate !== null ||
       filters.endDate !== null ||
       filters.categories.length > 0 ||
-      filters.type !== 'all' ||
+      filters.type !== "all" ||
       filters.minAmount !== null ||
       filters.maxAmount !== null
     );
@@ -129,7 +129,7 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
     if (filters.startDate) count++;
     if (filters.endDate) count++;
     if (filters.categories.length > 0) count += filters.categories.length;
-    if (filters.type !== 'all') count++;
+    if (filters.type !== "all") count++;
     if (filters.minAmount !== null) count++;
     if (filters.maxAmount !== null) count++;
     return count;
@@ -163,7 +163,7 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
 export function useFilter() {
   const context = useContext(FilterContext);
   if (context === undefined) {
-    throw new Error('useFilter must be used within a FilterProvider');
+    throw new Error("useFilter must be used within a FilterProvider");
   }
   return context;
 }

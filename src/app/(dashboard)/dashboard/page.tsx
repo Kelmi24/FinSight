@@ -3,11 +3,8 @@ import { DashboardContent } from "@/components/dashboard/DashboardContent"
 import { ConnectedAccount } from "@/components/plaid/ConnectedAccount"
 import { ConnectBankButton } from "@/components/plaid/ConnectBankButton"
 import { getCategories } from "@/lib/actions/dashboard"
-import { auth } from "@/auth"
 
 export default async function DashboardPage() {
-  const session = await auth()
-  const userId = session?.user?.id || "mock-user-id"
   const user = {
     institutionName: null,
   }
@@ -41,7 +38,7 @@ export default async function DashboardPage() {
       <DashboardFilters categories={categories} />
 
       {/* Dashboard Content (with real-time filter updates) */}
-      <DashboardContent userId={userId} />
+      <DashboardContent />
     </div>
   )
 }
