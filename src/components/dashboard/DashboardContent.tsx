@@ -54,7 +54,7 @@ interface Transaction {
 
 export function DashboardContent() {
   const { filters } = useFilter()
-  const { currency, convertAmount, formatCurrency: baseCurrency } = useCurrency()
+  const { formatCurrency: baseCurrency } = useCurrency()
   
   const [summary, setSummary] = useState<SummaryMetrics | null>(null)
   const [cashFlowData, setCashFlowData] = useState<CashFlowData[]>([])
@@ -80,41 +80,17 @@ export function DashboardContent() {
           getSpendingTrendsFiltered(filters),
           getRecentTransactionsFiltered(filters, 10),
         ])
-
-        // Convert amounts from USD (database base) to current currency
-        const convertedCashFlow = cashFlow.map(item => ({
-          ...item,
-          income: convertAmount(item.income, "USD", currency),
-          expenses: convertAmount(item.expenses, "USD", currency),
-        }))
-
-        const convertedCategories = categories.map(item => ({
-          ...item,
-          amount: convertAmount(item.amount, "USD", currency),
-        }))
-
-        const convertedTrends = trends.map(item => ({
-          ...item,
-          income: convertAmount(item.income, "USD", currency),
-          expenses: convertAmount(item.expenses, "USD", currency),
-          net: convertAmount(item.net, "USD", currency),
-        }))
-
-        const convertedTransactions = (recentTxns as Transaction[]).map(txn => ({
-          ...txn,
-          amount: convertAmount(txn.amount, "USD", currency),
-        }))
-
+        // Use stored amounts directly (what you type is what you save)
         setSummary({
-          totalIncome: convertAmount(summaryData.totalIncome, "USD", currency),
-          totalExpenses: convertAmount(summaryData.totalExpenses, "USD", currency),
-          netBalance: convertAmount(summaryData.netBalance, "USD", currency),
+          totalIncome: summaryData.totalIncome,
+          totalExpenses: summaryData.totalExpenses,
+          netBalance: summaryData.netBalance,
           transactionCount: summaryData.transactionCount,
         })
-        setCashFlowData(convertedCashFlow)
-        setCategoryData(convertedCategories)
-        setTrendData(convertedTrends)
-        setRecentTransactions(convertedTransactions)
+        setCashFlowData(cashFlow)
+        setCategoryData(categories)
+        setTrendData(trends)
+        setRecentTransactions(recentTxns as Transaction[])
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error)
       } finally {
@@ -123,7 +99,7 @@ export function DashboardContent() {
     }
 
     fetchData()
-  }, [filters, currency, convertAmount])
+  }, [filters])
 
   if (isLoading) {
     return (
