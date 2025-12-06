@@ -11,7 +11,7 @@ import { RecurringList } from "@/components/transactions/RecurringList"
 import { RecurringDialog } from "@/components/transactions/RecurringDialog"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
-import { useCurrency } from "@/providers/currency-provider"
+// Currency context no longer used for conversion on this page
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<any[]>([])
@@ -20,37 +20,27 @@ export default function TransactionsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<"one-time" | "recurring">("one-time")
   const [isRecurringDialogOpen, setIsRecurringDialogOpen] = useState(false)
-  const { currency, convertAmount } = useCurrency()
 
   const loadTransactions = useCallback(async () => {
     setIsLoading(true)
     try {
       const data = await getTransactions(filters)
-      // Convert amounts from USD to current currency
-      const converted = data.map((t: any) => ({
-        ...t,
-        amount: convertAmount(t.amount, "USD", currency),
-      }))
-      setTransactions(converted)
+      // Use stored amounts/currencies without auto-conversion
+      setTransactions(data)
     } finally {
       setIsLoading(false)
     }
-  }, [filters, currency, convertAmount])
+  }, [filters])
 
   const loadRecurringTransactions = useCallback(async () => {
     setIsLoading(true)
     try {
       const data = await getRecurringTransactions()
-      // Convert amounts from USD to current currency
-      const converted = data.map((t: any) => ({
-        ...t,
-        amount: convertAmount(t.amount, "USD", currency),
-      }))
-      setRecurringTransactions(converted)
+      setRecurringTransactions(data)
     } finally {
       setIsLoading(false)
     }
-  }, [currency, convertAmount])
+  }, [])
 
   useEffect(() => {
     if (activeTab === "one-time") {
