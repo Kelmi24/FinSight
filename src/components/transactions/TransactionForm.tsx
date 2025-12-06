@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DatePicker } from "@/components/ui/date-picker"
 import { Loader2 } from "lucide-react"
 import { useCurrency } from "@/providers/currency-provider"
+import { formatAmountPreview } from "@/lib/currency"
 
 interface TransactionFormProps {
   transaction?: any
@@ -24,6 +25,7 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
     transaction?.type || "expense"
   )
   const { currency } = useCurrency()
+  const [amountInput, setAmountInput] = React.useState(transaction?.amount?.toString() || "")
   
   // Recurring state
   const [isRecurring, setIsRecurring] = React.useState(false)
@@ -64,6 +66,8 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
     })
   }
 
+  const amountPreview = formatAmountPreview(amountInput, currency)
+
   return (
     <form action={handleSubmit} className="space-y-4 rounded-xl bg-white p-4 sm:p-6 border border-gray-200 transition-all">
       {/* Hidden input for type - Radix Select doesn't submit via FormData */}
@@ -91,15 +95,18 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
         <div>
           <Label htmlFor="amount">Amount</Label>
           <Input
-            type="number"
+            type="text"
+            inputMode="decimal"
             name="amount"
             id="amount"
             placeholder="0.00"
-            step="0.01"
-            min="0"
-            defaultValue={transaction?.amount || ""}
+            value={amountInput}
+            onChange={(e) => setAmountInput(e.target.value)}
             required
           />
+          {amountPreview && (
+            <p className="mt-1 text-xs text-gray-500">{amountPreview}</p>
+          )}
         </div>
       </div>
 

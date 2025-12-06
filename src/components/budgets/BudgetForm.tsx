@@ -8,8 +8,7 @@ import { createBudget, updateBudget } from "@/lib/actions/budgets"
 import { CategorySelect } from "@/components/categories/CategorySelect"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useRouter } from "next/navigation"
-import { useCurrency } from "@/providers/currency-provider"
-import { getCurrencySymbol } from "@/lib/currency"
+import { formatAmountPreview, type CurrencyCode } from "@/lib/currency"
 
 interface BudgetFormProps {
   budget?: any
@@ -18,11 +17,11 @@ interface BudgetFormProps {
 
 export function BudgetForm({ budget, onSuccess }: BudgetFormProps) {
   const router = useRouter()
-  const { currency } = useCurrency()
   const [selectedCurrency, setSelectedCurrency] = useState(budget?.currency || "USD")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [period, setPeriod] = useState(budget?.period || "monthly")
+  const [amountInput, setAmountInput] = useState(budget?.amount?.toString() || "")
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -51,6 +50,8 @@ export function BudgetForm({ budget, onSuccess }: BudgetFormProps) {
       setIsSubmitting(false)
     }
   }
+
+  const amountPreview = formatAmountPreview(amountInput, (selectedCurrency as CurrencyCode) || "USD")
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 rounded-xl bg-white p-4 sm:p-6 border border-gray-200 transition-all">
@@ -99,13 +100,16 @@ export function BudgetForm({ budget, onSuccess }: BudgetFormProps) {
             <Input
               id="amount"
               name="amount"
-              type="number"
-              step="0.01"
-              min="0"
-              defaultValue={budget?.amount || ""}
+              type="text"
+              inputMode="decimal"
+              value={amountInput}
+              onChange={(e) => setAmountInput(e.target.value)}
               placeholder="100.00"
               required
             />
+            {amountPreview && (
+              <p className="mt-1 text-xs text-gray-500">{amountPreview}</p>
+            )}
           </div>
         </div>
       </div>

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { DatePicker } from "@/components/ui/date-picker"
 import { createGoal, updateGoal } from "@/lib/actions/goals"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { formatAmountPreview, type CurrencyCode } from "@/lib/currency"
 
 interface Goal {
   id: string
@@ -26,6 +27,11 @@ export function GoalForm({ goal, onSuccess }: GoalFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [selectedCurrency, setSelectedCurrency] = useState(goal?.currency || "USD")
+  const [targetAmountInput, setTargetAmountInput] = useState(goal?.targetAmount?.toString() || "")
+  const [currentAmountInput, setCurrentAmountInput] = useState(goal?.currentAmount?.toString() || "")
+
+  const targetAmountPreview = formatAmountPreview(targetAmountInput, selectedCurrency as CurrencyCode)
+  const currentAmountPreview = formatAmountPreview(currentAmountInput, selectedCurrency as CurrencyCode)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -94,23 +100,31 @@ export function GoalForm({ goal, onSuccess }: GoalFormProps) {
           <Input
             id="targetAmount"
             name="targetAmount"
-            type="number"
-            step="0.01"
+            type="text"
+            inputMode="decimal"
             placeholder="0.00"
-            defaultValue={goal?.targetAmount}
+            value={targetAmountInput}
+            onChange={(e) => setTargetAmountInput(e.target.value)}
             required
           />
+          {targetAmountPreview && (
+            <p className="mt-1 text-xs text-gray-500">{targetAmountPreview}</p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="currentAmount">Current Saved</Label>
           <Input
             id="currentAmount"
             name="currentAmount"
-            type="number"
-            step="0.01"
+            type="text"
+            inputMode="decimal"
             placeholder="0.00"
-            defaultValue={goal?.currentAmount || 0}
+            value={currentAmountInput}
+            onChange={(e) => setCurrentAmountInput(e.target.value)}
           />
+          {currentAmountPreview && (
+            <p className="mt-1 text-xs text-gray-500">{currentAmountPreview}</p>
+          )}
         </div>
       </div>
 

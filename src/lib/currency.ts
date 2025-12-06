@@ -174,6 +174,26 @@ export function getCurrencyConfig(code: CurrencyCode): CurrencyConfig {
 }
 
 /**
+ * Format a user-entered amount string for live previews without mutating the raw value.
+ * Returns an empty string when the input cannot be parsed.
+ */
+export function formatAmountPreview(value: string, currency: CurrencyCode): string {
+  if (!value) return ""
+
+  const normalized = value.replace(/,/g, "").trim()
+  if (!normalized) return ""
+
+  const numeric = Number.parseFloat(normalized)
+  if (Number.isNaN(numeric)) return ""
+
+  const config = getCurrencyConfig(currency)
+  return formatCurrency(numeric, currency, {
+    minimumFractionDigits: config.minimumFractionDigits,
+    maximumFractionDigits: config.maximumFractionDigits,
+  })
+}
+
+/**
  * Check if a string is a valid currency code
  * 
  * @param code - String to check

@@ -10,6 +10,7 @@ import { CategorySelect } from "@/components/categories/CategorySelect"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useRouter } from "next/navigation"
 import { useCurrency } from "@/providers/currency-provider"
+import { formatAmountPreview } from "@/lib/currency"
 
 interface RecurringFormProps {
   recurring?: any
@@ -25,6 +26,7 @@ export function RecurringForm({ recurring, onSuccess }: RecurringFormProps) {
     recurring?.type || "expense"
   )
   const [frequency, setFrequency] = useState(recurring?.frequency || "monthly")
+  const [amountInput, setAmountInput] = useState(recurring?.amount?.toString() || "")
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -53,6 +55,8 @@ export function RecurringForm({ recurring, onSuccess }: RecurringFormProps) {
       setIsSubmitting(false)
     }
   }
+
+  const amountPreview = formatAmountPreview(amountInput, currency)
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -114,13 +118,16 @@ export function RecurringForm({ recurring, onSuccess }: RecurringFormProps) {
           <Input
             id="amount"
             name="amount"
-            type="number"
-            step="0.01"
-            min="0"
-            defaultValue={recurring?.amount || ""}
+            type="text"
+            inputMode="decimal"
+            value={amountInput}
+            onChange={(e) => setAmountInput(e.target.value)}
             placeholder="0.00"
             required
           />
+          {amountPreview && (
+            <p className="mt-1 text-xs text-gray-500">{amountPreview}</p>
+          )}
         </div>
 
         <div>
