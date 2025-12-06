@@ -11,7 +11,6 @@ import { RecurringList } from "@/components/transactions/RecurringList"
 import { RecurringDialog } from "@/components/transactions/RecurringDialog"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
-// Currency context no longer used for conversion on this page
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<any[]>([])
@@ -25,7 +24,7 @@ export default function TransactionsPage() {
     setIsLoading(true)
     try {
       const data = await getTransactions(filters)
-      // Use stored amounts/currencies without auto-conversion
+      // Keep stored currency and amount as-is to avoid double conversion
       setTransactions(data)
     } finally {
       setIsLoading(false)
