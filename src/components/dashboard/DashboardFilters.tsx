@@ -3,7 +3,7 @@
 import { useFilter } from "@/providers/filter-provider"
 import { getFilterSummary } from "@/lib/filterUtils"
 import { Button } from "@/components/ui/button"
-import { DatePicker } from "@/components/ui/date-picker"
+import { DateRangePicker } from "@/components/ui/date-range-picker"
 import { Card } from "@/components/ui/card"
 import { X } from "lucide-react"
 
@@ -27,6 +27,11 @@ export function DashboardFilters({ categories }: DashboardFiltersProps) {
     } else {
       updateFilter('categories', [...filters.categories, category])
     }
+  }
+
+  const handleDateRangeChange = (range: { startDate: string | null; endDate: string | null }) => {
+    updateFilter('startDate', range.startDate)
+    updateFilter('endDate', range.endDate)
   }
 
   return (
@@ -54,28 +59,17 @@ export function DashboardFilters({ categories }: DashboardFiltersProps) {
 
       {/* Filter Controls */}
       <Card className="p-4">
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
-          {/* Start Date */}
-          <div className="space-y-2">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Date Range - Single Picker */}
+          <div className="space-y-2 sm:col-span-2 lg:col-span-1">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              From Date
+              Date Range
             </label>
-            <DatePicker
-              value={filters.startDate || undefined}
-              onChange={(date) => updateFilter('startDate', date || null)}
-              placeholder="Select start date"
-            />
-          </div>
-
-          {/* End Date */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              To Date
-            </label>
-            <DatePicker
-              value={filters.endDate || undefined}
-              onChange={(date) => updateFilter('endDate', date || null)}
-              placeholder="Select end date"
+            <DateRangePicker
+              startDate={filters.startDate}
+              endDate={filters.endDate}
+              onChange={handleDateRangeChange}
+              placeholder="Select date range"
             />
           </div>
 
@@ -122,48 +116,39 @@ export function DashboardFilters({ categories }: DashboardFiltersProps) {
             </select>
           </div>
 
-          {/* Min Amount */}
+          {/* Amount Range */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Min Amount
+              Amount Range
             </label>
-            <input
-              type="number"
-              value={filters.minAmount ?? ''}
-              onChange={(e) => updateFilter('minAmount', e.target.value ? parseFloat(e.target.value) : null)}
-              placeholder="0"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
-            />
+            <div className="flex gap-2">
+              <input
+                type="number"
+                value={filters.minAmount ?? ''}
+                onChange={(e) => updateFilter('minAmount', e.target.value ? parseFloat(e.target.value) : null)}
+                placeholder="Min"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
+              />
+              <input
+                type="number"
+                value={filters.maxAmount ?? ''}
+                onChange={(e) => updateFilter('maxAmount', e.target.value ? parseFloat(e.target.value) : null)}
+                placeholder="Max"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Second Row for Max Amount */}
-        <div className="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
-          {/* Max Amount - Span 1 column */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Max Amount
-            </label>
-            <input
-              type="number"
-              value={filters.maxAmount ?? ''}
-              onChange={(e) => updateFilter('maxAmount', e.target.value ? parseFloat(e.target.value) : null)}
-              placeholder="No limit"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
-            />
-          </div>
-
-          {/* Reset Button - Span remaining columns */}
-          <div className="sm:col-span-1 lg:col-span-4 flex items-end">
-            <Button
-              onClick={handleResetFilters}
-              variant="outline"
-              size="sm"
-              className="w-full sm:w-auto"
-            >
-              Reset All Filters
-            </Button>
-          </div>
+        {/* Reset Button Row */}
+        <div className="mt-4 flex justify-end">
+          <Button
+            onClick={handleResetFilters}
+            variant="outline"
+            size="sm"
+          >
+            Reset All Filters
+          </Button>
         </div>
       </Card>
     </div>

@@ -2,9 +2,8 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
-import { DatePicker } from "@/components/ui/date-picker"
+import { DateRangePicker } from "@/components/ui/date-range-picker"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { X } from "lucide-react"
 
@@ -30,11 +29,16 @@ interface TransactionFiltersProps {
 }
 
 export function TransactionFilters({ onFilter }: TransactionFiltersProps) {
-  const [startDate, setStartDate] = useState("")
-  const [endDate, setEndDate] = useState("")
+  const [startDate, setStartDate] = useState<string | null>(null)
+  const [endDate, setEndDate] = useState<string | null>(null)
   const [category, setCategory] = useState("")
   const [type, setType] = useState("")
   const [isOpen, setIsOpen] = useState(false)
+
+  const handleDateRangeChange = (range: { startDate: string | null; endDate: string | null }) => {
+    setStartDate(range.startDate)
+    setEndDate(range.endDate)
+  }
 
   const handleApplyFilters = () => {
     const filters: any = {}
@@ -47,8 +51,8 @@ export function TransactionFilters({ onFilter }: TransactionFiltersProps) {
   }
 
   const handleReset = () => {
-    setStartDate("")
-    setEndDate("")
+    setStartDate(null)
+    setEndDate(null)
     setCategory("")
     setType("")
     onFilter({})
@@ -81,80 +85,69 @@ export function TransactionFilters({ onFilter }: TransactionFiltersProps) {
         <Card className="animate-in fade-in">
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs sm:text-sm font-medium">Start Date</label>
-              <DatePicker
-                name="startDate"
-                value={startDate}
-                onChange={setStartDate}
-                className="mt-1"
-                placeholder="Select start date"
-              />
+              {/* Date Range Picker - Single Component */}
+              <div className="sm:col-span-2">
+                <label className="text-xs sm:text-sm font-medium">Date Range</label>
+                <DateRangePicker
+                  startDate={startDate}
+                  endDate={endDate}
+                  onChange={handleDateRangeChange}
+                  placeholder="Select date range"
+                  className="mt-1"
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="text-xs sm:text-sm font-medium">End Date</label>
-              <DatePicker
-                name="endDate"
-                value={endDate}
-                onChange={setEndDate}
-                className="mt-1"
-                placeholder="Select end date"
-              />
-            </div>
-          </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+              <div>
+                <label className="text-sm font-medium">Category</label>
+                <Select
+                  value={category}
+                  onValueChange={setCategory}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="All Categories" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {CATEGORIES.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium">Category</label>
-              <Select
-                value={category}
-                onValueChange={setCategory}
+              <div>
+                <label className="text-sm font-medium">Type</label>
+                <Select
+                  value={type}
+                  onValueChange={setType}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="All Types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="income">Income</SelectItem>
+                    <SelectItem value="expense">Expense</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-4 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => setIsOpen(false)}
               >
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="All Categories" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {CATEGORIES.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                Cancel
+              </Button>
+              <Button onClick={handleApplyFilters}>
+                Apply Filters
+              </Button>
             </div>
-
-            <div>
-              <label className="text-sm font-medium">Type</label>
-              <Select
-                value={type}
-                onValueChange={setType}
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="All Types" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="income">Income</SelectItem>
-                  <SelectItem value="expense">Expense</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="flex gap-2 pt-2 justify-end">
-            <Button
-              variant="outline"
-              onClick={() => setIsOpen(false)}
-              className=""
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleApplyFilters} className="">
-              Apply Filters
-            </Button>
-          </div>
           </CardContent>
         </Card>
       )}

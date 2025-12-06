@@ -44,15 +44,16 @@ function Calendar({
           buttonVariants({ variant: "ghost" }),
           "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
         ),
-        range_end: "day-range-end",
+        range_start: "day-range-start rounded-l-md",
+        range_end: "day-range-end rounded-r-md",
         selected:
-          "bg-blue-600 text-white rounded-md hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white",
+          "bg-primary-600 text-white rounded-md hover:bg-primary-600 hover:text-white focus:bg-primary-600 focus:text-white",
         today: "bg-gray-100 text-gray-900 rounded-md dark:bg-gray-800 dark:text-gray-50",
         outside:
           "text-gray-500 opacity-50 aria-selected:bg-gray-100/50 aria-selected:text-gray-500 aria-selected:opacity-30 dark:text-gray-400",
         disabled: "text-gray-500 opacity-50 dark:text-gray-400",
         range_middle:
-          "aria-selected:bg-gray-100 aria-selected:text-gray-900 dark:aria-selected:bg-gray-800 dark:aria-selected:text-gray-50",
+          "aria-selected:bg-primary-100 aria-selected:text-gray-900 dark:aria-selected:bg-primary-900/30 dark:aria-selected:text-gray-50 rounded-none",
         hidden: "invisible",
         ...classNames,
       }}
