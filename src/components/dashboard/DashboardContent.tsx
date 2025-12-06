@@ -54,7 +54,7 @@ interface Transaction {
 
 export function DashboardContent() {
   const { filters } = useFilter()
-  const { currency } = useCurrency()
+  const { currency, convertAmount, formatCurrency: baseCurrency } = useCurrency()
   
   const [summary, setSummary] = useState<SummaryMetrics | null>(null)
   const [cashFlowData, setCashFlowData] = useState<CashFlowData[]>([])
@@ -64,11 +64,8 @@ export function DashboardContent() {
   const [isLoading, setIsLoading] = useState(true)
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currency,
-      minimumFractionDigits: 0,
-    }).format(amount)
+    // Amount is already converted, just format it
+    return baseCurrency(amount)
   }
 
   // Fetch all data whenever filters change
@@ -84,11 +81,40 @@ export function DashboardContent() {
           getRecentTransactionsFiltered(filters, 10),
         ])
 
-        setSummary(summaryData)
-        setCashFlowData(cashFlow)
-        setCategoryData(categories)
-        setTrendData(trends)
-        setRecentTransactions(recentTxns as Transaction[])
+        // Convert amounts from USD (database base) to current currency
+        const convertedCashFlow = cashFlow.map(item => ({
+          ...item,
+          income: convertAmount(item.income, "USD", currency),
+          expenses: convertAmount(item.expenses, "USD", currency),
+        }))
+
+        const convertedCategories = categories.map(item => ({
+          ...item,
+          amount: convertAmount(item.amount, "USD", currency),
+        }))
+
+        const convertedTrends = trends.map(item => ({
+          ...item,
+          income: convertAmount(item.income, "USD", currency),
+          expenses: convertAmount(item.expenses, "USD", currency),
+          net: convertAmount(item.net, "USD", currency),
+        }))
+
+        const convertedTransactions = (recentTxns as Transaction[]).map(txn => ({
+          ...txn,
+          amount: convertAmount(txn.amount, "USD", currency),
+        }))
+
+        setSummary({
+          totalIncome: convertAmount(summaryData.totalIncome, "USD", currency),
+          totalExpenses: convertAmount(summaryData.totalExpenses, "USD", currency),
+          netBalance: convertAmount(summaryData.netBalance, "USD", currency),
+          transactionCount: summaryData.transactionCount,
+        })
+        setCashFlowData(convertedCashFlow)
+        setCategoryData(convertedCategories)
+        setTrendData(convertedTrends)
+        setRecentTransactions(convertedTransactions)
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error)
       } finally {
@@ -97,7 +123,7 @@ export function DashboardContent() {
     }
 
     fetchData()
-  }, [filters])
+  }, [filters, currency, convertAmount])
 
   if (isLoading) {
     return (

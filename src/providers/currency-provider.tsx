@@ -8,6 +8,7 @@ import {
   DEFAULT_CURRENCY,
   formatCurrency as baseFormatCurrency,
 } from "@/lib/currency"
+import { convertCurrency, getExchangeRate } from "@/lib/exchange-rates"
 
 interface CurrencyContextValue {
   /** Current selected currency code */
@@ -16,6 +17,10 @@ interface CurrencyContextValue {
   setCurrency: (currency: CurrencyCode) => Promise<void>
   /** Format an amount using the current currency */
   formatCurrency: (amount: number, opts?: Intl.NumberFormatOptions) => string
+  /** Convert an amount from one currency to another at current exchange rates */
+  convertAmount: (amount: number, fromCurrency: CurrencyCode, toCurrency?: CurrencyCode) => number
+  /** Get the exchange rate between two currencies */
+  getConversionRate: (fromCurrency: CurrencyCode, toCurrency?: CurrencyCode) => number
   /** Whether currency update is in progress */
   isUpdating: boolean
 }
@@ -48,6 +53,22 @@ export function CurrencyProvider({
       baseFormatCurrency(amount, currency, opts)
   }, [currency])
 
+  // Convert amount from one currency to another
+  const convertAmount = useMemo(() => {
+    return (amount: number, fromCurrency: CurrencyCode, toCurrency?: CurrencyCode) => {
+      const targetCurrency = toCurrency || currency
+      return convertCurrency(amount, fromCurrency, targetCurrency)
+    }
+  }, [currency])
+
+  // Get conversion rate between currencies
+  const getConversionRate = useMemo(() => {
+    return (fromCurrency: CurrencyCode, toCurrency?: CurrencyCode) => {
+      const targetCurrency = toCurrency || currency
+      return getExchangeRate(fromCurrency, targetCurrency)
+    }
+  }, [currency])
+
   // Update currency and persist to database
   const setCurrency = async (nextCurrency: CurrencyCode) => {
     if (nextCurrency === currency) return
@@ -71,6 +92,8 @@ export function CurrencyProvider({
     currency,
     setCurrency,
     formatCurrency,
+    convertAmount,
+    getConversionRate,
     isUpdating: isPending,
   }
 
@@ -85,11 +108,17 @@ export function CurrencyProvider({
  * Hook to access currency context
  * 
  * @throws Error if used outside CurrencyProvider
- * @returns CurrencyContextValue with currency, setCurrency, formatCurrency
+ * @returns CurrencyContextValue with:
+ *   - currency: Current selected currency code
+ *   - setCurrency: Update currency preference
+ *   - formatCurrency: Format amount in current currency
+ *   - convertAmount: Convert between currencies
+ *   - getConversionRate: Get exchange rate
  * 
  * @example
- * const { currency, formatCurrency } = useCurrency()
- * return <span>{formatCurrency(1500)}</span> // "Rp 1.500" or "$1,500.00"
+ * const { currency, formatCurrency, convertAmount } = useCurrency()
+ * const formatted = formatCurrency(1500) // "Rp 1.500" or "$1,500.00"
+ * const converted = convertAmount(1000, 'USD', 'IDR') // 16,600,000
  */
 export function useCurrency(): CurrencyContextValue {
   const context = useContext(CurrencyContext)

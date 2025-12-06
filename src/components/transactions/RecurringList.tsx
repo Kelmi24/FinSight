@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Trash2, Edit2, Repeat2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -17,10 +17,18 @@ interface RecurringListProps {
 
 export function RecurringList({ recurring, onDeleteSuccess }: RecurringListProps) {
   const router = useRouter()
-  const { formatCurrency } = useCurrency()
+  const { formatCurrency, currency, convertAmount } = useCurrency()
   const [editingRecurring, setEditingRecurring] = useState<any | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  // Convert recurring amounts when currency changes
+  const convertedRecurring = useMemo(() => {
+    return recurring.map(rec => ({
+      ...rec,
+      amount: convertAmount(rec.amount, "USD", currency),
+    }))
+  }, [recurring, currency, convertAmount])
 
   const handleDelete = async (id: string) => {
     setIsDeleting(true)
@@ -74,7 +82,7 @@ export function RecurringList({ recurring, onDeleteSuccess }: RecurringListProps
           Recurring Transactions
         </h3>
         <div className="grid gap-3">
-          {recurring.map((rec) => (
+          {convertedRecurring.map((rec) => (
             <div
               key={rec.id}
               className="rounded-xl border border-primary-100 bg-primary-50 p-4 flex items-center justify-between"
