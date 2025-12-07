@@ -21,6 +21,7 @@ export const COLUMN_MAPPINGS: Record<string, string> = {
   "jumlah (idr)": "amount",
   nominal: "amount",
   amount: "amount",
+  mutasi: "amount", // BCA uses MUTASI for signed amounts
 
   // Debit columns
   debet: "debit",
@@ -37,6 +38,9 @@ export const COLUMN_MAPPINGS: Record<string, string> = {
   // Balance columns
   saldo: "balance",
   balance: "balance",
+
+  // Branch columns (ignored but mapped)
+  cbg: "branch",
 };
 
 /**

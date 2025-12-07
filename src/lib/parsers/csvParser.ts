@@ -125,6 +125,12 @@ export function parseCSV(fileContent: string, currency: string = "IDR"): ParseRe
         return;
       }
 
+      // Skip opening balance rows
+      if (description.toLowerCase().includes("saldo awal") || 
+          description.toLowerCase().includes("opening balance")) {
+        return;
+      }
+
       // Detect transaction type
       let type = detectTransactionType(row, headers);
       
@@ -150,11 +156,18 @@ export function parseCSV(fileContent: string, currency: string = "IDR"): ParseRe
         amount = parseAmount(creditValue.toString());
         if (amount !== null && !type) type = "income";
       } else {
-        // Try amount field
+        // Try amount field (handles signed amounts like MUTASI column)
         const amountField = headers.find((h) => getFieldName(h) === "amount");
         const amountValue = amountField ? row[amountField] : null;
         if (amountValue && amountValue.toString().trim() !== "") {
-          amount = parseAmount(amountValue.toString());
+          const parsedAmount = parseAmount(amountValue.toString());
+          if (parsedAmount !== null) {
+            amount = parsedAmount;
+            // For signed amounts: negative = expense, positive = income
+            if (!type) {
+              type = parsedAmount < 0 ? "expense" : "income";
+            }
+          }
         }
       }
 

@@ -39,7 +39,8 @@ export async function extractTextFromPDF(
   if (!pdfjsLib) {
     const module = await import("pdfjs-dist");
     pdfjsLib = module;
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+    // Use webpack to bundle the worker file
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
   }
 
   try {

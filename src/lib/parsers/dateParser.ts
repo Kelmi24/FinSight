@@ -53,14 +53,32 @@ export function parseIndonesianDate(value: string): Date | null {
 export function parseDate(value: string): Date | null {
   if (!value || typeof value !== "string") return null;
 
+  const trimmed = value.trim();
+
+  // Handle dates without year (e.g., "01/09" or "31/12")
+  // Assume current year or previous year if month is in the future
+  if (/^\d{1,2}\/\d{1,2}$/.test(trimmed)) {
+    const [day, month] = trimmed.split("/").map((n) => parseInt(n, 10));
+    const currentDate = new Date();
+    let year = currentDate.getFullYear();
+    
+    // If the month is in the future, assume it's from the previous year
+    if (month > currentDate.getMonth() + 1) {
+      year--;
+    }
+    
+    const date = new Date(year, month - 1, day);
+    if (isValid(date)) return date;
+  }
+
   // Try Indonesian date format first
-  const indonesianResult = parseIndonesianDate(value);
+  const indonesianResult = parseIndonesianDate(trimmed);
   if (indonesianResult) return indonesianResult;
 
   // Try standard formats
   for (const format of DATE_FORMATS) {
     try {
-      const parsed = parse(value.trim(), format, new Date());
+      const parsed = parse(trimmed, format, new Date());
       if (isValid(parsed)) return parsed;
     } catch {
       continue;
@@ -68,7 +86,7 @@ export function parseDate(value: string): Date | null {
   }
 
   // Try native Date parsing as fallback
-  const fallback = new Date(value);
+  const fallback = new Date(trimmed);
   if (isValid(fallback)) return fallback;
 
   return null;
