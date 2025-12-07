@@ -33,7 +33,7 @@ export function CategoryChart({ data }: CategoryChartProps) {
   }
 
   return (
-    <Card>
+    <Card className="rounded-2xl">
       <CardContent>
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Spending Breakdown</h3>
         <ResponsiveContainer width="100%" height={300}>

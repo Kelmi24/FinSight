@@ -30,7 +30,7 @@ const formatDate = (date: Date) => {
 export function RecentTransactions({ transactions }: RecentTransactionsProps) {
   
   return (
-    <Card>
+    <Card className="rounded-2xl">
       <CardHeader>
         <CardTitle>Recent Transactions</CardTitle>
         <Link href="/transactions">

@@ -36,33 +36,33 @@ export function DashboardFilters({ categories }: DashboardFiltersProps) {
 
   return (
     <div className="space-y-4">
-      {/* Filter Summary */}
+      {/* Filter Summary - Subtle */}
       {hasActiveFilters() && (
-        <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg px-4 py-3">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
-              {activeCount} filter{activeCount === 1 ? '' : 's'} applied:
+        <div className="flex items-center gap-2 text-sm">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-medium">
+            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-300 text-xs font-semibold">
+              {activeCount}
             </span>
-            <span className="text-sm text-blue-700 dark:text-blue-200">{filterSummary}</span>
-          </div>
+            {filterSummary}
+          </span>
           <Button
             variant="ghost"
             size="sm"
             onClick={handleResetFilters}
-            className="h-8 px-2 text-blue-600 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-100"
+            className="h-7 px-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
           >
-            <X className="h-4 w-4 mr-1" />
+            <X className="h-3.5 w-3.5 mr-1" />
             Clear
           </Button>
         </div>
       )}
 
-      {/* Filter Controls */}
-      <Card className="p-4">
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Date Range - Single Picker */}
-          <div className="space-y-2 sm:col-span-2 lg:col-span-1">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+      {/* Filter Controls - Compact Toolbar */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4">
+        <div className="flex flex-wrap items-end gap-3">
+          {/* Date Range */}
+          <div className="flex-1 min-w-[200px] space-y-1.5">
+            <label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
               Date Range
             </label>
             <DateRangePicker
@@ -73,9 +73,9 @@ export function DashboardFilters({ categories }: DashboardFiltersProps) {
             />
           </div>
 
-          {/* Category Filter - Simple Dropdown */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          {/* Category Filter */}
+          <div className="w-full sm:w-auto sm:min-w-[160px] space-y-1.5">
+            <label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
               Category
             </label>
             <select
@@ -87,7 +87,7 @@ export function DashboardFilters({ categories }: DashboardFiltersProps) {
                   updateFilter('categories', [])
                 }
               }}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
+              className="w-full h-10 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-primary-500 transition-colors"
             >
               <option value="">All categories</option>
               {categories.map((cat) => (
@@ -99,8 +99,8 @@ export function DashboardFilters({ categories }: DashboardFiltersProps) {
           </div>
 
           {/* Type Filter */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <div className="w-full sm:w-auto sm:min-w-[140px] space-y-1.5">
+            <label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
               Type
             </label>
             <select
@@ -108,7 +108,7 @@ export function DashboardFilters({ categories }: DashboardFiltersProps) {
               onChange={(e) =>
                 updateFilter('type', e.target.value as 'all' | 'income' | 'expense')
               }
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
+              className="w-full h-10 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-primary-500 transition-colors"
             >
               <option value="all">All Types</option>
               <option value="income">Income</option>
@@ -117,8 +117,8 @@ export function DashboardFilters({ categories }: DashboardFiltersProps) {
           </div>
 
           {/* Amount Range */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <div className="w-full sm:w-auto sm:min-w-[200px] space-y-1.5">
+            <label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
               Amount Range
             </label>
             <div className="flex gap-2">
@@ -127,30 +127,31 @@ export function DashboardFilters({ categories }: DashboardFiltersProps) {
                 value={filters.minAmount ?? ''}
                 onChange={(e) => updateFilter('minAmount', e.target.value ? parseFloat(e.target.value) : null)}
                 placeholder="Min"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
+                className="w-full h-10 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-primary-500 transition-colors"
               />
               <input
                 type="number"
                 value={filters.maxAmount ?? ''}
                 onChange={(e) => updateFilter('maxAmount', e.target.value ? parseFloat(e.target.value) : null)}
                 placeholder="Max"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
+                className="w-full h-10 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-primary-500 transition-colors"
               />
             </div>
           </div>
-        </div>
 
-        {/* Reset Button Row */}
-        <div className="mt-4 flex justify-end">
-          <Button
-            onClick={handleResetFilters}
-            variant="outline"
-            size="sm"
-          >
-            Reset All Filters
-          </Button>
+          {/* Reset Button - Aligned to bottom */}
+          {hasActiveFilters() && (
+            <Button
+              onClick={handleResetFilters}
+              variant="outline"
+              size="sm"
+              className="h-10"
+            >
+              Reset
+            </Button>
+          )}
         </div>
-      </Card>
+      </div>
     </div>
   )
 }

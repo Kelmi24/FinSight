@@ -53,7 +53,7 @@ export function MonthOverMonthComparison() {
   const formattedPercent = Math.abs(comparison.changePercent).toFixed(1)
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-6">
+    <div className="rounded-2xl border border-gray-200 bg-white p-6">
       <h3 className="font-semibold text-lg text-gray-900 mb-4">Month-over-Month Comparison</h3>
       
       <div className="space-y-4">

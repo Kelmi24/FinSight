@@ -20,7 +20,7 @@ export function TrendChart({ data }: TrendChartProps) {
   
   if (data.length === 0) {
     return (
-      <Card>
+      <Card className="rounded-2xl">
         <h3 className="font-semibold text-lg text-gray-900 mb-4">Spending Trends</h3>
         <div className="flex h-[300px] items-center justify-center text-gray-500">
           No data available for the selected filters
@@ -30,7 +30,7 @@ export function TrendChart({ data }: TrendChartProps) {
   }
 
   return (
-    <Card>
+    <Card className="rounded-2xl">
       <h3 className="font-semibold text-lg text-gray-900 mb-4">Spending Trends</h3>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={data}>
