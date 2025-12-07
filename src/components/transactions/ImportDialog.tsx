@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Upload, AlertCircle, CheckCircle, ArrowRight, ArrowLeft, FileText, Trash2 } from "lucide-react"
 import {
@@ -11,10 +11,18 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { parseCSV, ParsedTransaction } from "@/lib/parsers/csvParser"
 import { bulkCreateTransactions } from "@/lib/actions/transactions"
+import { getCategories } from "@/lib/actions/categories"
 import { format } from "date-fns"
 import { useCurrency } from "@/providers/currency-provider"
+interface Category {
+  id: string
+  name: string
+  type: string
+  color: string | null
+}
 
 interface ImportDialogProps {
   open: boolean
@@ -35,6 +43,53 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
   const [bankDetected, setBankDetected] = useState<string | undefined>()
   const [isLoading, setIsLoading] = useState(false)
   const { currency, formatCurrency } = useCurrency()
+  const [incomeCategories, setIncomeCategories] = useState<Category[]>([])
+  const [expenseCategories, setExpenseCategories] = useState<Category[]>([])
+  const [categoriesLoaded, setCategoriesLoaded] = useState(false)
+
+  // Load categories when dialog opens
+  useEffect(() => {
+    if (open && !categoriesLoaded) {
+      loadCategories()
+    }
+  }, [open, categoriesLoaded])
+
+  async function loadCategories() {
+    const [incomeResult, expenseResult] = await Promise.all([
+      getCategories("income"),
+      getCategories("expense")
+    ])
+    
+    if (incomeResult.categories) {
+      setIncomeCategories(incomeResult.categories)
+    }
+    if (expenseResult.categories) {
+      setExpenseCategories(expenseResult.categories)
+    }
+    setCategoriesLoaded(true)
+  }
+
+  // Match parsed category to canonical categories
+  const matchCategory = (parsedCategory: string | undefined, type: "income" | "expense"): string | undefined => {
+    if (!parsedCategory) return undefined
+    
+    const categories = type === "income" ? incomeCategories : expenseCategories
+    const lowerParsed = parsedCategory.toLowerCase().trim()
+    
+    // Exact match (case-insensitive)
+    const exactMatch = categories.find(cat => cat.name.toLowerCase() === lowerParsed)
+    if (exactMatch) return exactMatch.name
+    
+    // Normalized match (remove punctuation and extra spaces)
+    const normalized = lowerParsed.replace(/[^\w\s]/g, '').replace(/\s+/g, ' ')
+    const normalizedMatch = categories.find(cat => 
+      cat.name.toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ') === normalized
+    )
+    if (normalizedMatch) return normalizedMatch.name
+    
+    // No match - return undefined to leave blank
+    return undefined
+  }
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
@@ -59,13 +114,19 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
       // Parse CSV content
       const result = parseCSV(csvContent, currency)
 
-      setParsedData(result.transactions)
-      setEditableData(result.transactions) // Initialize editable copy
+      // Validate and match categories to canonical list
+      const validatedTransactions = result.transactions.map(txn => ({
+        ...txn,
+        category: matchCategory(txn.category, txn.type as "income" | "expense")
+      }))
+
+      setParsedData(validatedTransactions)
+      setEditableData(validatedTransactions) // Initialize editable copy
       setErrors(result.errors)
       setWarnings([...warnings, ...result.warnings])
       setBankDetected(result.bankDetected)
 
-      if (result.transactions.length > 0) {
+      if (validatedTransactions.length > 0) {
         setStep("preview")
       } else {
         // Show feedback even when no transactions parsed
@@ -269,82 +330,116 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
                   <p className="text-sm text-muted-foreground">Review, edit, or delete transactions before importing</p>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-muted/50">
-                      <tr>
-                        <th className="text-left p-3 text-sm font-medium">Date</th>
-                        <th className="text-left p-3 text-sm font-medium">Description</th>
-                        <th className="text-left p-3 text-sm font-medium">Amount</th>
-                        <th className="text-left p-3 text-sm font-medium">Type</th>
-                        <th className="text-left p-3 text-sm font-medium">Category</th>
-                        <th className="text-center p-3 text-sm font-medium w-16">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {editableData.slice(0, 10).map((txn, i) => (
-                        <tr key={i} className="border-t hover:bg-muted/30">
-                          <td className="p-2">
-                            <input
-                              type="date"
-                              value={format(txn.date, "yyyy-MM-dd")}
-                              onChange={(e) => handleEditTransaction(i, "date", new Date(e.target.value))}
-                              className="w-full px-2 py-1 text-sm rounded border bg-background"
-                            />
-                          </td>
-                          <td className="p-2">
-                            <input
-                              type="text"
-                              value={txn.description}
-                              onChange={(e) => handleEditTransaction(i, "description", e.target.value)}
-                              className="w-full px-2 py-1 text-sm rounded border bg-background"
-                            />
-                          </td>
-                          <td className="p-2">
-                            <input
-                              type="number"
-                              value={txn.amount}
-                              onChange={(e) => handleEditTransaction(i, "amount", parseFloat(e.target.value) || 0)}
-                              className="w-24 px-2 py-1 text-sm rounded border bg-background"
-                              step="0.01"
-                            />
-                          </td>
-                          <td className="p-2">
-                            <select
-                              value={txn.type}
-                              onChange={(e) => handleEditTransaction(i, "type", e.target.value as "income" | "expense")}
-                              className="w-full px-2 py-1 text-sm rounded border bg-background"
-                            >
-                              <option value="income">Income</option>
-                              <option value="expense">Expense</option>
-                            </select>
-                          </td>
-                          <td className="p-2">
-                            <input
-                              type="text"
-                              value={txn.category || ""}
-                              onChange={(e) => handleEditTransaction(i, "category", e.target.value)}
-                              placeholder="Category"
-                              className="w-full px-2 py-1 text-sm rounded border bg-background"
-                            />
-                          </td>
-                          <td className="p-2 text-center">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleDeleteTransaction(i)}
-                              className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <div className="min-w-full">
+                    {/* Table Header */}
+                    <div className="bg-muted/50 border-b grid grid-cols-[120px_1fr_100px_120px_150px_60px] gap-2">
+                      <div className="text-left p-3 text-sm font-medium">Date</div>
+                      <div className="text-left p-3 text-sm font-medium">Description</div>
+                      <div className="text-left p-3 text-sm font-medium">Amount</div>
+                      <div className="text-left p-3 text-sm font-medium">Type</div>
+                      <div className="text-left p-3 text-sm font-medium">Category</div>
+                      <div className="text-center p-3 text-sm font-medium">Delete</div>
+                    </div>
+                    
+                    {/* Scrollable Table Body */}
+                    <div className="max-h-[60vh] overflow-y-auto">
+                      {editableData.map((txn, index) => {
+                        const categories = txn.type === "income" ? incomeCategories : expenseCategories
+                        
+                        return (
+                          <div key={index} className="border-t hover:bg-muted/30">
+                            <div className="grid grid-cols-[120px_1fr_100px_120px_150px_60px] gap-2 items-center py-2 px-2">
+                              {/* Date */}
+                              <div>
+                                <input
+                                  type="date"
+                                  value={format(txn.date, "yyyy-MM-dd")}
+                                  onChange={(e) => handleEditTransaction(index, "date", new Date(e.target.value))}
+                                  className="w-full px-2 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                                />
+                              </div>
+                              
+                              {/* Description */}
+                              <div>
+                                <input
+                                  type="text"
+                                  value={txn.description}
+                                  onChange={(e) => handleEditTransaction(index, "description", e.target.value)}
+                                  className="w-full px-2 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                                />
+                              </div>
+                              
+                              {/* Amount */}
+                              <div>
+                                <input
+                                  type="number"
+                                  value={txn.amount}
+                                  onChange={(e) => handleEditTransaction(index, "amount", parseFloat(e.target.value) || 0)}
+                                  className="w-full px-2 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                                  step="0.01"
+                                />
+                              </div>
+                              
+                              {/* Type */}
+                              <div>
+                                <Select
+                                  value={txn.type}
+                                  onValueChange={(val) => {
+                                    handleEditTransaction(index, "type", val as "income" | "expense")
+                                    // Clear category when type changes
+                                    handleEditTransaction(index, "category", "")
+                                  }}
+                                >
+                                  <SelectTrigger className="w-full h-9 text-sm">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="expense">Expense</SelectItem>
+                                    <SelectItem value="income">Income</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              
+                              {/* Category */}
+                              <div>
+                                <Select
+                                  value={txn.category || ""}
+                                  onValueChange={(val) => handleEditTransaction(index, "category", val)}
+                                >
+                                  <SelectTrigger className="w-full h-9 text-sm">
+                                    <SelectValue placeholder="Select category..." />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {categories.map(cat => (
+                                      <SelectItem key={cat.id} value={cat.name}>
+                                        {cat.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              
+                              {/* Delete Button */}
+                              <div className="text-center">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleDeleteTransaction(index)}
+                                  className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
                 </div>
                 {editableData.length > 10 && (
                   <div className="p-3 border-t bg-muted/50 text-sm text-center text-muted-foreground">
-                    ... and {editableData.length - 10} more transactions (scroll in confirm step to edit all)
+                    Showing all {editableData.length} transactions - scroll to view more
                   </div>
                 )}
               </div>
@@ -365,53 +460,34 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
           {/* Step: Confirm */}
           {step === "confirm" && (
             <div className="space-y-4">
-              <div className="rounded-lg border p-6 text-center space-y-4">
-                <CheckCircle className="h-12 w-12 text-green-600 dark:text-green-500 mx-auto" />
-                <div>
-                  <h3 className="text-lg font-medium mb-2">Ready to Import</h3>
-                  <p className="text-sm text-muted-foreground">
-                    You are about to import <strong>{editableData.length} transactions</strong>
+              <div className="rounded-lg border p-4">
+                <h3 className="font-medium mb-2">Ready to Import</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {editableData.length} transaction{editableData.length === 1 ? '' : 's'} will be added to your account
+                </p>
+                {parsedData.length !== editableData.length && (
+                  <p className="text-sm text-yellow-600 dark:text-yellow-500">
+                    Note: You edited {parsedData.length - editableData.length} transaction{parsedData.length - editableData.length === 1 ? '' : 's'}
                   </p>
-                  {parsedData.length !== editableData.length && (
-                    <p className="text-sm text-yellow-600 dark:text-yellow-500 mt-1">
-                      ({parsedData.length - editableData.length} transactions removed)
-                    </p>
-                  )}
-                  {bankDetected && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      From: <strong>{bankDetected}</strong>
-                    </p>
-                  )}
-                </div>
-
-                {/* Summary */}
-                <div className="grid grid-cols-3 gap-4 pt-4">
-                  <div className="rounded-lg bg-muted p-4">
-                    <div className="text-2xl font-bold">{editableData.length}</div>
-                    <div className="text-sm text-muted-foreground">Total</div>
-                  </div>
-                  <div className="rounded-lg bg-green-500/10 p-4">
-                    <div className="text-2xl font-bold text-green-600 dark:text-green-500">
-                      {editableData.filter(t => t.type === "income").length}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Income</div>
-                  </div>
-                  <div className="rounded-lg bg-red-500/10 p-4">
-                    <div className="text-2xl font-bold text-red-600 dark:text-red-500">
-                      {editableData.filter(t => t.type === "expense").length}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Expense</div>
-                  </div>
-                </div>
+                )}
               </div>
 
               <div className="flex justify-between">
-                <Button variant="outline" onClick={() => setStep("preview")} disabled={isLoading}>
+                <Button variant="outline" onClick={() => setStep("preview")}>
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back
                 </Button>
                 <Button onClick={handleImport} disabled={isLoading}>
-                  {isLoading ? "Importing..." : "Import Transactions"}
+                  {isLoading ? (
+                    <>
+                      <span className="animate-spin mr-2">⏳</span>
+                      Importing...
+                    </>
+                  ) : (
+                    <>
+                      Add {editableData.length} Transaction{editableData.length === 1 ? '' : 's'}
+                    </>
+                  )}
                 </Button>
               </div>
             </div>
