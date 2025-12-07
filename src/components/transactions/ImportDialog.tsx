@@ -344,8 +344,8 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
                         <div className="text-center p-3 text-sm font-medium">Delete</div>
                       </div>
                       
-                      {/* Scrollable Table Body - max 7 rows visible (~420px) */}
-                      <div className="max-h-[420px] overflow-y-auto">
+                      {/* Scrollable Table Body - max 7 rows visible (~385px) */}
+                      <div className="max-h-[385px] overflow-y-auto">
                         {editableData.map((txn, index) => {
                       const categories = txn.type === "income" ? incomeCategories : expenseCategories
                       
