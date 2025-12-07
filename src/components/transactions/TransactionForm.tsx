@@ -3,6 +3,7 @@
 import * as React from "react"
 import { createTransaction, updateTransaction } from "@/lib/actions/transactions"
 import { createRecurringTransaction } from "@/lib/actions/recurring"
+import { getWallets } from "@/lib/actions/wallets"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -24,8 +25,10 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
   const [transactionType, setTransactionType] = React.useState<"income" | "expense">(
     transaction?.type || "expense"
   )
-  const { currency } = useCurrency()
+  const { currency, formatCurrency } = useCurrency()
   const [amountInput, setAmountInput] = React.useState(transaction?.amount?.toString() || "")
+  const [wallets, setWallets] = React.useState<any[]>([])
+  const [selectedWallet, setSelectedWallet] = React.useState(transaction?.walletId || "")
   
   // Recurring state
   const [isRecurring, setIsRecurring] = React.useState(false)
@@ -35,6 +38,19 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
       ? new Date(transaction.date).toISOString().split("T")[0]
       : new Date().toISOString().split("T")[0]
   )
+  
+  React.useEffect(() => {
+    async function fetchWallets() {
+      const data = await getWallets()
+      setWallets(data)
+      // Set default wallet if no wallet selected
+      if (!selectedWallet && data.length > 0) {
+        const defaultWallet = data.find((w: any) => w.isDefault) || data[0]
+        setSelectedWallet(defaultWallet.id)
+      }
+    }
+    fetchWallets()
+  }, [])
 
   async function handleSubmit(formData: FormData) {
     setError(null)
@@ -74,6 +90,7 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
       <input type="hidden" name="type" value={transactionType} />
       {/* Use user's preferred currency from settings; no picker on form */}
       <input type="hidden" name="currency" value={currency} />
+      <input type="hidden" name="walletId" value={selectedWallet} />
       
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
@@ -108,6 +125,30 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
             <p className="mt-1 text-xs text-gray-500">{amountPreview}</p>
           )}
         </div>
+      </div>
+      
+      <div>
+        <Label htmlFor="wallet">Wallet *</Label>
+        <Select
+          value={selectedWallet}
+          onValueChange={setSelectedWallet}
+        >
+          <SelectTrigger id="wallet">
+            <SelectValue placeholder="Select wallet" />
+          </SelectTrigger>
+          <SelectContent>
+            {wallets.map((wallet) => (
+              <SelectItem key={wallet.id} value={wallet.id}>
+                {wallet.icon} {wallet.name} ({formatCurrency(wallet.balance)})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {selectedWallet && wallets.find(w => w.id === selectedWallet) && (
+          <p className="mt-1 text-xs text-gray-500">
+            Current balance: {formatCurrency(wallets.find(w => w.id === selectedWallet)?.balance || 0)}
+          </p>
+        )}
       </div>
 
       <div className="grid gap-4">

@@ -24,6 +24,7 @@ model User {
   resetTokenExpiry DateTime?
   
   // Domain Models
+  wallets               Wallet[]
   transactions          Transaction[]
   recurringTransactions RecurringTransaction[]
   budgets               Budget[]
@@ -76,6 +77,29 @@ model VerificationToken {
 
 // Domain Models
 
+model Wallet {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // "bank", "cash", "ewallet", "investment", "other"
+  currency    String   @default("USD")
+  balance     Float    @default(0)
+  icon        String?  // Optional icon identifier
+  color       String?  // Optional hex color for UI
+  isDefault   Boolean  @default(false)
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  transactions Transaction[]
+  recurringTransactions RecurringTransaction[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([userId, name])
+  @@index([userId])
+}
+
 model Transaction {
   id          String   @id @default(cuid())
   amount      Float
@@ -83,11 +107,24 @@ model Transaction {
   description String
   category    String
   date        DateTime
-  type        String   // "income" or "expense"
+  type        String   // "income", "expense", "transfer"
+  
+  // Wallet relation
+  walletId    String?
+  wallet      Wallet?  @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  
+  // For wallet-to-wallet transfers
+  transferId      String?  @unique
+  relatedTransfer Transaction? @relation("TransferPair", fields: [transferId], references: [id], onDelete: SetNull)
+  transfer        Transaction? @relation("TransferPair")
+  
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  
+  @@index([userId, walletId])
+  @@index([date])
 }
 
 model RecurringTransaction {
@@ -107,6 +144,11 @@ model RecurringTransaction {
   lastConfirmedAt DateTime?
   status        String   @default("pending")
   reminderEnabled Boolean @default(false)
+  
+  // Wallet relation
+  walletId      String?
+  wallet        Wallet?  @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  
   userId        String
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt     DateTime @default(now())

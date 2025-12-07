@@ -2,6 +2,7 @@ import { DashboardFilters } from "@/components/dashboard/DashboardFilters"
 import { DashboardContent } from "@/components/dashboard/DashboardContent"
 import { ConnectedAccount } from "@/components/plaid/ConnectedAccount"
 import { ConnectBankButton } from "@/components/plaid/ConnectBankButton"
+import { WalletList } from "@/components/wallets/WalletList"
 import { getCategories } from "@/lib/actions/dashboard"
 
 export default async function DashboardPage() {
@@ -32,6 +33,14 @@ export default async function DashboardPage() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* My Wallets Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold tracking-tight">My Wallets</h2>
+        </div>
+        <WalletList />
       </div>
 
       {/* Filters */}

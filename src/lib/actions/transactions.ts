@@ -57,6 +57,7 @@ export async function createTransaction(formData: FormData) {
   const category = formData.get("category") as string
   const type = formData.get("type") as string
   const date = new Date(formData.get("date") as string)
+  const walletId = formData.get("walletId") as string
 
   if (!amount || !description || !category || !type || !date) {
     return { error: "Missing required fields" }
@@ -72,8 +73,26 @@ export async function createTransaction(formData: FormData) {
       type,
       date,
     }
+    
+    if (walletId) {
+      data.walletId = walletId
+    }
 
-    await db.transaction.create({ data })
+    // Create transaction and update wallet balance atomically
+    await db.$transaction(async (tx: any) => {
+      // Create the transaction
+      await tx.transaction.create({ data })
+      
+      // Update wallet balance if wallet is specified
+      if (walletId) {
+        const balanceChange = type === "income" ? amount : -amount
+        await tx.wallet.update({
+          where: { id: walletId },
+          data: { balance: { increment: balanceChange } },
+        })
+      }
+    })
+    
     revalidatePath("/transactions")
     revalidatePath("/dashboard")
     revalidatePath("/")
@@ -93,12 +112,32 @@ export async function deleteTransaction(id: string) {
   const userId = session.user.id
 
   try {
-    await db.transaction.delete({
-      where: {
-        id,
-        userId: userId, // Ensure user owns transaction
-      },
+    // Get transaction first to revert wallet balance
+    const transaction: any = await db.transaction.findUnique({
+      where: { id, userId },
     })
+    
+    if (!transaction) {
+      return { error: "Transaction not found" }
+    }
+    
+    // Delete transaction and update wallet balance atomically
+    await db.$transaction(async (tx: any) => {
+      // Delete the transaction
+      await tx.transaction.delete({
+        where: { id, userId },
+      })
+      
+      // Revert wallet balance if wallet is specified and not a transfer
+      if (transaction.walletId && transaction.type !== "transfer") {
+        const balanceChange = transaction.type === "income" ? -transaction.amount : transaction.amount
+        await tx.wallet.update({
+          where: { id: transaction.walletId },
+          data: { balance: { increment: balanceChange } },
+        })
+      }
+    })
+    
     revalidatePath("/transactions")
     revalidatePath("/dashboard")
     revalidatePath("/")
@@ -154,6 +193,7 @@ export async function updateTransaction(id: string, formData: FormData) {
   const category = formData.get("category") as string
   const type = formData.get("type") as string
   const date = new Date(formData.get("date") as string)
+  const walletId = formData.get("walletId") as string
 
   if (!amount || !description || !category || !type || !date) {
     return { error: "Missing required fields" }
@@ -161,7 +201,7 @@ export async function updateTransaction(id: string, formData: FormData) {
 
   try {
     // Verify ownership before update
-    const existingTransaction = await db.transaction.findFirst({
+    const existingTransaction: any = await db.transaction.findFirst({
         where: { id, userId }
     })
     
@@ -176,15 +216,44 @@ export async function updateTransaction(id: string, formData: FormData) {
       type,
       date,
     }
+    
+    if (walletId) {
+      data.walletId = walletId
+    }
 
     if (currency) {
       data.currency = currency
     }
 
-    await db.transaction.update({
-      where: { id },
-      data,
+    // Update transaction and adjust wallet balances atomically
+    await db.$transaction(async (tx: any) => {
+      // Revert old wallet balance if it exists and not a transfer
+      if (existingTransaction.walletId && existingTransaction.type !== "transfer") {
+        const oldBalanceChange = existingTransaction.type === "income" 
+          ? -existingTransaction.amount 
+          : existingTransaction.amount
+        await tx.wallet.update({
+          where: { id: existingTransaction.walletId },
+          data: { balance: { increment: oldBalanceChange } },
+        })
+      }
+      
+      // Update the transaction
+      await tx.transaction.update({
+        where: { id },
+        data,
+      })
+      
+      // Apply new wallet balance if specified and not a transfer
+      if (walletId && type !== "transfer") {
+        const newBalanceChange = type === "income" ? amount : -amount
+        await tx.wallet.update({
+          where: { id: walletId },
+          data: { balance: { increment: newBalanceChange } },
+        })
+      }
     })
+    
     revalidatePath("/transactions")
     revalidatePath("/dashboard")
     revalidatePath("/")
