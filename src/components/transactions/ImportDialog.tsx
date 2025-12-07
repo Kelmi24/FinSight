@@ -15,8 +15,6 @@ import { parseCSV, ParsedTransaction } from "@/lib/parsers/csvParser"
 import { bulkCreateTransactions } from "@/lib/actions/transactions"
 import { format } from "date-fns"
 import { useCurrency } from "@/providers/currency-provider"
-import { extractTextFromPDF } from "@/lib/parsers/pdfParser"
-import { convertPDFTextToCSV } from "@/lib/parsers/pdfToCSV"
 
 interface ImportDialogProps {
   open: boolean
@@ -59,6 +57,10 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
       let csvContent: string
 
       if (isPDF) {
+        // Dynamically import PDF parsers (client-side only)
+        const { extractTextFromPDF } = await import("@/lib/parsers/pdfParser")
+        const { convertPDFTextToCSV } = await import("@/lib/parsers/pdfToCSV")
+        
         // Extract text from PDF
         const pdfResult = await extractTextFromPDF(selectedFile)
         

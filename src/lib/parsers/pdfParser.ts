@@ -1,12 +1,17 @@
 /**
  * PDF text extraction utilities using PDF.js
+ * Client-side only - do not use in server components
  */
 
-import * as pdfjsLib from "pdfjs-dist";
+// Only import in browser environment
+let pdfjsLib: any = null;
 
-// Configure PDF.js worker
 if (typeof window !== "undefined") {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+  import("pdfjs-dist").then((module) => {
+    pdfjsLib = module;
+    // Configure PDF.js worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+  });
 }
 
 export interface PDFExtractionResult {
@@ -21,6 +26,22 @@ export interface PDFExtractionResult {
 export async function extractTextFromPDF(
   file: File
 ): Promise<PDFExtractionResult> {
+  // Ensure we're in browser environment
+  if (typeof window === "undefined") {
+    return {
+      text: "",
+      pageCount: 0,
+      error: "PDF parsing is only available in browser environment",
+    };
+  }
+
+  // Dynamically import pdfjs-dist
+  if (!pdfjsLib) {
+    const module = await import("pdfjs-dist");
+    pdfjsLib = module;
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+  }
+
   try {
     // Convert file to ArrayBuffer
     const arrayBuffer = await file.arrayBuffer();
