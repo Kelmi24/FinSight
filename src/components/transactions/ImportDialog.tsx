@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Upload, AlertCircle, CheckCircle, ArrowRight, ArrowLeft, FileText } from "lucide-react"
+import { Upload, AlertCircle, CheckCircle, ArrowRight, ArrowLeft, FileText, Trash2 } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -15,6 +15,8 @@ import { parseCSV, ParsedTransaction } from "@/lib/parsers/csvParser"
 import { bulkCreateTransactions } from "@/lib/actions/transactions"
 import { format } from "date-fns"
 import { useCurrency } from "@/providers/currency-provider"
+import { extractTextFromPDF } from "@/lib/parsers/pdfParser"
+import { convertPDFTextToCSV } from "@/lib/parsers/pdfToCSV"
 
 interface ImportDialogProps {
   open: boolean
@@ -29,6 +31,7 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
   const [step, setStep] = useState<Step>("upload")
   const [file, setFile] = useState<File | null>(null)
   const [parsedData, setParsedData] = useState<ParsedTransaction[]>([])
+  const [editableData, setEditableData] = useState<ParsedTransaction[]>([])
   const [errors, setErrors] = useState<string[]>([])
   const [warnings, setWarnings] = useState<string[]>([])
   const [bankDetected, setBankDetected] = useState<string | undefined>()
@@ -39,8 +42,11 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
     const selectedFile = e.target.files?.[0]
     if (!selectedFile) return
 
-    if (!selectedFile.name.endsWith(".csv")) {
-      setErrors(["Please select a valid CSV file"])
+    const isCSV = selectedFile.name.endsWith(".csv")
+    const isPDF = selectedFile.name.endsWith(".pdf")
+
+    if (!isCSV && !isPDF) {
+      setErrors(["Please select a valid CSV or PDF file"])
       return
     }
 
@@ -50,28 +56,78 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
     setWarnings([])
 
     try {
-      const content = await selectedFile.text()
-      const result = parseCSV(content, currency)
+      let csvContent: string
+
+      if (isPDF) {
+        // Extract text from PDF
+        const pdfResult = await extractTextFromPDF(selectedFile)
+        
+        if (pdfResult.error) {
+          setErrors([`PDF extraction failed: ${pdfResult.error}`])
+          setIsLoading(false)
+          return
+        }
+
+        // Convert PDF text to CSV
+        const conversionResult = convertPDFTextToCSV(pdfResult.text)
+        
+        if (conversionResult.error) {
+          setErrors([`PDF conversion failed: ${conversionResult.error}`])
+          setIsLoading(false)
+          return
+        }
+
+        csvContent = conversionResult.csv
+        
+        // Add info about PDF processing
+        setWarnings([
+          `PDF processed: ${pdfResult.pageCount} pages, ${conversionResult.rowCount} rows detected`
+        ])
+      } else {
+        // Read CSV directly
+        csvContent = await selectedFile.text()
+      }
+
+      // Parse CSV content
+      const result = parseCSV(csvContent, currency)
 
       setParsedData(result.transactions)
+      setEditableData(result.transactions) // Initialize editable copy
       setErrors(result.errors)
-      setWarnings(result.warnings)
+      setWarnings([...warnings, ...result.warnings])
       setBankDetected(result.bankDetected)
 
       if (result.transactions.length > 0) {
         setStep("preview")
+      } else {
+        // Show feedback even when no transactions parsed
+        setErrors([
+          ...result.errors,
+          result.errors.length === 0 ? "No valid transactions found in the file. Please check the format and try again." : ""
+        ].filter(Boolean))
       }
     } catch (error) {
-      setErrors([`Failed to parse CSV: ${error instanceof Error ? error.message : "Unknown error"}`])
+      setErrors([`Failed to process file: ${error instanceof Error ? error.message : "Unknown error"}`])
     } finally {
       setIsLoading(false)
     }
   }
 
+  const handleEditTransaction = (index: number, field: keyof ParsedTransaction, value: any) => {
+    const updated = [...editableData]
+    updated[index] = { ...updated[index], [field]: value }
+    setEditableData(updated)
+  }
+
+  const handleDeleteTransaction = (index: number) => {
+    const updated = editableData.filter((_, i) => i !== index)
+    setEditableData(updated)
+  }
+
   const handleImport = async () => {
     setIsLoading(true)
     try {
-      const result = await bulkCreateTransactions(parsedData)
+      const result = await bulkCreateTransactions(editableData)
       
       if (result.error) {
         setErrors([result.error])
@@ -104,6 +160,7 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
       setStep("upload")
       setFile(null)
       setParsedData([])
+      setEditableData([])
       setErrors([])
       setWarnings([])
       setBankDetected(undefined)
@@ -153,17 +210,17 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
             <div className="space-y-4">
               <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border p-12 text-center">
                 <Upload className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium mb-2">Upload CSV File</h3>
+                <h3 className="text-lg font-medium mb-2">Upload CSV or PDF File</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Supports Indonesian banks: BCA, Mandiri, BNI, BRI
+                  Supports CSV exports and PDF statements from Indonesian banks
                 </p>
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept=".csv"
+                  accept=".csv,.pdf"
                   onChange={handleFileSelect}
                   className="hidden"
-                  id="csv-upload"
+                  id="file-upload"
                 />
                 <Button 
                   onClick={() => fileInputRef.current?.click()}
@@ -171,21 +228,39 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
                 >
                   {isLoading ? "Processing..." : "Choose File"}
                 </Button>
+                {file && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Selected: {file.name}
+                  </p>
+                )}
               </div>
 
               {/* Help Text */}
               <div className="rounded-lg bg-muted p-4 text-sm space-y-2">
                 <h4 className="font-medium flex items-center">
                   <FileText className="h-4 w-4 mr-2" />
-                  Supported CSV Formats
+                  Supported Formats
                 </h4>
-                <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-6">
-                  <li><strong>BCA:</strong> Tanggal, Keterangan, Debet, Kredit, Saldo</li>
-                  <li><strong>Mandiri:</strong> Tanggal Transaksi, Keterangan, Jenis, Jumlah (IDR), Saldo</li>
-                  <li><strong>BNI:</strong> TGL, URAIAN, DEBIT, KREDIT, SALDO</li>
-                  <li><strong>BRI:</strong> Tanggal, Deskripsi, Nominal, Jenis, Saldo</li>
-                  <li><strong>Custom:</strong> Date, Description, Amount (or Debit/Credit columns)</li>
-                </ul>
+                <div className="space-y-3 ml-6">
+                  <div>
+                    <p className="font-medium text-foreground">CSV Files:</p>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                      <li><strong>BCA:</strong> Tanggal, Keterangan, Debet, Kredit, Saldo</li>
+                      <li><strong>Mandiri:</strong> Tanggal Transaksi, Keterangan, Jenis, Jumlah (IDR), Saldo</li>
+                      <li><strong>BNI:</strong> TGL, URAIAN, DEBIT, KREDIT, SALDO</li>
+                      <li><strong>BRI:</strong> Tanggal, Deskripsi, Nominal, Jenis, Saldo</li>
+                      <li><strong>Custom:</strong> Date, Description, Amount (or Debit/Credit columns)</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">PDF Files:</p>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                      <li>Bank statement PDFs with transaction tables</li>
+                      <li>Multi-page statements supported</li>
+                      <li>Automatically converted to CSV format</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
 
               {errors.length > 0 && (
@@ -233,8 +308,8 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
 
               <div className="rounded-lg border">
                 <div className="p-4 border-b">
-                  <h3 className="font-medium">Preview ({parsedData.length} transactions)</h3>
-                  <p className="text-sm text-muted-foreground">Review the first 10 transactions</p>
+                  <h3 className="font-medium">Preview & Edit ({editableData.length} transactions)</h3>
+                  <p className="text-sm text-muted-foreground">Review, edit, or delete transactions before importing</p>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full">
@@ -245,34 +320,74 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
                         <th className="text-left p-3 text-sm font-medium">Amount</th>
                         <th className="text-left p-3 text-sm font-medium">Type</th>
                         <th className="text-left p-3 text-sm font-medium">Category</th>
+                        <th className="text-center p-3 text-sm font-medium w-16">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {parsedData.slice(0, 10).map((txn, i) => (
-                        <tr key={i} className="border-t">
-                          <td className="p-3 text-sm">{format(txn.date, "dd/MM/yyyy")}</td>
-                          <td className="p-3 text-sm">{txn.description}</td>
-                          <td className="p-3 text-sm">{formatCurrency(txn.amount)}</td>
-                          <td className="p-3 text-sm">
-                            <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                              txn.type === "income" 
-                                ? "bg-green-500/10 text-green-600 dark:text-green-500"
-                                : "bg-red-500/10 text-red-600 dark:text-red-500"
-                            }`}>
-                              {txn.type}
-                            </span>
+                      {editableData.slice(0, 10).map((txn, i) => (
+                        <tr key={i} className="border-t hover:bg-muted/30">
+                          <td className="p-2">
+                            <input
+                              type="date"
+                              value={format(txn.date, "yyyy-MM-dd")}
+                              onChange={(e) => handleEditTransaction(i, "date", new Date(e.target.value))}
+                              className="w-full px-2 py-1 text-sm rounded border bg-background"
+                            />
                           </td>
-                          <td className="p-3 text-sm text-muted-foreground">
-                            {txn.category || "Uncategorized"}
+                          <td className="p-2">
+                            <input
+                              type="text"
+                              value={txn.description}
+                              onChange={(e) => handleEditTransaction(i, "description", e.target.value)}
+                              className="w-full px-2 py-1 text-sm rounded border bg-background"
+                            />
+                          </td>
+                          <td className="p-2">
+                            <input
+                              type="number"
+                              value={txn.amount}
+                              onChange={(e) => handleEditTransaction(i, "amount", parseFloat(e.target.value) || 0)}
+                              className="w-24 px-2 py-1 text-sm rounded border bg-background"
+                              step="0.01"
+                            />
+                          </td>
+                          <td className="p-2">
+                            <select
+                              value={txn.type}
+                              onChange={(e) => handleEditTransaction(i, "type", e.target.value as "income" | "expense")}
+                              className="w-full px-2 py-1 text-sm rounded border bg-background"
+                            >
+                              <option value="income">Income</option>
+                              <option value="expense">Expense</option>
+                            </select>
+                          </td>
+                          <td className="p-2">
+                            <input
+                              type="text"
+                              value={txn.category || ""}
+                              onChange={(e) => handleEditTransaction(i, "category", e.target.value)}
+                              placeholder="Category"
+                              className="w-full px-2 py-1 text-sm rounded border bg-background"
+                            />
+                          </td>
+                          <td className="p-2 text-center">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleDeleteTransaction(i)}
+                              className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-                {parsedData.length > 10 && (
+                {editableData.length > 10 && (
                   <div className="p-3 border-t bg-muted/50 text-sm text-center text-muted-foreground">
-                    ... and {parsedData.length - 10} more transactions
+                    ... and {editableData.length - 10} more transactions (scroll in confirm step to edit all)
                   </div>
                 )}
               </div>
@@ -298,8 +413,13 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
                 <div>
                   <h3 className="text-lg font-medium mb-2">Ready to Import</h3>
                   <p className="text-sm text-muted-foreground">
-                    You are about to import <strong>{parsedData.length} transactions</strong>
+                    You are about to import <strong>{editableData.length} transactions</strong>
                   </p>
+                  {parsedData.length !== editableData.length && (
+                    <p className="text-sm text-yellow-600 dark:text-yellow-500 mt-1">
+                      ({parsedData.length - editableData.length} transactions removed)
+                    </p>
+                  )}
                   {bankDetected && (
                     <p className="text-sm text-muted-foreground mt-1">
                       From: <strong>{bankDetected}</strong>
@@ -310,18 +430,18 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
                 {/* Summary */}
                 <div className="grid grid-cols-3 gap-4 pt-4">
                   <div className="rounded-lg bg-muted p-4">
-                    <div className="text-2xl font-bold">{parsedData.length}</div>
+                    <div className="text-2xl font-bold">{editableData.length}</div>
                     <div className="text-sm text-muted-foreground">Total</div>
                   </div>
                   <div className="rounded-lg bg-green-500/10 p-4">
                     <div className="text-2xl font-bold text-green-600 dark:text-green-500">
-                      {parsedData.filter(t => t.type === "income").length}
+                      {editableData.filter(t => t.type === "income").length}
                     </div>
                     <div className="text-sm text-muted-foreground">Income</div>
                   </div>
                   <div className="rounded-lg bg-red-500/10 p-4">
                     <div className="text-2xl font-bold text-red-600 dark:text-red-500">
-                      {parsedData.filter(t => t.type === "expense").length}
+                      {editableData.filter(t => t.type === "expense").length}
                     </div>
                     <div className="text-sm text-muted-foreground">Expense</div>
                   </div>

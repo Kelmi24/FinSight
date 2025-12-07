@@ -139,17 +139,22 @@ export function parseCSV(fileContent: string, currency: string = "IDR"): ParseRe
         ["credit", "kredit"].includes(normalizeColumnName(h))
       );
 
-      if (debitField && row[debitField]) {
-        amount = parseAmount(row[debitField].toString());
+      // Get values and handle empty strings explicitly
+      const debitValue = debitField ? row[debitField] : null;
+      const creditValue = creditField ? row[creditField] : null;
+
+      if (debitValue && debitValue.toString().trim() !== "") {
+        amount = parseAmount(debitValue.toString());
         if (amount !== null && !type) type = "expense";
-      } else if (creditField && row[creditField]) {
-        amount = parseAmount(row[creditField].toString());
+      } else if (creditValue && creditValue.toString().trim() !== "") {
+        amount = parseAmount(creditValue.toString());
         if (amount !== null && !type) type = "income";
       } else {
         // Try amount field
         const amountField = headers.find((h) => getFieldName(h) === "amount");
-        if (amountField && row[amountField]) {
-          amount = parseAmount(row[amountField].toString());
+        const amountValue = amountField ? row[amountField] : null;
+        if (amountValue && amountValue.toString().trim() !== "") {
+          amount = parseAmount(amountValue.toString());
         }
       }
 
@@ -181,6 +186,22 @@ export function parseCSV(fileContent: string, currency: string = "IDR"): ParseRe
       errors.push(`Row ${index + 2}: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
   });
+
+  // Add feedback if no transactions parsed
+  if (transactions.length === 0 && warnings.length > 0) {
+    errors.push(`No valid transactions found. ${warnings.length} rows were skipped due to missing or invalid data.`);
+  }
+
+  // Debug logging in development
+  if (process.env.NODE_ENV === "development") {
+    console.log("CSV Parse Result:", {
+      totalRows: parsed.data.length,
+      validTransactions: transactions.length,
+      warnings: warnings.length,
+      errors: errors.length,
+      bankDetected,
+    });
+  }
 
   return {
     transactions,
