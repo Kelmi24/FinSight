@@ -41,10 +41,9 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
     if (!selectedFile) return
 
     const isCSV = selectedFile.name.endsWith(".csv")
-    const isPDF = selectedFile.name.endsWith(".pdf")
 
-    if (!isCSV && !isPDF) {
-      setErrors(["Please select a valid CSV or PDF file"])
+    if (!isCSV) {
+      setErrors(["Please select a valid CSV file"])
       return
     }
 
@@ -54,41 +53,8 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
     setWarnings([])
 
     try {
-      let csvContent: string
-
-      if (isPDF) {
-        // Dynamically import PDF parsers (client-side only)
-        const { extractTextFromPDF } = await import("@/lib/parsers/pdfParser")
-        const { convertPDFTextToCSV } = await import("@/lib/parsers/pdfToCSV")
-        
-        // Extract text from PDF
-        const pdfResult = await extractTextFromPDF(selectedFile)
-        
-        if (pdfResult.error) {
-          setErrors([`PDF extraction failed: ${pdfResult.error}`])
-          setIsLoading(false)
-          return
-        }
-
-        // Convert PDF text to CSV
-        const conversionResult = convertPDFTextToCSV(pdfResult.text)
-        
-        if (conversionResult.error) {
-          setErrors([`PDF conversion failed: ${conversionResult.error}`])
-          setIsLoading(false)
-          return
-        }
-
-        csvContent = conversionResult.csv
-        
-        // Add info about PDF processing
-        setWarnings([
-          `PDF processed: ${pdfResult.pageCount} pages, ${conversionResult.rowCount} rows detected`
-        ])
-      } else {
-        // Read CSV directly
-        csvContent = await selectedFile.text()
-      }
+      // Read CSV directly
+      const csvContent = await selectedFile.text()
 
       // Parse CSV content
       const result = parseCSV(csvContent, currency)
@@ -212,14 +178,14 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
             <div className="space-y-4">
               <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border p-12 text-center">
                 <Upload className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium mb-2">Upload CSV or PDF File</h3>
+                <h3 className="text-lg font-medium mb-2">Upload CSV File</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Supports CSV exports and PDF statements from Indonesian banks
+                  Supports CSV exports from Indonesian banks (BCA, Mandiri, BNI, BRI)
                 </p>
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept=".csv,.pdf"
+                  accept=".csv"
                   onChange={handleFileSelect}
                   className="hidden"
                   id="file-upload"
@@ -241,27 +207,16 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
               <div className="rounded-lg bg-muted p-4 text-sm space-y-2">
                 <h4 className="font-medium flex items-center">
                   <FileText className="h-4 w-4 mr-2" />
-                  Supported Formats
+                  Supported CSV Formats
                 </h4>
-                <div className="space-y-3 ml-6">
-                  <div>
-                    <p className="font-medium text-foreground">CSV Files:</p>
-                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                      <li><strong>BCA:</strong> Tanggal, Keterangan, Debet, Kredit, Saldo</li>
-                      <li><strong>Mandiri:</strong> Tanggal Transaksi, Keterangan, Jenis, Jumlah (IDR), Saldo</li>
-                      <li><strong>BNI:</strong> TGL, URAIAN, DEBIT, KREDIT, SALDO</li>
-                      <li><strong>BRI:</strong> Tanggal, Deskripsi, Nominal, Jenis, Saldo</li>
-                      <li><strong>Custom:</strong> Date, Description, Amount (or Debit/Credit columns)</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <p className="font-medium text-foreground">PDF Files:</p>
-                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                      <li>Bank statement PDFs with transaction tables</li>
-                      <li>Multi-page statements supported</li>
-                      <li>Automatically converted to CSV format</li>
-                    </ul>
-                  </div>
+                <div className="ml-6">
+                  <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    <li><strong>BCA:</strong> Tanggal, Keterangan, CBG, Mutasi, Saldo</li>
+                    <li><strong>Mandiri:</strong> Tanggal Transaksi, Keterangan, Jenis, Jumlah (IDR), Saldo</li>
+                    <li><strong>BNI:</strong> TGL, URAIAN, DEBIT, KREDIT, SALDO</li>
+                    <li><strong>BRI:</strong> Tanggal, Deskripsi, Nominal, Jenis, Saldo</li>
+                    <li><strong>Custom:</strong> Date, Description, Amount (or Debit/Credit columns)</li>
+                  </ul>
                 </div>
               </div>
 
