@@ -9,6 +9,7 @@ import { TransactionFilters } from "@/components/transactions/TransactionFilters
 import { TransactionTabs } from "@/components/transactions/TransactionTabs"
 import { RecurringList } from "@/components/transactions/RecurringList"
 import { RecurringDialog } from "@/components/transactions/RecurringDialog"
+import { ImportButton } from "@/components/transactions/ImportButton"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 
@@ -90,7 +91,10 @@ export default function TransactionsPage() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <TransactionTabs activeTab={activeTab} onTabChange={handleTabChange} />
           {activeTab === "one-time" && (
-            <TransactionFilters onFilter={handleFilter} />
+            <div className="flex items-center gap-2">
+              <TransactionFilters onFilter={handleFilter} />
+              <ImportButton />
+            </div>
           )}
         </div>
       </div>

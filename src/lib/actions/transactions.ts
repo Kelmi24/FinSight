@@ -162,3 +162,41 @@ export async function updateTransaction(id: string, formData: FormData) {
     return { error: `Failed to update transaction` }
   }
 }
+
+export async function bulkCreateTransactions(
+  transactions: Array<{
+    date: Date
+    description: string
+    amount: number
+    type: "income" | "expense"
+    category?: string
+    currency: string
+  }>
+) {
+  const session = await auth()
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+  
+  const userId = session.user.id
+
+  try {
+    // Create transactions in bulk
+    const result = await db.transaction.createMany({
+      data: transactions.map((t) => ({
+        ...t,
+        userId,
+        category: t.category || "Uncategorized",
+      })),
+    })
+
+    revalidatePath("/transactions")
+    revalidatePath("/dashboard")
+    revalidatePath("/")
+    
+    return { success: true, count: result.count }
+  } catch (error) {
+    return { error: "Failed to import transactions" }
+  }
+}
