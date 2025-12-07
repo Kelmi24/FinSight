@@ -299,160 +299,171 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
 
           {/* Step: Preview */}
           {step === "preview" && (
-            <div className="space-y-4">
-              {bankDetected && (
-                <div className="rounded-lg bg-primary/10 p-3 text-sm flex items-center text-primary">
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  <span>{bankDetected} format detected</span>
-                </div>
-              )}
-
-              {warnings.length > 0 && (
-                <div className="rounded-lg bg-yellow-500/10 p-4 text-sm">
-                  <div className="flex items-center text-yellow-600 dark:text-yellow-500 font-medium mb-2">
-                    <AlertCircle className="h-4 w-4 mr-2" />
-                    Warnings ({warnings.length})
+            <div className="flex flex-col max-h-[85vh] overflow-hidden">
+              {/* Fixed Header Section */}
+              <div className="flex-none space-y-4">
+                {bankDetected && (
+                  <div className="rounded-lg bg-primary/10 p-3 text-sm flex items-center text-primary">
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    <span>{bankDetected} format detected</span>
                   </div>
-                  <ul className="list-disc list-inside space-y-1 text-yellow-600 dark:text-yellow-500 max-h-32 overflow-y-auto">
-                    {warnings.slice(0, 10).map((warning, i) => (
-                      <li key={i}>{warning}</li>
-                    ))}
-                    {warnings.length > 10 && (
-                      <li>... and {warnings.length - 10} more warnings</li>
-                    )}
-                  </ul>
-                </div>
-              )}
+                )}
 
-              <div className="rounded-lg border">
-                <div className="p-4 border-b">
-                  <h3 className="font-medium">Preview & Edit ({editableData.length} transactions)</h3>
-                  <p className="text-sm text-muted-foreground">Review, edit, or delete transactions before importing</p>
+                {warnings.length > 0 && (
+                  <div className="rounded-lg bg-yellow-500/10 p-4 text-sm">
+                    <div className="flex items-center text-yellow-600 dark:text-yellow-500 font-medium mb-2">
+                      <AlertCircle className="h-4 w-4 mr-2" />
+                      Warnings ({warnings.length})
+                    </div>
+                    <ul className="list-disc list-inside space-y-1 text-yellow-600 dark:text-yellow-500 max-h-24 overflow-y-auto">
+                      {warnings.slice(0, 10).map((warning, i) => (
+                        <li key={i}>{warning}</li>
+                      ))}
+                      {warnings.length > 10 && (
+                        <li>... and {warnings.length - 10} more warnings</li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Table Header */}
+                <div className="rounded-lg border">
+                  <div className="p-4 border-b">
+                    <h3 className="font-medium">Preview & Edit ({editableData.length} transactions)</h3>
+                    <p className="text-sm text-muted-foreground">Review, edit, or delete transactions before importing</p>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <div className="min-w-full">
+                      <div className="bg-muted/50 border-b grid grid-cols-[120px_1fr_100px_120px_150px_60px] gap-2">
+                        <div className="text-left p-3 text-sm font-medium">Date</div>
+                        <div className="text-left p-3 text-sm font-medium">Description</div>
+                        <div className="text-left p-3 text-sm font-medium">Amount</div>
+                        <div className="text-left p-3 text-sm font-medium">Type</div>
+                        <div className="text-left p-3 text-sm font-medium">Category</div>
+                        <div className="text-center p-3 text-sm font-medium">Delete</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+              </div>
+
+              {/* Scrollable Table Body */}
+              <div className="flex-1 overflow-y-auto min-h-0 border-x">
                 <div className="overflow-x-auto">
                   <div className="min-w-full">
-                    {/* Table Header */}
-                    <div className="bg-muted/50 border-b grid grid-cols-[120px_1fr_100px_120px_150px_60px] gap-2">
-                      <div className="text-left p-3 text-sm font-medium">Date</div>
-                      <div className="text-left p-3 text-sm font-medium">Description</div>
-                      <div className="text-left p-3 text-sm font-medium">Amount</div>
-                      <div className="text-left p-3 text-sm font-medium">Type</div>
-                      <div className="text-left p-3 text-sm font-medium">Category</div>
-                      <div className="text-center p-3 text-sm font-medium">Delete</div>
-                    </div>
-                    
-                    {/* Scrollable Table Body */}
-                    <div className="max-h-[60vh] overflow-y-auto">
-                      {editableData.map((txn, index) => {
-                        const categories = txn.type === "income" ? incomeCategories : expenseCategories
-                        
-                        return (
-                          <div key={index} className="border-t hover:bg-muted/30">
-                            <div className="grid grid-cols-[120px_1fr_100px_120px_150px_60px] gap-2 items-center py-2 px-2">
-                              {/* Date */}
-                              <div>
-                                <input
-                                  type="date"
-                                  value={format(txn.date, "yyyy-MM-dd")}
-                                  onChange={(e) => handleEditTransaction(index, "date", new Date(e.target.value))}
-                                  className="w-full px-2 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                                />
-                              </div>
-                              
-                              {/* Description */}
-                              <div>
-                                <input
-                                  type="text"
-                                  value={txn.description}
-                                  onChange={(e) => handleEditTransaction(index, "description", e.target.value)}
-                                  className="w-full px-2 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                                />
-                              </div>
-                              
-                              {/* Amount */}
-                              <div>
-                                <input
-                                  type="number"
-                                  value={txn.amount}
-                                  onChange={(e) => handleEditTransaction(index, "amount", parseFloat(e.target.value) || 0)}
-                                  className="w-full px-2 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                                  step="0.01"
-                                />
-                              </div>
-                              
-                              {/* Type */}
-                              <div>
-                                <Select
-                                  value={txn.type}
-                                  onValueChange={(val) => {
-                                    handleEditTransaction(index, "type", val as "income" | "expense")
-                                    // Clear category when type changes
-                                    handleEditTransaction(index, "category", "")
-                                  }}
-                                >
-                                  <SelectTrigger className="w-full h-9 text-sm">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="expense">Expense</SelectItem>
-                                    <SelectItem value="income">Income</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              
-                              {/* Category */}
-                              <div>
-                                <Select
-                                  value={txn.category || ""}
-                                  onValueChange={(val) => handleEditTransaction(index, "category", val)}
-                                >
-                                  <SelectTrigger className="w-full h-9 text-sm">
-                                    <SelectValue placeholder="Select category..." />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {categories.map(cat => (
-                                      <SelectItem key={cat.id} value={cat.name}>
-                                        {cat.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              
-                              {/* Delete Button */}
-                              <div className="text-center">
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => handleDeleteTransaction(index)}
-                                  className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
+                    {editableData.map((txn, index) => {
+                      const categories = txn.type === "income" ? incomeCategories : expenseCategories
+                      
+                      return (
+                        <div key={index} className="border-t hover:bg-muted/30">
+                          <div className="grid grid-cols-[120px_1fr_100px_120px_150px_60px] gap-2 items-center py-2 px-2">
+                            {/* Date */}
+                            <div>
+                              <input
+                                type="date"
+                                value={format(txn.date, "yyyy-MM-dd")}
+                                onChange={(e) => handleEditTransaction(index, "date", new Date(e.target.value))}
+                                className="w-full px-2 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                              />
+                            </div>
+                            
+                            {/* Description */}
+                            <div>
+                              <input
+                                type="text"
+                                value={txn.description}
+                                onChange={(e) => handleEditTransaction(index, "description", e.target.value)}
+                                className="w-full px-2 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                              />
+                            </div>
+                            
+                            {/* Amount */}
+                            <div>
+                              <input
+                                type="number"
+                                value={txn.amount}
+                                onChange={(e) => handleEditTransaction(index, "amount", parseFloat(e.target.value) || 0)}
+                                className="w-full px-2 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                                step="0.01"
+                              />
+                            </div>
+                            
+                            {/* Type */}
+                            <div>
+                              <Select
+                                value={txn.type}
+                                onValueChange={(val) => {
+                                  handleEditTransaction(index, "type", val as "income" | "expense")
+                                  // Clear category when type changes
+                                  handleEditTransaction(index, "category", "")
+                                }}
+                              >
+                                <SelectTrigger className="w-full h-9 text-sm">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="expense">Expense</SelectItem>
+                                  <SelectItem value="income">Income</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            {/* Category */}
+                            <div>
+                              <Select
+                                value={txn.category || ""}
+                                onValueChange={(val) => handleEditTransaction(index, "category", val)}
+                              >
+                                <SelectTrigger className="w-full h-9 text-sm">
+                                  <SelectValue placeholder="Select category..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {categories.map(cat => (
+                                    <SelectItem key={cat.id} value={cat.name}>
+                                      {cat.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            {/* Delete Button */}
+                            <div className="text-center">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleDeleteTransaction(index)}
+                                className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
                             </div>
                           </div>
-                        )
-                      })}
-                    </div>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
-                {editableData.length > 10 && (
-                  <div className="p-3 border-t bg-muted/50 text-sm text-center text-muted-foreground">
+              </div>
+
+              {/* Fixed Footer Section */}
+              <div className="flex-none space-y-4 pt-4">
+                {editableData.length > 7 && (
+                  <div className="p-3 border rounded-lg bg-muted/50 text-sm text-center text-muted-foreground">
                     Showing all {editableData.length} transactions - scroll to view more
                   </div>
                 )}
-              </div>
-
-              <div className="flex justify-between">
-                <Button variant="outline" onClick={() => setStep("upload")}>
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back
-                </Button>
-                <Button onClick={() => setStep("confirm")}>
-                  Continue
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                
+                <div className="flex justify-between">
+                  <Button variant="outline" onClick={() => setStep("upload")}>
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back
+                  </Button>
+                  <Button onClick={() => setStep("confirm")}>
+                    Continue
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           )}
