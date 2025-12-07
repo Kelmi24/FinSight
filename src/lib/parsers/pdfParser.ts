@@ -6,14 +6,6 @@
 // Only import in browser environment
 let pdfjsLib: any = null;
 
-if (typeof window !== "undefined") {
-  import("pdfjs-dist").then((module) => {
-    pdfjsLib = module;
-    // Configure PDF.js worker
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
-  });
-}
-
 export interface PDFExtractionResult {
   text: string;
   pageCount: number;
@@ -39,8 +31,8 @@ export async function extractTextFromPDF(
   if (!pdfjsLib) {
     const module = await import("pdfjs-dist");
     pdfjsLib = module;
-    // Use webpack to bundle the worker file
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+    // Use unpkg CDN for reliable worker loading
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
   }
 
   try {
