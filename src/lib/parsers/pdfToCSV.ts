@@ -41,10 +41,90 @@ function detectBankHeader(line: string): boolean {
 }
 
 /**
+ * Parse BCA bank statement PDF text
+ * BCA PDFs have specific patterns we can detect
+ */
+function parseBCAStatement(text: string): string[][] {
+  const lines = text.split("\n");
+  const rows: string[][] = [];
+
+  // BCA statement pattern: DATE DESCRIPTION AMOUNT BALANCE
+  // Look for lines that start with a date pattern (DD/MM)
+  const datePattern = /^(\d{2}\/\d{2})/;
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    
+    // Skip empty lines
+    if (!line) continue;
+    
+    // Check if line starts with a date
+    const dateMatch = line.match(datePattern);
+    if (dateMatch) {
+      const date = dateMatch[1];
+      
+      // Extract the rest of the line after the date
+      let remainder = line.substring(date.length).trim();
+      
+      // Try to extract description and amounts
+      // Pattern: DATE DESCRIPTION AMOUNT BALANCE or DATE DESCRIPTION (negative amount)
+      // BCA format: amounts can be negative (with minus) or positive
+      
+      // Look for amount patterns: numbers with dots/commas and optional minus
+      const amountPattern = /-?\d+[\d.,]*\d+/g;
+      const amounts = remainder.match(amountPattern) || [];
+      
+      // Description is everything before the last 1-2 numbers
+      let description = remainder;
+      let mutasi = "";
+      let saldo = "";
+      
+      if (amounts.length >= 2) {
+        // Has both mutasi and saldo
+        saldo = amounts[amounts.length - 1];
+        mutasi = amounts[amounts.length - 2];
+        // Description is everything before the mutasi
+        const mutasiIndex = remainder.lastIndexOf(mutasi);
+        description = remainder.substring(0, mutasiIndex).trim();
+      } else if (amounts.length === 1) {
+        // Might be just balance or just amount
+        // Check if description mentions SALDO
+        if (remainder.toLowerCase().includes("saldo")) {
+          saldo = amounts[0];
+          description = remainder.substring(0, remainder.lastIndexOf(amounts[0])).trim();
+        } else {
+          mutasi = amounts[0];
+          description = remainder.substring(0, remainder.lastIndexOf(amounts[0])).trim();
+        }
+      }
+      
+      // Skip opening balance rows
+      if (description.toLowerCase().includes("saldo awal")) {
+        continue;
+      }
+      
+      // Only add if we have a description and at least one amount
+      if (description && (mutasi || saldo)) {
+        rows.push([date, description, "", mutasi, saldo]);
+      }
+    }
+  }
+  
+  return rows;
+}
+
+/**
  * Parse table-like text structure from PDF
  * Handles both space-separated and tab-separated columns
  */
 function parseTableStructure(text: string): string[][] {
+  // First try BCA-specific parsing
+  const bcaRows = parseBCAStatement(text);
+  if (bcaRows.length > 0) {
+    return bcaRows;
+  }
+
+  // Fallback to generic table parsing
   const lines = text.split("\n").map((l) => l.trim()).filter((l) => l.length > 0);
 
   const rows: string[][] = [];
@@ -122,9 +202,25 @@ export function convertPDFTextToCSV(pdfText: string): PDFToCSVResult {
       };
     }
 
-    // Normalize header row
-    const headers = normalizeColumnNames(rows[0]);
-    const dataRows = rows.slice(1);
+    // Check if this is BCA format (5 columns: date, desc, cbg, mutasi, saldo)
+    const isBCAFormat = rows.length > 0 && rows[0].length === 5;
+
+    // Build CSV
+    const csvLines: string[] = [];
+    let headers: string[];
+    let dataRows: string[][];
+
+    // Add header and determine data rows based on detected format
+    if (isBCAFormat) {
+      headers = ["TANGGAL", "KETERANGAN", "CBG", "MUTASI", "SALDO"];
+      csvLines.push(headers.join(","));
+      dataRows = rows; // All rows are data in BCA format
+    } else {
+      // Normalize header row for other formats
+      headers = normalizeColumnNames(rows[0]);
+      csvLines.push(headers.join(","));
+      dataRows = rows.slice(1); // First row is header, rest are data
+    }
 
     if (dataRows.length === 0) {
       return {
@@ -133,12 +229,6 @@ export function convertPDFTextToCSV(pdfText: string): PDFToCSVResult {
         error: "No data rows found after header. The PDF may be empty or formatted incorrectly.",
       };
     }
-
-    // Build CSV
-    const csvLines: string[] = [];
-
-    // Add header
-    csvLines.push(headers.join(","));
 
     // Add data rows
     for (const row of dataRows) {
