@@ -71,10 +71,7 @@ export async function createCategory(formData: FormData) {
   const type = formData.get("type") as string
   const color = formData.get("color") as string | null
 
-  console.log("Creating category:", { name, type, color, userId })
-
   if (!name || !type) {
-    console.log("Validation failed: name or type missing")
     return { error: "Name and type are required" }
   }
 
@@ -89,16 +86,12 @@ export async function createCategory(formData: FormData) {
       },
     })
 
-    console.log("Category created successfully:", category)
-
     // Don't revalidate here - it causes the parent dialog to close
     // The CategorySelect component will refresh its own list
 
     return { category }
   } catch (error: any) {
-    console.error("Full error object:", error)
-    console.error("Error message:", error?.message)
-    console.error("Error code:", error?.code)
+    console.error("Failed to create category:", error)
     
     if (error.code === "P2002") {
       return { error: "A category with this name already exists" }

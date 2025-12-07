@@ -115,10 +115,8 @@ export async function requestPasswordReset(formData: FormData) {
   })
 
   // In production, you would send an email here
-  // For development, we'll log the reset link
+  // For development, the reset link is: ${process.env.NEXTAUTH_URL}/reset-password/${resetToken}
   const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password/${resetToken}`
-  console.log("Password reset link:", resetUrl)
-  console.log("Token expires at:", resetTokenExpiry)
 
   return { 
     success: "If an account exists with this email, you will receive a password reset link shortly. Check your console for the reset link (development mode)." 

@@ -205,17 +205,6 @@ export function parseCSV(fileContent: string, currency: string = "IDR"): ParseRe
     errors.push(`No valid transactions found. ${warnings.length} rows were skipped due to missing or invalid data.`);
   }
 
-  // Debug logging in development
-  if (process.env.NODE_ENV === "development") {
-    console.log("CSV Parse Result:", {
-      totalRows: parsed.data.length,
-      validTransactions: transactions.length,
-      warnings: warnings.length,
-      errors: errors.length,
-      bankDetected,
-    });
-  }
-
   return {
     transactions,
     errors,
