@@ -49,8 +49,8 @@ function parseBCAStatement(text: string): string[][] {
   const rows: string[][] = [];
 
   // BCA statement pattern: DATE DESCRIPTION AMOUNT BALANCE
-  // Look for lines that start with a date pattern (DD/MM)
-  const datePattern = /^(\d{2}\/\d{2})/;
+  // Look for lines that contain a date pattern (DD/MM) - may not be at start due to spaces
+  const datePattern = /(\d{2}\/\d{2})/;
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
@@ -58,43 +58,60 @@ function parseBCAStatement(text: string): string[][] {
     // Skip empty lines
     if (!line) continue;
     
-    // Check if line starts with a date
+    // Check if line contains a date
     const dateMatch = line.match(datePattern);
     if (dateMatch) {
       const date = dateMatch[1];
+      const dateIndex = line.indexOf(date);
       
       // Extract the rest of the line after the date
-      let remainder = line.substring(date.length).trim();
+      let remainder = line.substring(dateIndex + date.length).trim();
       
       // Try to extract description and amounts
       // Pattern: DATE DESCRIPTION AMOUNT BALANCE or DATE DESCRIPTION (negative amount)
       // BCA format: amounts can be negative (with minus) or positive
       
-      // Look for amount patterns: numbers with dots/commas and optional minus
-      const amountPattern = /-?\d+[\d.,]*\d+/g;
-      const amounts = remainder.match(amountPattern) || [];
+      // Look for amount patterns: numbers with dots/commas/spaces and optional minus
+      // Match patterns like: 1.500.000,00 or -1.500.000,00 or 1500000
+      const amountPattern = /-?\d+[\d.,\s]*\d*/g;
+      const potentialAmounts = remainder.match(amountPattern) || [];
+      
+      // Filter out small numbers that are likely not amounts (like CBG codes)
+      const amounts = potentialAmounts.filter(amt => {
+        const cleanAmt = amt.replace(/[.,\s]/g, '');
+        return cleanAmt.length >= 3; // At least 3 digits to be a real amount
+      });
       
       // Description is everything before the last 1-2 numbers
       let description = remainder;
       let mutasi = "";
       let saldo = "";
+      let cbg = "";
       
       if (amounts.length >= 2) {
         // Has both mutasi and saldo
         saldo = amounts[amounts.length - 1];
         mutasi = amounts[amounts.length - 2];
-        // Description is everything before the mutasi
-        const mutasiIndex = remainder.lastIndexOf(mutasi);
-        description = remainder.substring(0, mutasiIndex).trim();
+        
+        // Check if there's a CBG code (3 digits between description and amounts)
+        if (amounts.length >= 3 && amounts[amounts.length - 3].replace(/\D/g, '').length <= 4) {
+          cbg = amounts[amounts.length - 3];
+        }
+        
+        // Description is everything before the first amount we identified
+        const firstAmountIndex = cbg ? remainder.indexOf(cbg) : remainder.indexOf(mutasi);
+        description = remainder.substring(0, firstAmountIndex).trim();
       } else if (amounts.length === 1) {
         // Might be just balance or just amount
+        const amt = amounts[0];
+        const amtIndex = remainder.indexOf(amt);
+        description = remainder.substring(0, amtIndex).trim();
+        
         // Check if description mentions SALDO
-        if (remainder.toLowerCase().includes("saldo")) {
-          saldo = amounts[0];
-          description = remainder.substring(0, remainder.lastIndexOf(amounts[0])).trim();
+        if (description.toLowerCase().includes("saldo") || description.toLowerCase().includes("balance")) {
+          saldo = amt;
         } else {
-          mutasi = amounts[0];
-          description = remainder.substring(0, remainder.lastIndexOf(amounts[0])).trim();
+          mutasi = amt;
         }
       }
       
@@ -105,7 +122,7 @@ function parseBCAStatement(text: string): string[][] {
       
       // Only add if we have a description and at least one amount
       if (description && (mutasi || saldo)) {
-        rows.push([date, description, "", mutasi, saldo]);
+        rows.push([date, description, cbg, mutasi, saldo]);
       }
     }
   }
@@ -120,6 +137,15 @@ function parseBCAStatement(text: string): string[][] {
 function parseTableStructure(text: string): string[][] {
   // First try BCA-specific parsing
   const bcaRows = parseBCAStatement(text);
+  
+  if (process.env.NODE_ENV === "development") {
+    console.log("BCA Parser Results:", {
+      rowsFound: bcaRows.length,
+      sampleRow: bcaRows[0],
+      textPreview: text.substring(0, 500)
+    });
+  }
+  
   if (bcaRows.length > 0) {
     return bcaRows;
   }
