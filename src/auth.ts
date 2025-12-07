@@ -7,10 +7,18 @@ import { DEFAULT_CURRENCY } from "@/lib/currency"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(db),
+  trustHost: true,
   providers: [
     Google({
-      clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      clientId: process.env.AUTH_GOOGLE_ID!,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code"
+        }
+      }
     }),
     Credentials({
       name: "Credentials",
@@ -70,5 +78,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return session;
     },
+  },
+  pages: {
+    signIn: "/login",
+    error: "/login",
   },
 })
