@@ -1,12 +1,10 @@
 import NextAuth from "next-auth"
-import { PrismaAdapter } from "@auth/prisma-adapter"
 import { db } from "@/lib/db"
 import Credentials from "next-auth/providers/credentials"
 import Google from "next-auth/providers/google"
 import { DEFAULT_CURRENCY } from "@/lib/currency"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(db),
   trustHost: true,
   providers: [
     Google({
@@ -18,7 +16,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           access_type: "offline",
           response_type: "code"
         }
-      }
+      },
+      profile(profile) {
+        return {
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture,
+        }
+      },
     }),
     Credentials({
       name: "Credentials",
@@ -52,17 +58,45 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: "jwt",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async signIn({ user, account, profile }) {
+      // For Google OAuth, create or update user in database
+      if (account?.provider === "google" && profile?.email) {
+        try {
+          const existingUser = await db.user.findUnique({
+            where: { email: profile.email },
+          })
+
+          if (!existingUser) {
+            // Create new user for Google sign-in (works for both login and signup)
+            const newUser = await db.user.create({
+              data: {
+                email: profile.email,
+                name: profile.name || profile.email.split("@")[0],
+                currencyPreference: DEFAULT_CURRENCY,
+              },
+            })
+            // Update the user object with the new user id
+            user.id = newUser.id
+          } else {
+            // User exists, use their id
+            user.id = existingUser.id
+          }
+          return true
+        } catch (error) {
+          console.error("Error during Google sign-in:", error)
+          return false
+        }
+      }
+      return true
+    },
+    async jwt({ token, user, account, trigger }) {
       // When user logs in, attach user id and currency preference
       if (user) {
         token.sub = user.id
-        token.email = user.email // Ensure email is in token
-        const dbUser = await db.user.findUnique({
-          where: { id: user.id },
-          select: { currencyPreference: true },
-        })
-        token.currencyPreference = dbUser?.currencyPreference || DEFAULT_CURRENCY
+        token.email = user.email
+        token.currencyPreference = DEFAULT_CURRENCY
       }
+      
       return token
     },
     async session({ session, token }) {
