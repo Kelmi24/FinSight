@@ -11,12 +11,14 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Trash2, Edit2, Receipt } from "lucide-react"
-import { deleteTransaction } from "@/lib/actions/transactions"
+import { bulkDeleteTransactions } from "@/lib/actions/transactions"
 import { useRouter } from "next/navigation"
 import { TransactionForm } from "./TransactionForm"
 import { EmptyState } from "@/components/ui/empty-state"
 import { formatCurrency } from "@/lib/currency"
+import { toast } from "sonner"
 
 // Simple date formatter if date-fns not installed yet
 const formatDate = (date: Date) => {
@@ -38,30 +40,81 @@ interface Transaction {
 interface TransactionListProps {
   transactions: Transaction[]
   onDeleteSuccess?: () => void
+  selectedIds: Set<string>
+  onSelectionChange: (ids: Set<string>) => void
+  showDeleteDialog?: boolean
+  onDeleteDialogChange?: (show: boolean) => void
 }
 
-export function TransactionList({ transactions, onDeleteSuccess }: TransactionListProps) {
-  const [deleteId, setDeleteId] = useState<string | null>(null)
+export function TransactionList({ 
+  transactions, 
+  onDeleteSuccess,
+  selectedIds,
+  onSelectionChange,
+  showDeleteDialog: externalShowDeleteDialog,
+  onDeleteDialogChange
+}: TransactionListProps) {
+  const [internalShowDeleteDialog, setInternalShowDeleteDialog] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
   const router = useRouter()
 
-  async function handleDelete(id: string) {
+  // Use external dialog state if provided, otherwise use internal
+  const showDeleteDialog = externalShowDeleteDialog ?? internalShowDeleteDialog
+  const setShowDeleteDialog = (show: boolean) => {
+    if (onDeleteDialogChange) {
+      onDeleteDialogChange(show)
+    } else {
+      setInternalShowDeleteDialog(show)
+    }
+  }
+
+  // Select/deselect all visible transactions
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const allIds = new Set(transactions.map(t => t.id))
+      onSelectionChange(allIds)
+    } else {
+      onSelectionChange(new Set())
+    }
+  }
+
+  // Toggle individual transaction selection
+  const handleSelectOne = (id: string, checked: boolean) => {
+    const newSelection = new Set(selectedIds)
+    if (checked) {
+      newSelection.add(id)
+    } else {
+      newSelection.delete(id)
+    }
+    onSelectionChange(newSelection)
+  }
+
+  // Bulk delete selected transactions
+  async function handleBulkDelete() {
+    if (selectedIds.size === 0) return
+
     setIsDeleting(true)
-    const result = await deleteTransaction(id)
+    const result = await bulkDeleteTransactions(Array.from(selectedIds))
     setIsDeleting(false)
-    setDeleteId(null)
+    setShowDeleteDialog(false)
     
     if (result.error) {
-      alert(result.error)
+      toast.error(result.error)
     } else {
+      toast.success(`Successfully deleted ${result.count} transaction${result.count === 1 ? '' : 's'}`)
+      onSelectionChange(new Set()) // Clear selection
       router.refresh()
       if (onDeleteSuccess) {
         onDeleteSuccess()
       }
     }
   }
+
+  // Check if all visible transactions are selected
+  const isAllSelected = transactions.length > 0 && selectedIds.size === transactions.length
+  const isIndeterminate = selectedIds.size > 0 && selectedIds.size < transactions.length
 
   const editingTransaction = editingId
     ? transactions.find(t => t.id === editingId)
@@ -84,17 +137,33 @@ export function TransactionList({ transactions, onDeleteSuccess }: TransactionLi
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[50px]">
+                  <Checkbox
+                    checked={isAllSelected}
+                    onCheckedChange={handleSelectAll}
+                    aria-label="Select all transactions"
+                    disabled={isDeleting}
+                  />
+                </TableHead>
                 <TableHead className="whitespace-nowrap">Date</TableHead>
                 <TableHead className="whitespace-nowrap">Description</TableHead>
                 <TableHead className="whitespace-nowrap">Category</TableHead>
                 <TableHead className="whitespace-nowrap">Type</TableHead>
                 <TableHead className="text-right whitespace-nowrap">Amount</TableHead>
-                <TableHead className="w-[100px]"></TableHead>
+                <TableHead className="w-[80px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {transactions.map((transaction) => (
                 <TableRow key={transaction.id}>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedIds.has(transaction.id)}
+                      onCheckedChange={(checked) => handleSelectOne(transaction.id, checked as boolean)}
+                      aria-label={`Select transaction ${transaction.description}`}
+                      disabled={isDeleting}
+                    />
+                  </TableCell>
                   <TableCell>{formatDate(transaction.date)}</TableCell>
                   <TableCell>{transaction.description}</TableCell>
                   <TableCell>{transaction.category}</TableCell>
@@ -120,16 +189,6 @@ export function TransactionList({ transactions, onDeleteSuccess }: TransactionLi
                       <Edit2 className="h-4 w-4" />
                       <span className="sr-only">Edit</span>
                     </Button>
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      onClick={() => setDeleteId(transaction.id)}
-                      className="h-8 w-8 text-white"
-                      title="Delete transaction"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Delete</span>
-                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -152,26 +211,26 @@ export function TransactionList({ transactions, onDeleteSuccess }: TransactionLi
         </DialogContent>
       </Dialog>
 
-      {/* Delete Dialog */}
-      <Dialog open={deleteId !== null} onOpenChange={(open) => !open && setDeleteId(null)}>
+      {/* Bulk Delete Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete transaction?</DialogTitle>
+            <DialogTitle>Delete {selectedIds.size} transaction{selectedIds.size === 1 ? '' : 's'}?</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-gray-600">
-            Are you sure you want to delete this transaction? This action cannot be undone.
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Are you sure you want to delete <strong>{selectedIds.size}</strong> transaction{selectedIds.size === 1 ? '' : 's'}? This action cannot be undone.
           </p>
           <div className="flex gap-3 justify-end pt-4">
             <Button
               variant="outline"
-              onClick={() => setDeleteId(null)}
+              onClick={() => setShowDeleteDialog(false)}
               disabled={isDeleting}
             >
               Cancel
             </Button>
             <Button
               variant="destructive"
-              onClick={() => deleteId && handleDelete(deleteId)}
+              onClick={handleBulkDelete}
               disabled={isDeleting}
             >
               {isDeleting ? "Deleting..." : "Delete"}

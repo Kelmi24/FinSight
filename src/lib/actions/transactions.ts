@@ -108,6 +108,37 @@ export async function deleteTransaction(id: string) {
   }
 }
 
+export async function bulkDeleteTransactions(ids: string[]) {
+  const session = await auth()
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+  
+  const userId = session.user.id
+
+  if (ids.length === 0) {
+    return { error: "No transactions selected" }
+  }
+
+  try {
+    const result = await db.transaction.deleteMany({
+      where: {
+        id: { in: ids },
+        userId: userId, // Ensure user owns all transactions
+      },
+    })
+    
+    revalidatePath("/transactions")
+    revalidatePath("/dashboard")
+    revalidatePath("/")
+    
+    return { success: true, count: result.count }
+  } catch (error) {
+    return { error: "Failed to delete transactions" }
+  }
+}
+
 export async function updateTransaction(id: string, formData: FormData) {
   const session = await auth()
   

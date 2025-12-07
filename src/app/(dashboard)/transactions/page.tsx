@@ -11,7 +11,7 @@ import { RecurringList } from "@/components/transactions/RecurringList"
 import { RecurringDialog } from "@/components/transactions/RecurringDialog"
 import { ImportButton } from "@/components/transactions/ImportButton"
 import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
+import { Plus, Trash2 } from "lucide-react"
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<any[]>([])
@@ -20,6 +20,8 @@ export default function TransactionsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<"one-time" | "recurring">("one-time")
   const [isRecurringDialogOpen, setIsRecurringDialogOpen] = useState(false)
+  const [selectedTransactionIds, setSelectedTransactionIds] = useState<Set<string>>(new Set())
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const loadTransactions = useCallback(async () => {
     setIsLoading(true)
@@ -52,11 +54,22 @@ export default function TransactionsPage() {
 
   const handleFilter = (newFilters: any) => {
     setFilters(newFilters)
+    setSelectedTransactionIds(new Set()) // Clear selection when filters change
   }
 
   const handleTabChange = (tab: "one-time" | "recurring") => {
     setActiveTab(tab)
     setFilters({}) // Reset filters when switching tabs
+    setSelectedTransactionIds(new Set()) // Clear selection when switching tabs
+  }
+
+  const handleSelectionChange = (ids: Set<string>) => {
+    setSelectedTransactionIds(ids)
+  }
+
+  const handleDeleteSuccess = () => {
+    setSelectedTransactionIds(new Set()) // Clear selection after delete
+    loadTransactions()
   }
 
   return (
@@ -92,6 +105,16 @@ export default function TransactionsPage() {
           <TransactionTabs activeTab={activeTab} onTabChange={handleTabChange} />
           {activeTab === "one-time" && (
             <div className="flex items-center gap-2">
+              {selectedTransactionIds.size > 0 && (
+                <Button 
+                  variant="destructive"
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="gap-2"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete Selected ({selectedTransactionIds.size})
+                </Button>
+              )}
               <TransactionFilters onFilter={handleFilter} />
               <ImportButton />
             </div>
@@ -105,7 +128,11 @@ export default function TransactionsPage() {
         <div>
           <TransactionList 
             transactions={transactions} 
-            onDeleteSuccess={loadTransactions}
+            onDeleteSuccess={handleDeleteSuccess}
+            selectedIds={selectedTransactionIds}
+            onSelectionChange={handleSelectionChange}
+            showDeleteDialog={showDeleteDialog}
+            onDeleteDialogChange={setShowDeleteDialog}
           />
         </div>
       ) : (
