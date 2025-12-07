@@ -326,7 +326,7 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
                   </div>
                 )}
 
-                {/* Table Header */}
+                {/* Table with Scrollable Body */}
                 <div className="rounded-lg border">
                   <div className="p-4 border-b">
                     <h3 className="font-medium">Preview & Edit ({editableData.length} transactions)</h3>
@@ -334,6 +334,7 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
                   </div>
                   <div className="overflow-x-auto">
                     <div className="min-w-full">
+                      {/* Fixed Table Header */}
                       <div className="bg-muted/50 border-b grid grid-cols-[120px_1fr_100px_120px_150px_60px] gap-2">
                         <div className="text-left p-3 text-sm font-medium">Date</div>
                         <div className="text-left p-3 text-sm font-medium">Description</div>
@@ -342,16 +343,10 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
                         <div className="text-left p-3 text-sm font-medium">Category</div>
                         <div className="text-center p-3 text-sm font-medium">Delete</div>
                       </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Scrollable Table Body */}
-              <div className="flex-1 overflow-y-auto min-h-0 border-x">
-                <div className="overflow-x-auto">
-                  <div className="min-w-full">
-                    {editableData.map((txn, index) => {
+                      
+                      {/* Scrollable Table Body - max 7 rows visible (~420px) */}
+                      <div className="max-h-[420px] overflow-y-auto">
+                        {editableData.map((txn, index) => {
                       const categories = txn.type === "income" ? incomeCategories : expenseCategories
                       
                       return (
@@ -442,6 +437,8 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
                         </div>
                       )
                     })}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
