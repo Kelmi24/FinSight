@@ -30,12 +30,12 @@
   --cx-bg-overlay: rgba(0, 0, 0, 0.5);
 
   /* ============================================
-     TEXT COLORS
+     TEXT COLORS (Updated for WCAG AA compliance)
      ============================================ */
   --cx-text-primary: #111827;
   --cx-text-secondary: #374151;
   --cx-text-muted: #6B7280;
-  --cx-text-placeholder: #9CA3AF;
+  --cx-text-placeholder: #6B7280; /* Changed from #9CA3AF (gray-400) to #6B7280 (gray-500) for 4.5:1 contrast */
   --cx-text-inverse: #FFFFFF;
   --cx-text-link: #4F46E5;
   --cx-text-link-hover: #4338CA;

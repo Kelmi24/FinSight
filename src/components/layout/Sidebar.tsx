@@ -60,20 +60,7 @@ export function Sidebar() {
         ))}
       </div>
       
-      {/* Invite & Earn Card - CopperX style */}
-      <div className="mx-4 mb-4 rounded-xl bg-gray-50 p-4">
-        <div className="flex -space-x-2 mb-3">
-          <div className="h-8 w-8 rounded-full bg-primary-200 border-2 border-white" />
-          <div className="h-8 w-8 rounded-full bg-primary-300 border-2 border-white" />
-          <div className="h-8 w-8 rounded-full bg-primary-400 border-2 border-white" />
-        </div>
-        <p className="text-sm font-semibold text-gray-900">Invite and Earn</p>
-        <p className="text-xs text-gray-500 mt-1">
-          Earn 10% of their fees plus $25 in points for every friend you invite.
-        </p>
-      </div>
-      
-      <div className="border-t border-gray-200 p-4">
+      <div className="mt-auto border-t border-gray-200 p-4">
         <ThemeToggle />
       </div>
     </div>

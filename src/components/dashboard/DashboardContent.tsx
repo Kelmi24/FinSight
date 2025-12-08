@@ -16,6 +16,7 @@ import { CategoryChart } from "@/components/dashboard/CategoryChart"
 import { TrendChart } from "@/components/analytics/TrendChart"
 import { MonthOverMonthComparison } from "@/components/analytics/MonthOverMonthComparison"
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions"
+import { CardSkeleton, ChartSkeleton } from "@/components/ui/skeleton"
 import { DollarSign, TrendingUp, TrendingDown, Receipt } from "lucide-react"
 
 interface SummaryMetrics {
@@ -103,8 +104,25 @@ export function DashboardContent() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 dark:border-gray-600 border-t-indigo-600"></div>
+      <div className="space-y-6">
+        {/* KPI Cards Skeleton */}
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
+        
+        {/* Charts Skeleton */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <ChartSkeleton />
+          <ChartSkeleton />
+        </div>
+        
+        <div className="grid gap-6 lg:grid-cols-2">
+          <ChartSkeleton />
+          <ChartSkeleton />
+        </div>
       </div>
     )
   }

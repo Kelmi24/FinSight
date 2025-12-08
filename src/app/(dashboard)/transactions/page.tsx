@@ -10,10 +10,14 @@ import { TransactionTabs } from "@/components/transactions/TransactionTabs"
 import { RecurringList } from "@/components/transactions/RecurringList"
 import { RecurringDialog } from "@/components/transactions/RecurringDialog"
 import { ImportButton } from "@/components/transactions/ImportButton"
+import { SearchAndDatePresets } from "@/components/transactions/SearchAndDatePresets"
+import { TableSkeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { Plus, Trash2 } from "lucide-react"
+import { useFilter } from "@/providers/filter-provider"
 
 export default function TransactionsPage() {
+  const { filters: globalFilters } = useFilter()
   const [transactions, setTransactions] = useState<any[]>([])
   const [recurringTransactions, setRecurringTransactions] = useState<any[]>([])
   const [filters, setFilters] = useState<any>({})
@@ -28,11 +32,21 @@ export default function TransactionsPage() {
     try {
       const data = await getTransactions(filters)
       // Keep stored currency and amount as-is to avoid double conversion
-      setTransactions(data)
+      // Apply client-side search filter
+      let filtered = data
+      if (globalFilters.searchQuery) {
+        const query = globalFilters.searchQuery.toLowerCase()
+        filtered = data.filter((txn: any) =>
+          txn.description?.toLowerCase().includes(query) ||
+          txn.category?.toLowerCase().includes(query) ||
+          txn.amount?.toString().includes(query)
+        )
+      }
+      setTransactions(filtered)
     } finally {
       setIsLoading(false)
     }
-  }, [filters])
+  }, [filters, globalFilters.searchQuery])
 
   const loadRecurringTransactions = useCallback(async () => {
     setIsLoading(true)
@@ -101,29 +115,33 @@ export default function TransactionsPage() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4">
           <TransactionTabs activeTab={activeTab} onTabChange={handleTabChange} />
+          
           {activeTab === "one-time" && (
-            <div className="flex items-center gap-2">
-              {selectedTransactionIds.size > 0 && (
-                <Button 
-                  variant="destructive"
-                  onClick={() => setShowDeleteDialog(true)}
-                  className="gap-2"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Delete Selected ({selectedTransactionIds.size})
-                </Button>
-              )}
-              <TransactionFilters onFilter={handleFilter} />
-              <ImportButton />
-            </div>
+            <>
+              <SearchAndDatePresets />
+              <div className="flex items-center gap-2 flex-wrap">
+                {selectedTransactionIds.size > 0 && (
+                  <Button 
+                    variant="destructive"
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="gap-2"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete Selected ({selectedTransactionIds.size})
+                  </Button>
+                )}
+                <TransactionFilters onFilter={handleFilter} />
+                <ImportButton />
+              </div>
+            </>
           )}
         </div>
       </div>
 
       {isLoading ? (
-        <div className="text-center py-12 text-gray-500">Loading...</div>
+        <TableSkeleton rows={10} />
       ) : activeTab === "one-time" ? (
         <div>
           <TransactionList 

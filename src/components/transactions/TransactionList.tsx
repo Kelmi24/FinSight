@@ -17,6 +17,7 @@ import { bulkDeleteTransactions } from "@/lib/actions/transactions"
 import { useRouter } from "next/navigation"
 import { TransactionForm } from "./TransactionForm"
 import { EmptyState } from "@/components/ui/empty-state"
+import { TableSkeleton } from "@/components/ui/skeleton"
 import { formatCurrency } from "@/lib/currency"
 import { toast } from "sonner"
 
@@ -184,7 +185,7 @@ export function TransactionList({
                       size="icon"
                       onClick={() => setEditingId(transaction.id)}
                       className="h-8 w-8 text-gray-600 hover:text-primary-600"
-                      title="Edit transaction"
+                      aria-label={`Edit transaction: ${transaction.description}`}
                     >
                       <Edit2 className="h-4 w-4" />
                       <span className="sr-only">Edit</span>
