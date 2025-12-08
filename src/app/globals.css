@@ -1,74 +1,116 @@
 @import "tailwindcss";
-@import "../styles/copperx-tokens.css";
 @config "../../tailwind.config.ts";
 
 @layer base {
   :root {
-    /* CopperX Light Theme - Primary Colors */
-    --background: 210 20% 98%; /* #F9FAFB */
-    --foreground: 220 13% 13%; /* #111827 */
+    /* ============================================
+       SEMANTIC COLOR TOKENS (HSL for Tailwind)
+       ============================================ */
+    
+    /* Background Colors */
+    --background: 210 20% 98%; /* #F9FAFB - page background */
+    --foreground: 220 13% 13%; /* #111827 - primary text */
 
-    --card: 0 0% 100%; /* #FFFFFF */
-    --card-foreground: 220 13% 13%;
+    /* Card Colors */
+    --card: 0 0% 100%; /* #FFFFFF - card background */
+    --card-foreground: 220 13% 13%; /* #111827 - card text */
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 13% 13%;
+    /* Popover/Dropdown Colors */
+    --popover: 0 0% 100%; /* #FFFFFF */
+    --popover-foreground: 220 13% 13%; /* #111827 */
 
-    --primary: 239 84% 67%; /* #4F46E5 - Indigo 600 */
-    --primary-foreground: 0 0% 100%;
+    /* Primary Brand Colors */
+    --primary: 239 84% 67%; /* #6366F1 - Indigo 500 */
+    --primary-foreground: 0 0% 100%; /* #FFFFFF */
 
-    --secondary: 220 14% 96%; /* #F3F4F6 */
-    --secondary-foreground: 220 13% 13%;
+    /* Secondary Colors */
+    --secondary: 220 14% 96%; /* #F3F4F6 - Gray 100 */
+    --secondary-foreground: 220 13% 13%; /* #111827 */
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%; /* #6B7280 */
+    /* Muted Colors */
+    --muted: 220 14% 96%; /* #F3F4F6 */
+    --muted-foreground: 220 9% 46%; /* #6B7280 - Gray 500 */
 
+    /* Accent Colors */
     --accent: 239 84% 97%; /* #EEF2FF - Indigo 50 */
-    --accent-foreground: 239 84% 67%;
+    --accent-foreground: 239 68% 56%; /* #4F46E5 - Indigo 600 */
 
-    --destructive: 0 72% 51%; /* #DC2626 */
-    --destructive-foreground: 0 0% 100%;
+    /* Destructive Colors */
+    --destructive: 0 72% 51%; /* #DC2626 - Red 600 */
+    --destructive-foreground: 0 0% 100%; /* #FFFFFF */
 
-    --border: 220 13% 91%; /* #E5E7EB */
-    --input: 220 13% 83%; /* #D1D5DB */
-    --ring: 239 84% 67%; /* #4F46E5 */
+    /* Status Colors */
+    --success: 160 84% 39%; /* #059669 - Emerald 600 */
+    --success-foreground: 0 0% 100%; /* #FFFFFF */
+    --warning: 32 95% 44%; /* #D97706 - Amber 600 */
+    --warning-foreground: 0 0% 100%; /* #FFFFFF */
+    --info: 217 91% 60%; /* #3B82F6 - Blue 500 */
+    --info-foreground: 0 0% 100%; /* #FFFFFF */
 
-    --radius: 0.5rem;
+    /* Border & Input Colors */
+    --border: 220 13% 91%; /* #E5E7EB - Gray 200 */
+    --input: 220 13% 83%; /* #D1D5DB - Gray 300 */
+    --ring: 239 68% 56%; /* #4F46E5 - Indigo 600 focus ring */
 
-    /* Success/Warning/Info */
-    --success: 160 84% 39%; /* #059669 */
-    --success-foreground: 0 0% 100%;
-    --warning: 32 95% 44%; /* #D97706 */
-    --warning-foreground: 0 0% 100%;
-    --info: 217 91% 60%; /* #2563EB */
-    --info-foreground: 0 0% 100%;
+    /* Border Radius */
+    --radius: 0.5rem; /* 8px default */
   }
 
-  /* Dark mode - keeping existing for now, will update later */
+  /* ============================================
+     DARK MODE THEME (Improved WCAG AAA)
+     ============================================ */
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 239 84% 67%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 239 84% 67%;
+    /* Background Colors */
+    --background: 222 47% 11%; /* #0F172A - Slate 900 */
+    --foreground: 210 40% 98%; /* #F8FAFC - Slate 50 */
+
+    /* Card Colors */
+    --card: 217 33% 17%; /* #1E293B - Slate 800 */
+    --card-foreground: 210 40% 98%; /* #F8FAFC */
+
+    /* Popover Colors */
+    --popover: 217 33% 17%; /* #1E293B */
+    --popover-foreground: 210 40% 98%; /* #F8FAFC */
+
+    /* Primary Colors */
+    --primary: 239 84% 67%; /* #6366F1 - Indigo 500 */
+    --primary-foreground: 0 0% 100%; /* #FFFFFF */
+
+    /* Secondary Colors */
+    --secondary: 215 25% 27%; /* #334155 - Slate 700 */
+    --secondary-foreground: 210 40% 98%; /* #F8FAFC */
+
+    /* Muted Colors */
+    --muted: 215 25% 27%; /* #334155 - Slate 700 */
+    --muted-foreground: 215 16% 65%; /* #94A3B8 - Slate 400 */
+
+    /* Accent Colors */
+    --accent: 217 33% 17%; /* #1E293B - Slate 800 */
+    --accent-foreground: 239 84% 67%; /* #6366F1 */
+
+    /* Destructive Colors */
+    --destructive: 0 63% 31%; /* #991B1B - Red 800 */
+    --destructive-foreground: 0 86% 97%; /* #FEE2E2 - Red 100 */
+
+    /* Status Colors */
+    --success: 160 84% 39%; /* #059669 - Emerald 600 */
+    --success-foreground: 0 0% 100%; /* #FFFFFF */
+    --warning: 32 95% 44%; /* #D97706 - Amber 600 */
+    --warning-foreground: 0 0% 100%; /* #FFFFFF */
+    --info: 217 91% 60%; /* #3B82F6 - Blue 500 */
+    --info-foreground: 0 0% 100%; /* #FFFFFF */
+
+    /* Border & Input Colors */
+    --border: 215 25% 27%; /* #334155 - Slate 700 */
+    --input: 215 25% 27%; /* #334155 */
+    --ring: 239 84% 67%; /* #6366F1 */
   }
 }
 
 @layer base {
+  /* ============================================
+     GLOBAL STYLES
+     ============================================ */
   * {
     @apply border-border;
   }
@@ -80,7 +122,69 @@
   }
   
   body {
-    @apply bg-[#F9FAFB] text-gray-900;
+    @apply bg-background text-foreground;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    transition: background-color 200ms ease-in-out, color 200ms ease-in-out;
+  }
+
+  /* ============================================
+     TYPOGRAPHY HIERARCHY
+     ============================================ */
+  h1 {
+    @apply text-3xl font-bold tracking-tight sm:text-4xl;
+  }
+  
+  h2 {
+    @apply text-2xl font-semibold tracking-tight sm:text-3xl;
+  }
+  
+  h3 {
+    @apply text-xl font-semibold tracking-tight sm:text-2xl;
+  }
+  
+  h4 {
+    @apply text-lg font-semibold tracking-tight sm:text-xl;
+  }
+  
+  h5 {
+    @apply text-base font-semibold tracking-tight sm:text-lg;
+  }
+  
+  h6 {
+    @apply text-sm font-semibold tracking-tight sm:text-base;
+  }
+
+  /* ============================================
+     SCROLLBAR STYLING
+     ============================================ */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-lg;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
+
+  /* ============================================
+     FOCUS STATES (Accessibility)
+     ============================================ */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* ============================================
+     SELECTION
+     ============================================ */
+  ::selection {
+    @apply bg-primary/20 text-foreground;
   }
 }
