@@ -14,13 +14,13 @@ interface KpiCardProps {
 export function KpiCard({ title, value, icon: Icon, trend }: KpiCardProps) {
   return (
     <Card className="rounded-2xl">
-      <CardContent>
+      <CardContent className="pt-6">
         <div className="flex items-center justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-500 capitalize">
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 capitalize text-center sm:text-left">
               {title}
             </p>
-            <p className="mt-2 text-2xl font-semibold text-gray-900 tracking-tight truncate">{value}</p>
+            <p className="mt-2 text-2xl font-semibold text-gray-900 dark:text-gray-100 tracking-tight truncate text-center sm:text-left">{value}</p>
             {trend && (
               <p
                 className={`mt-2 text-sm font-medium flex items-center gap-1 ${
