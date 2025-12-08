@@ -6,6 +6,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { logout } from "@/lib/actions/user"
 import { toast } from "sonner"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
 interface UserMenuProps {
   user: {
@@ -67,18 +68,14 @@ export function UserMenu({ user }: UserMenuProps) {
         className="flex items-center gap-2 rounded-full p-1 transition-colors duration-200 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
         aria-expanded={isOpen}
         aria-haspopup="true"
+        aria-label="User menu"
       >
-        {user.image ? (
-          <img
-            src={user.image}
-            alt={user.name || "User"}
-            className="h-9 w-9 rounded-full object-cover ring-2 ring-white"
-          />
-        ) : (
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-600 text-sm font-semibold text-white ring-2 ring-white">
+        <Avatar className="h-9 w-9 ring-2 ring-white">
+          <AvatarImage src={user.image || undefined} alt={user.name || "User"} />
+          <AvatarFallback className="bg-primary-600 text-white text-sm font-semibold">
             {initials}
-          </div>
-        )}
+          </AvatarFallback>
+        </Avatar>
         <span className="hidden sm:block text-sm font-medium text-gray-700">{user.name || "User"}</span>
         <ChevronDown
           className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
