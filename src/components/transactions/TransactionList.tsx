@@ -12,8 +12,15 @@ import {
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Trash2, Edit2, Receipt } from "lucide-react"
-import { bulkDeleteTransactions } from "@/lib/actions/transactions"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
+import { Trash2, Edit2, Receipt, ArrowLeftRight } from "lucide-react"
+import { bulkDeleteTransactions, bulkRestoreTransactions } from "@/lib/actions/transactions"
 import { useRouter } from "next/navigation"
 import { TransactionForm } from "./TransactionForm"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -92,19 +99,41 @@ export function TransactionList({
     onSelectionChange(newSelection)
   }
 
-  // Bulk delete selected transactions
+  // Bulk delete selected transactions with undo
   async function handleBulkDelete() {
     if (selectedIds.size === 0) return
 
     setIsDeleting(true)
-    const result = await bulkDeleteTransactions(Array.from(selectedIds))
+    const deletedIds = Array.from(selectedIds)
+    const result = await bulkDeleteTransactions(deletedIds)
     setIsDeleting(false)
     setShowDeleteDialog(false)
     
     if (result.error) {
       toast.error(result.error)
     } else {
-      toast.success(`Successfully deleted ${result.count} transaction${result.count === 1 ? '' : 's'}`)
+      const count = result.count || deletedIds.length
+      
+      // Show success toast with undo button
+      toast.success(
+        `Deleted ${count} transaction${count === 1 ? '' : 's'}`,
+        {
+          duration: 5000,
+          action: {
+            label: "Undo",
+            onClick: async () => {
+              const restoreResult = await bulkRestoreTransactions(deletedIds)
+              if (restoreResult.error) {
+                toast.error("Failed to restore transactions")
+              } else {
+                toast.success(`Restored ${restoreResult.count} transaction${restoreResult.count === 1 ? '' : 's'}`)
+                router.refresh()
+              }
+            },
+          },
+        }
+      )
+      
       onSelectionChange(new Set()) // Clear selection
       router.refresh()
       if (onDeleteSuccess) {
@@ -166,7 +195,17 @@ export function TransactionList({
                     />
                   </TableCell>
                   <TableCell>{formatDate(transaction.date)}</TableCell>
-                  <TableCell>{transaction.description}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {transaction.description}
+                      {transaction.type === "transfer" && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                          <ArrowLeftRight className="h-3 w-3" />
+                          Transfer
+                        </span>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell>{transaction.category}</TableCell>
                   <TableCell className="capitalize">{transaction.type}</TableCell>
                   <TableCell
@@ -180,16 +219,25 @@ export function TransactionList({
                     {formatCurrency(transaction.amount, transaction.currency as any)}
                   </TableCell>
                   <TableCell className="flex gap-2 items-center justify-end">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setEditingId(transaction.id)}
-                      className="h-8 w-8 text-gray-600 hover:text-primary-600"
-                      aria-label={`Edit transaction: ${transaction.description}`}
-                    >
-                      <Edit2 className="h-4 w-4" />
-                      <span className="sr-only">Edit</span>
-                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => setEditingId(transaction.id)}
+                            className="h-8 w-8 text-gray-600 hover:text-primary-600"
+                            aria-label={`Edit transaction: ${transaction.description}`}
+                          >
+                            <Edit2 className="h-4 w-4" />
+                            <span className="sr-only">Edit</span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Edit transaction</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </TableCell>
                 </TableRow>
               ))}
@@ -212,33 +260,18 @@ export function TransactionList({
         </DialogContent>
       </Dialog>
 
-      {/* Bulk Delete Dialog */}
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete {selectedIds.size} transaction{selectedIds.size === 1 ? '' : 's'}?</DialogTitle>
-          </DialogHeader>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Are you sure you want to delete <strong>{selectedIds.size}</strong> transaction{selectedIds.size === 1 ? '' : 's'}? This action cannot be undone.
-          </p>
-          <div className="flex gap-3 justify-end pt-4">
-            <Button
-              variant="outline"
-              onClick={() => setShowDeleteDialog(false)}
-              disabled={isDeleting}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleBulkDelete}
-              disabled={isDeleting}
-            >
-              {isDeleting ? "Deleting..." : "Delete"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Bulk Delete Confirmation */}
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        variant="danger"
+        title={`Delete ${selectedIds.size} transaction${selectedIds.size === 1 ? '' : 's'}?`}
+        description={`You can undo this action within 5 seconds. Transactions will be permanently deleted after 30 days.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={handleBulkDelete}
+        loading={isDeleting}
+      />
     </>
   )
 }

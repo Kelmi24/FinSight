@@ -30,7 +30,10 @@ export async function getTransactions(filters?: {
   const userId = session.user.id
   const limit = filters?.limit || 50
 
-  const where: any = { userId }
+  const where: any = { 
+    userId,
+    deletedAt: null as any // Exclude soft-deleted transactions
+  }
 
   if (filters?.startDate || filters?.endDate) {
     where.date = {}
@@ -170,6 +173,9 @@ export async function createTransaction(formData: FormData) {
   }
 }
 
+/**
+ * Soft delete a transaction (marks as deleted, can be undone)
+ */
 export async function deleteTransaction(id: string) {
   const session = await auth()
   
@@ -188,12 +194,17 @@ export async function deleteTransaction(id: string) {
     if (!transaction) {
       return { error: "Transaction not found" }
     }
+
+    if (transaction.deletedAt) {
+      return { error: "Transaction already deleted" }
+    }
     
-    // Delete transaction and update wallet balance atomically
+    // Soft delete: mark as deleted and revert wallet balance
     await db.$transaction(async (tx: any) => {
-      // Delete the transaction
-      await tx.transaction.delete({
+      // Mark as deleted
+      await tx.transaction.update({
         where: { id, userId },
+        data: { deletedAt: new Date() },
       })
       
       // Revert wallet balance if wallet is specified and not a transfer
@@ -215,6 +226,87 @@ export async function deleteTransaction(id: string) {
   }
 }
 
+/**
+ * Restore a soft-deleted transaction (undo delete)
+ */
+export async function restoreTransaction(id: string) {
+  const session = await auth()
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+  
+  const userId = session.user.id
+
+  try {
+    // Get transaction to restore wallet balance
+    const transaction: any = await db.transaction.findUnique({
+      where: { id, userId },
+    })
+    
+    if (!transaction) {
+      return { error: "Transaction not found" }
+    }
+
+    if (!transaction.deletedAt) {
+      return { error: "Transaction is not deleted" }
+    }
+
+    // Restore: clear deletedAt and restore wallet balance
+    await db.$transaction(async (tx: any) => {
+      await tx.transaction.update({
+        where: { id, userId },
+        data: { deletedAt: null },
+      })
+      
+      // Restore wallet balance if transaction had a wallet
+      if (transaction.walletId && transaction.type !== "transfer") {
+        const balanceChange = transaction.type === "income" ? transaction.amount : -transaction.amount
+        await tx.wallet.update({
+          where: { id: transaction.walletId },
+          data: { balance: { increment: balanceChange } },
+        })
+      }
+    })
+    
+    revalidatePath("/transactions")
+    revalidatePath("/dashboard")
+    revalidatePath("/")
+    return { success: true }
+  } catch (error) {
+    return { error: "Failed to restore transaction" }
+  }
+}
+
+/**
+ * Permanently delete a transaction (cannot be undone)
+ */
+export async function permanentlyDeleteTransaction(id: string) {
+  const session = await auth()
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+  
+  const userId = session.user.id
+
+  try {
+    await db.transaction.delete({
+      where: { id, userId },
+    })
+    
+    revalidatePath("/transactions")
+    revalidatePath("/dashboard")
+    revalidatePath("/")
+    return { success: true }
+  } catch (error) {
+    return { error: "Failed to permanently delete transaction" }
+  }
+}
+
+/**
+ * Soft delete multiple transactions
+ */
 export async function bulkDeleteTransactions(ids: string[]) {
   const session = await auth()
   
@@ -229,20 +321,104 @@ export async function bulkDeleteTransactions(ids: string[]) {
   }
 
   try {
-    const result = await db.transaction.deleteMany({
+    // Get transactions to revert wallet balances
+    const transactions = await db.transaction.findMany({
       where: {
         id: { in: ids },
-        userId: userId, // Ensure user owns all transactions
-      },
+        userId,
+        deletedAt: null,
+      } as any,
+    })
+
+    // Soft delete and update wallet balances
+    await db.$transaction(async (tx) => {
+      // Mark all as deleted
+      await tx.transaction.updateMany({
+        where: {
+          id: { in: ids },
+          userId,
+        },
+        data: { deletedAt: new Date() } as any,
+      })
+
+      // Update wallet balances for each transaction
+      for (const transaction of transactions) {
+        if (transaction.walletId && transaction.type !== "transfer") {
+          const balanceChange = transaction.type === "income" ? -transaction.amount : transaction.amount
+          await tx.wallet.update({
+            where: { id: transaction.walletId },
+            data: { balance: { increment: balanceChange } },
+          })
+        }
+      }
     })
     
     revalidatePath("/transactions")
     revalidatePath("/dashboard")
     revalidatePath("/")
     
-    return { success: true, count: result.count }
+    return { success: true, count: transactions.length }
   } catch (error) {
     return { error: "Failed to delete transactions" }
+  }
+}
+
+/**
+ * Restore multiple soft-deleted transactions
+ */
+export async function bulkRestoreTransactions(ids: string[]) {
+  const session = await auth()
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+  
+  const userId = session.user.id
+
+  if (ids.length === 0) {
+    return { error: "No transactions selected" }
+  }
+
+  try {
+    // Get deleted transactions to restore wallet balances
+    const transactions = await db.transaction.findMany({
+      where: {
+        id: { in: ids },
+        userId,
+        deletedAt: { not: null },
+      } as any,
+    })
+
+    // Restore and update wallet balances
+    await db.$transaction(async (tx) => {
+      // Clear deletedAt
+      await tx.transaction.updateMany({
+        where: {
+          id: { in: ids },
+          userId,
+        },
+        data: { deletedAt: null } as any,
+      })
+
+      // Restore wallet balances for each transaction
+      for (const transaction of transactions) {
+        if (transaction.walletId && transaction.type !== "transfer") {
+          const balanceChange = transaction.type === "income" ? transaction.amount : -transaction.amount
+          await tx.wallet.update({
+            where: { id: transaction.walletId },
+            data: { balance: { increment: balanceChange } },
+          })
+        }
+      }
+    })
+    
+    revalidatePath("/transactions")
+    revalidatePath("/dashboard")
+    revalidatePath("/")
+    
+    return { success: true, count: transactions.length }
+  } catch (error) {
+    return { error: "Failed to restore transactions" }
   }
 }
 

@@ -100,7 +100,7 @@ export async function createTransfer(formData: FormData) {
   }
 }
 
-// DELETE transfer (removes both paired transactions)
+// SOFT DELETE transfer (marks both paired transactions as deleted)
 export async function deleteTransfer(transactionId: string) {
   const session = await auth()
   if (!session?.user?.id) return { error: "Unauthorized" }
@@ -120,13 +120,23 @@ export async function deleteTransfer(transactionId: string) {
       return { error: "Transfer not found" }
     }
     
+    if (transaction.deletedAt) {
+      return { error: "Transfer already deleted" }
+    }
+    
     const relatedTransfer = transaction.relatedTransfer
     
     await db.$transaction(async (tx: any) => {
-      // Delete both transactions
-      await tx.transaction.delete({ where: { id: transaction.id } })
+      // Soft delete both transactions
+      await tx.transaction.update({ 
+        where: { id: transaction.id },
+        data: { deletedAt: new Date() } as any
+      })
       if (relatedTransfer) {
-        await tx.transaction.delete({ where: { id: relatedTransfer.id } })
+        await tx.transaction.update({ 
+          where: { id: relatedTransfer.id },
+          data: { deletedAt: new Date() } as any
+        })
       }
       
       // Reverse balance changes (add back to source)
@@ -151,5 +161,69 @@ export async function deleteTransfer(transactionId: string) {
     return { success: true }
   } catch (error) {
     return { error: "Failed to delete transfer" }
+  }
+}
+
+// RESTORE soft-deleted transfer
+export async function restoreTransfer(transactionId: string) {
+  const session = await auth()
+  if (!session?.user?.id) return { error: "Unauthorized" }
+  
+  try {
+    const transaction: any = await (db as any).transaction.findUnique({
+      where: { id: transactionId, userId: session.user.id },
+      include: { 
+        wallet: true, 
+        relatedTransfer: { 
+          include: { wallet: true } 
+        } 
+      }
+    })
+    
+    if (!transaction || transaction.type !== 'transfer') {
+      return { error: "Transfer not found" }
+    }
+    
+    if (!transaction.deletedAt) {
+      return { error: "Transfer is not deleted" }
+    }
+    
+    const relatedTransfer = transaction.relatedTransfer
+    
+    await db.$transaction(async (tx: any) => {
+      // Restore both transactions
+      await tx.transaction.update({ 
+        where: { id: transaction.id },
+        data: { deletedAt: null } as any
+      })
+      if (relatedTransfer) {
+        await tx.transaction.update({ 
+          where: { id: relatedTransfer.id },
+          data: { deletedAt: null } as any
+        })
+      }
+      
+      // Restore balance changes (subtract from source)
+      if (transaction.wallet) {
+        await tx.wallet.update({
+          where: { id: transaction.walletId! },
+          data: { balance: { decrement: transaction.amount } }
+        })
+      }
+      
+      // Restore balance changes (add back to destination)
+      if (relatedTransfer?.wallet) {
+        await tx.wallet.update({
+          where: { id: relatedTransfer.walletId! },
+          data: { balance: { increment: relatedTransfer.amount } }
+        })
+      }
+    })
+    
+    revalidatePath("/dashboard")
+    revalidatePath("/transactions")
+    return { success: true }
+  } catch (error) {
+    return { error: "Failed to restore transfer" }
   }
 }

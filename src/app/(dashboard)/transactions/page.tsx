@@ -9,11 +9,12 @@ import { TransactionFilters } from "@/components/transactions/TransactionFilters
 import { TransactionTabs } from "@/components/transactions/TransactionTabs"
 import { RecurringList } from "@/components/transactions/RecurringList"
 import { RecurringDialog } from "@/components/transactions/RecurringDialog"
+import { TransferDialog } from "@/components/transactions/TransferDialog"
 import { ImportButton } from "@/components/transactions/ImportButton"
 import { SearchAndDatePresets } from "@/components/transactions/SearchAndDatePresets"
 import { TableSkeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
-import { Plus, Trash2, Loader2 } from "lucide-react"
+import { Plus, Trash2, Loader2, ArrowLeftRight } from "lucide-react"
 import { useFilter } from "@/providers/filter-provider"
 
 export default function TransactionsPage() {
@@ -25,6 +26,7 @@ export default function TransactionsPage() {
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [activeTab, setActiveTab] = useState<"one-time" | "recurring">("one-time")
   const [isRecurringDialogOpen, setIsRecurringDialogOpen] = useState(false)
+  const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false)
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<Set<string>>(new Set())
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [nextCursor, setNextCursor] = useState<string | null>(null)
@@ -142,9 +144,25 @@ export default function TransactionsPage() {
               Add, edit and review your income and expenses.
             </p>
           </div>
-          <div className="w-full sm:w-auto">
+          <div className="w-full sm:w-auto flex gap-2">
             {activeTab === "one-time" ? (
-              <TransactionDialog />
+              <>
+                <TransactionDialog />
+                <Button 
+                  variant="outline"
+                  onClick={() => setIsTransferDialogOpen(true)}
+                >
+                  <ArrowLeftRight className="mr-2 h-4 w-4" />
+                  Transfer
+                </Button>
+                <TransferDialog
+                  open={isTransferDialogOpen}
+                  onOpenChange={setIsTransferDialogOpen}
+                  onSuccess={() => {
+                    loadTransactions()
+                  }}
+                />
+              </>
             ) : (
               <>
                 <Button id="add-recurring-trigger" onClick={() => setIsRecurringDialogOpen(true)}>

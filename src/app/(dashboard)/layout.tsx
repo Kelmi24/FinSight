@@ -1,6 +1,8 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Footer } from "@/components/layout/Footer";
+import { Onboarding } from "@/components/onboarding/Onboarding";
+import { KeyboardShortcuts } from "@/components/keyboard-shortcuts/KeyboardShortcuts";
 import { CurrencyProvider } from "@/providers/currency-provider";
 import { FilterProvider } from "@/providers/filter-provider";
 import { auth } from "@/auth";
@@ -29,11 +31,11 @@ export default async function DashboardLayout({
   return (
     <CurrencyProvider initialCurrency={currencyPreference}>
       <FilterProvider>
-        <div className="flex min-h-screen flex-col bg-[#F9FAFB]">
+        <div className="flex min-h-screen flex-col bg-background">
           {/* Skip link for keyboard navigation */}
           <a
             href="#main-content"
-            className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary-600 focus:text-white focus:rounded-lg focus:shadow-lg"
+            className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:shadow-lg"
           >
             Skip to main content
           </a>
@@ -45,6 +47,8 @@ export default async function DashboardLayout({
             </main>
           </div>
           <Footer />
+          <Onboarding />
+          <KeyboardShortcuts />
         </div>
       </FilterProvider>
     </CurrencyProvider>
