@@ -4,7 +4,75 @@ import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
 
+/**
+ * Get paginated transactions with optional filters.
+ * Uses cursor-based pagination for efficient data fetching.
+ * 
+ * @param filters - Optional filters for date range, category, type
+ * @param cursor - Cursor for pagination (transaction ID)
+ * @param limit - Number of records per page (default: 50)
+ * @returns Object with transactions array, nextCursor, and hasMore flag
+ */
 export async function getTransactions(filters?: {
+  startDate?: Date
+  endDate?: Date
+  category?: string
+  type?: string
+  cursor?: string
+  limit?: number
+}) {
+  const session = await auth()
+  
+  if (!session?.user?.id) {
+    return { transactions: [], nextCursor: null, hasMore: false }
+  }
+  
+  const userId = session.user.id
+  const limit = filters?.limit || 50
+
+  const where: any = { userId }
+
+  if (filters?.startDate || filters?.endDate) {
+    where.date = {}
+    if (filters.startDate) where.date.gte = filters.startDate
+    if (filters.endDate) where.date.lte = filters.endDate
+  }
+
+  if (filters?.category) {
+    where.category = filters.category
+  }
+
+  if (filters?.type) {
+    where.type = filters.type
+  }
+
+  const transactions = await db.transaction.findMany({
+    where,
+    orderBy: { date: 'desc' },
+    take: limit + 1, // Fetch one extra to check if there are more
+    ...(filters?.cursor && {
+      cursor: { id: filters.cursor },
+      skip: 1, // Skip the cursor
+    }),
+  })
+
+  const hasMore = transactions.length > limit
+  const paginatedTransactions = hasMore ? transactions.slice(0, limit) : transactions
+  const nextCursor = hasMore ? paginatedTransactions[paginatedTransactions.length - 1].id : null
+
+  return {
+    transactions: paginatedTransactions,
+    nextCursor,
+    hasMore,
+  }
+}
+
+/**
+ * Legacy function for backward compatibility.
+ * Returns all transactions without pagination.
+ * @deprecated Use getTransactions with pagination instead
+ */
+export async function getAllTransactions(filters?: {
   startDate?: Date
   endDate?: Date
   category?: string

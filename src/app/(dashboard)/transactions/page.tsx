@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { getTransactions } from "@/lib/actions/transactions"
 import { getRecurringTransactions } from "@/lib/actions/recurring"
 import { TransactionList } from "@/components/transactions/TransactionList"
@@ -13,7 +13,7 @@ import { ImportButton } from "@/components/transactions/ImportButton"
 import { SearchAndDatePresets } from "@/components/transactions/SearchAndDatePresets"
 import { TableSkeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
-import { Plus, Trash2 } from "lucide-react"
+import { Plus, Trash2, Loader2 } from "lucide-react"
 import { useFilter } from "@/providers/filter-provider"
 
 export default function TransactionsPage() {
@@ -22,29 +22,49 @@ export default function TransactionsPage() {
   const [recurringTransactions, setRecurringTransactions] = useState<any[]>([])
   const [filters, setFilters] = useState<any>({})
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [activeTab, setActiveTab] = useState<"one-time" | "recurring">("one-time")
   const [isRecurringDialogOpen, setIsRecurringDialogOpen] = useState(false)
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<Set<string>>(new Set())
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [nextCursor, setNextCursor] = useState<string | null>(null)
+  const [hasMore, setHasMore] = useState(false)
+  const observerTarget = useRef<HTMLDivElement>(null)
 
-  const loadTransactions = useCallback(async () => {
-    setIsLoading(true)
+  const loadTransactions = useCallback(async (cursor?: string) => {
+    if (cursor) {
+      setIsLoadingMore(true)
+    } else {
+      setIsLoading(true)
+    }
+    
     try {
-      const data = await getTransactions(filters)
-      // Keep stored currency and amount as-is to avoid double conversion
+      const result = await getTransactions({ ...filters, cursor, limit: 50 })
+      
       // Apply client-side search filter
-      let filtered = data
+      let filtered = result.transactions || []
       if (globalFilters.searchQuery) {
         const query = globalFilters.searchQuery.toLowerCase()
-        filtered = data.filter((txn: any) =>
+        filtered = filtered.filter((txn: any) =>
           txn.description?.toLowerCase().includes(query) ||
           txn.category?.toLowerCase().includes(query) ||
           txn.amount?.toString().includes(query)
         )
       }
-      setTransactions(filtered)
+      
+      if (cursor) {
+        // Append to existing transactions
+        setTransactions(prev => [...prev, ...filtered])
+      } else {
+        // Replace transactions
+        setTransactions(filtered)
+      }
+      
+      setNextCursor(result.nextCursor)
+      setHasMore(result.hasMore)
     } finally {
       setIsLoading(false)
+      setIsLoadingMore(false)
     }
   }, [filters, globalFilters.searchQuery])
 
@@ -66,15 +86,40 @@ export default function TransactionsPage() {
     }
   }, [activeTab, loadTransactions, loadRecurringTransactions])
 
+  // Infinite scroll using Intersection Observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore && activeTab === "one-time") {
+          loadTransactions(nextCursor!)
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    const currentTarget = observerTarget.current
+    if (currentTarget) {
+      observer.observe(currentTarget)
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget)
+      }
+    }
+  }, [hasMore, isLoadingMore, nextCursor, activeTab, loadTransactions])
+
   const handleFilter = (newFilters: any) => {
     setFilters(newFilters)
     setSelectedTransactionIds(new Set()) // Clear selection when filters change
+    setNextCursor(null) // Reset pagination
   }
 
   const handleTabChange = (tab: "one-time" | "recurring") => {
     setActiveTab(tab)
     setFilters({}) // Reset filters when switching tabs
     setSelectedTransactionIds(new Set()) // Clear selection when switching tabs
+    setNextCursor(null) // Reset pagination
   }
 
   const handleSelectionChange = (ids: Set<string>) => {
@@ -83,6 +128,7 @@ export default function TransactionsPage() {
 
   const handleDeleteSuccess = () => {
     setSelectedTransactionIds(new Set()) // Clear selection after delete
+    setNextCursor(null) // Reset pagination
     loadTransactions()
   }
 
@@ -143,7 +189,7 @@ export default function TransactionsPage() {
       {isLoading ? (
         <TableSkeleton rows={10} />
       ) : activeTab === "one-time" ? (
-        <div>
+        <div className="space-y-4">
           <TransactionList 
             transactions={transactions} 
             onDeleteSuccess={handleDeleteSuccess}
@@ -152,6 +198,24 @@ export default function TransactionsPage() {
             showDeleteDialog={showDeleteDialog}
             onDeleteDialogChange={setShowDeleteDialog}
           />
+          
+          {/* Infinite scroll trigger */}
+          {hasMore && (
+            <div ref={observerTarget} className="flex justify-center py-4">
+              {isLoadingMore && (
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Loading more transactions...
+                </div>
+              )}
+            </div>
+          )}
+          
+          {!hasMore && transactions.length > 0 && (
+            <div className="text-center py-4 text-sm text-gray-500">
+              No more transactions to load
+            </div>
+          )}
         </div>
       ) : (
         <RecurringList recurring={recurringTransactions} onDeleteSuccess={loadRecurringTransactions} />

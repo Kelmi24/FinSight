@@ -125,6 +125,9 @@ model Transaction {
   
   @@index([userId, walletId])
   @@index([date])
+  @@index([userId, date(sort: Desc)])
+  @@index([userId, type])
+  @@index([userId, category])
 }
 
 model RecurringTransaction {
@@ -153,6 +156,10 @@ model RecurringTransaction {
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([userId, nextDueDate])
+  @@index([userId, status])
 }
 
 model Budget {
@@ -167,6 +174,8 @@ model Budget {
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  
+  @@index([userId])
 }
 
 model Goal {
@@ -182,6 +191,8 @@ model Goal {
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  
+  @@index([userId])
 }
 
 model Category {
