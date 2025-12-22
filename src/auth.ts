@@ -2,14 +2,17 @@ import NextAuth from "next-auth"
 import { db } from "@/lib/db"
 import Credentials from "next-auth/providers/credentials"
 import Google from "next-auth/providers/google"
+import { PrismaAdapter } from "@auth/prisma-adapter"
 import { DEFAULT_CURRENCY } from "@/lib/currency"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
+  adapter: PrismaAdapter(db),
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID!,
       clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+      allowDangerousEmailAccountLinking: true,
       authorization: {
         params: {
           prompt: "consent",
@@ -58,43 +61,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: "jwt",
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
-      // For Google OAuth, create or update user in database
-      if (account?.provider === "google" && profile?.email) {
-        try {
-          const existingUser = await db.user.findUnique({
-            where: { email: profile.email },
-          })
-
-          if (!existingUser) {
-            // Create new user for Google sign-in (works for both login and signup)
-            const newUser = await db.user.create({
-              data: {
-                email: profile.email,
-                name: profile.name || profile.email.split("@")[0],
-                currencyPreference: DEFAULT_CURRENCY,
-              },
-            })
-            // Update the user object with the new user id
-            user.id = newUser.id
-          } else {
-            // User exists, use their id
-            user.id = existingUser.id
-          }
-          return true
-        } catch (error) {
-          console.error("Error during Google sign-in:", error)
-          return false
-        }
+    async jwt({ token, user, account, trigger, session }) {
+      if (trigger === "update" && session?.user?.currencyPreference) {
+        token.currencyPreference = session.user.currencyPreference
       }
-      return true
-    },
-    async jwt({ token, user, account, trigger }) {
+
       // When user logs in, attach user id and currency preference
       if (user) {
         token.sub = user.id
         token.email = user.email
-        token.currencyPreference = DEFAULT_CURRENCY
+        // Fetch fresh currency preference from DB if possible or use default
+        // Since 'user' object from Adapter might not have it depending on the flow, 
+        // usually it does if returned from DB.
+        token.currencyPreference = (user as any).currencyPreference || DEFAULT_CURRENCY
       }
       
       return token

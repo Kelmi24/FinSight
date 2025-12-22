@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { parseCSV, ParsedTransaction } from "@/lib/parsers/csvParser"
 import { bulkCreateTransactions } from "@/lib/actions/transactions"
 import { getCategories } from "@/lib/actions/categories"
+import { predictCategories } from "@/lib/actions/ai"
 import { format } from "date-fns"
 import { useCurrency } from "@/providers/currency-provider"
 interface Category {
@@ -114,11 +115,30 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
       // Parse CSV content
       const result = parseCSV(csvContent, currency)
 
+      // Enhance with AI/Server-side categorization
+      const descriptions = result.transactions.map(t => t.description);
+      let predictions: (string | null)[] = [];
+      try {
+        const predResult = await predictCategories(descriptions);
+        if (predResult.predictions) {
+            predictions = predResult.predictions;
+        }
+      } catch (err) {
+        console.error("AI prediction failed, falling back to local rules", err);
+      }
+
       // Validate and match categories to canonical list
-      const validatedTransactions = result.transactions.map(txn => ({
+      const validatedTransactions = result.transactions.map((txn, index) => {
+        // Use local prediction > Server prediction
+        // Or if local is missing, use server.
+        // Currently result.transactions already has local rule applied by parseCSV internals.
+        // So we only overwrite if result.transactions[index].category is undefined
+        const candidateCategory = txn.category || predictions[index] || undefined;
+        
+        return {
         ...txn,
-        category: matchCategory(txn.category, txn.type as "income" | "expense")
-      }))
+        category: matchCategory(candidateCategory, txn.type as "income" | "expense")
+      }});
 
       setParsedData(validatedTransactions)
       setEditableData(validatedTransactions) // Initialize editable copy

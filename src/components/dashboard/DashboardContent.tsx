@@ -15,6 +15,8 @@ import { CashFlowChart } from "@/components/dashboard/CashFlowChart"
 import { CategoryChart } from "@/components/dashboard/CategoryChart"
 import { TrendChart } from "@/components/analytics/TrendChart"
 import { MonthOverMonthComparison } from "@/components/analytics/MonthOverMonthComparison"
+import { ForecastChart } from "@/components/analytics/ForecastChart"
+import { AIInsights } from "@/components/dashboard/AIInsights"
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions"
 import { CardSkeleton, ChartSkeleton } from "@/components/ui/skeleton"
 import { DollarSign, TrendingUp, TrendingDown, Receipt } from "lucide-react"
@@ -167,6 +169,12 @@ export function DashboardContent() {
       <div className="grid gap-6 lg:grid-cols-2">
         <TrendChart data={trendData} />
         <MonthOverMonthComparison />
+      </div>
+
+      {/* AI Insights & Alerts */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <ForecastChart />
+        <AIInsights />
       </div>
 
       {/* Recent Transactions */}

@@ -134,3 +134,20 @@ export async function getTopSpendingCategories(limit = 5) {
     .sort((a, b) => b.total - a.total)
     .slice(0, limit)
 }
+
+import { forecastService } from "@/lib/services/forecastService"
+
+export async function getForecastData(horizonDays = 30) {
+  const session = await auth()
+  
+  if (!session?.user?.id) {
+    return []
+  }
+
+  try {
+    return await forecastService.generateForecast(session.user.id, horizonDays);
+  } catch (error) {
+    console.error("Forecast Error:", error);
+    return [];
+  }
+}
