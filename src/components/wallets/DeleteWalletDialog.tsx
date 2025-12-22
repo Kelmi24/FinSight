@@ -28,6 +28,12 @@ export function DeleteWalletDialog({ open, onOpenChange, wallet, onSuccess }: De
   useEffect(() => {
     if (open && wallet) {
       fetchWallets()
+      // If has transactions, default to cancel (force choice). If empty, default to delete.
+      if (wallet._count?.transactions > 0) {
+        setDeleteOption("cancel")
+      } else {
+        setDeleteOption("delete")
+      }
     }
   }, [open, wallet])
   
