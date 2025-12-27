@@ -2,12 +2,6 @@
 
 import { db } from "@/lib/db"
 
-/**
- * Permanently delete soft-deleted transactions older than 30 days.
- * This should be called by a cron job or background task.
- * 
- * @returns Number of permanently deleted transactions
- */
 export async function cleanupOldDeletedTransactions() {
   const thirtyDaysAgo = new Date()
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
@@ -22,7 +16,6 @@ export async function cleanupOldDeletedTransactions() {
       } as any,
     })
 
-    console.log(`[Cleanup] Permanently deleted ${result.count} transactions older than 30 days`)
     return result.count
   } catch (error) {
     console.error("[Cleanup] Failed to delete old transactions:", error)
@@ -30,10 +23,6 @@ export async function cleanupOldDeletedTransactions() {
   }
 }
 
-/**
- * Get count of soft-deleted transactions for a user.
- * Can be used to show "trash" or "recently deleted" UI.
- */
 export async function getDeletedTransactionsCount(userId: string) {
   try {
     const count = await db.transaction.count({
@@ -49,9 +38,6 @@ export async function getDeletedTransactionsCount(userId: string) {
   }
 }
 
-/**
- * Get soft-deleted transactions for a user (for "Recently Deleted" view).
- */
 export async function getDeletedTransactions(userId: string) {
   try {
     const transactions = await db.transaction.findMany({

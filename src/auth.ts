@@ -47,7 +47,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!user || !(user as any).password) return null
 
-        // @ts-ignore - bcryptjs types might conflict slightly in strict mode but works at runtime
         const bcrypt = require("bcryptjs")
         const passwordsMatch = await bcrypt.compare(password, (user as any).password)
 
@@ -66,13 +65,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.currencyPreference = session.user.currencyPreference
       }
 
-      // When user logs in, attach user id and currency preference
       if (user) {
         token.sub = user.id
         token.email = user.email
-        // Fetch fresh currency preference from DB if possible or use default
-        // Since 'user' object from Adapter might not have it depending on the flow, 
-        // usually it does if returned from DB.
         token.currencyPreference = (user as any).currencyPreference || DEFAULT_CURRENCY
       }
       
@@ -86,7 +81,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.email = token.email as string;
       }
       if (session.user) {
-        // @ts-ignore add custom field
         session.user.currencyPreference = (token as any).currencyPreference || DEFAULT_CURRENCY
       }
       return session;

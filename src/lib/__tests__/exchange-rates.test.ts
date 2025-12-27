@@ -1,15 +1,3 @@
-/**
- * Unit tests for exchange rate conversion service
- * 
- * Tests core conversion logic:
- * - Basic conversions between currencies
- * - Idempotent conversions (same currency)
- * - Bidirectional conversion accuracy
- * - Batch operations
- * - Error handling
- * - Floating point precision
- */
-
 import { convertCurrency, getExchangeRate, formatExchangeRate, batchConvertCurrency, EXCHANGE_RATES } from "@/lib/exchange-rates"
 import { CurrencyCode } from "@/lib/currency"
 import { describe, it, expect } from "vitest"
